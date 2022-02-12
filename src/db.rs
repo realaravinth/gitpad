@@ -33,7 +33,9 @@ pub mod pg {
             pool_options,
             url: settings.database.url,
         });
-        let db = Box::new(connection_options.connect().await.unwrap());
+        let db = connection_options.connect().await.unwrap();
+        db.migrate().await.unwrap();
+        let db = Box::new(db);
 
         db
     }
@@ -54,7 +56,9 @@ pub mod sqlite {
             url: settings.database.url,
         });
 
-        let db = Box::new(connection_options.connect().await.unwrap());
+        let db = connection_options.connect().await.unwrap();
+        db.migrate().await.unwrap();
+        let db = Box::new(db);
         db
     }
 }
