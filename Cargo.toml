@@ -40,3 +40,9 @@ serde_json = "1"
 tokio = "1.16.1"
 url = "2.2"
 validator = { version = "0.14.0", features = ["derive"] }
+
+[dev-dependencies]
+db-sqlx-postgres = {path = "./database/db-sqlx-postgres"}
+db-sqlx-sqlite = {path = "./database/db-sqlx-sqlite"}
+actix-rt = "2"
+sqlx = { version = "0.5.10", features = [ "runtime-actix-rustls", "uuid", "postgres", "time", "offline", "sqlite" ] }

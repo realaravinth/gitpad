@@ -2,6 +2,9 @@ default: ## Debug build
 	cargo build
 
 clean: ## Clean all build artifacts and dependencies
+	@-/bin/rm -rf target/
+	@-/bin/rm -rf database/migrator/target/
+	@-/bin/rm -rf database/*/target/
 	@cargo clean
 
 coverage: migrate ## Generate coverage report in HTML format
@@ -33,6 +36,10 @@ run: default ## Run debug build
 migrate: ## run migrations
 	@-rm -rf database/db-sqlx-sqlite/tmp && mkdir database/db-sqlx-sqlite/tmp
 	cd database/migrator && cargo run
+
+sqlx-offline-data: ## prepare sqlx offline data
+	cargo sqlx prepare  --database-url=${POSTGRES_DATABASE_URL} -- --bin gists \
+		--all-features
 
 test: migrate ## Run tests
 	cd database/db-sqlx-postgres &&\

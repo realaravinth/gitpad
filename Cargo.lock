@@ -908,6 +908,8 @@ dependencies = [
  "argon2-creds",
  "config",
  "db-core",
+ "db-sqlx-postgres",
+ "db-sqlx-sqlite",
  "derive_more",
  "git2",
  "lazy_static",
@@ -917,6 +919,7 @@ dependencies = [
  "rand 0.8.4",
  "serde 1.0.136",
  "serde_json",
+ "sqlx",
  "tokio",
  "url",
  "validator",
@@ -2146,6 +2149,7 @@ dependencies = [
  "time 0.2.27",
  "tokio-stream",
  "url",
+ "uuid",
  "webpki",
  "webpki-roots",
  "whoami",
@@ -2574,6 +2578,12 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
+
+[[package]]
+name = "uuid"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 
 [[package]]
 name = "validator"
