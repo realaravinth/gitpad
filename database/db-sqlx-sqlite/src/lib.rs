@@ -160,17 +160,14 @@ impl GistDatabase for Database {
     }
 
     async fn email_exists(&self, email: &str) -> DBResult<bool> {
-        let exists;
         match sqlx::query!("SELECT id from admin_users WHERE email = $1", email)
             .fetch_one(&self.pool)
             .await
         {
-            Ok(_) => exists = true,
-            Err(Error::RowNotFound) => exists = false,
-            Err(e) => return Err(DBError::DBError(Box::new(e))),
-        };
-
-        Ok(exists)
+            Ok(_) => Ok(true),
+            Err(Error::RowNotFound) => Ok(false),
+            Err(e) => Err(DBError::DBError(Box::new(e))),
+        }
     }
 
     async fn delete_account(&self, username: &str) -> DBResult<()> {
@@ -182,17 +179,14 @@ impl GistDatabase for Database {
     }
 
     async fn username_exists(&self, username: &str) -> DBResult<bool> {
-        let exists;
         match sqlx::query!("SELECT id from admin_users WHERE username = $1", username)
             .fetch_one(&self.pool)
             .await
         {
-            Ok(_) => exists = true,
-            Err(Error::RowNotFound) => exists = false,
-            Err(e) => return Err(DBError::DBError(Box::new(e))),
-        };
-
-        Ok(exists)
+            Ok(_) => Ok(true),
+            Err(Error::RowNotFound) => Ok(false),
+            Err(e) => Err(DBError::DBError(Box::new(e))),
+        }
     }
 
     async fn update_username(&self, payload: &UpdateUsernamePayload) -> DBResult<()> {
