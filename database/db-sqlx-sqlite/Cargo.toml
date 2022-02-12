@@ -1,0 +1,22 @@
+[package]
+name = "db-sqlx-sqlite"
+version = "0.1.0"
+edition = "2021"
+homepage = "https://github.com/realaravinth/gists"
+repository = "https://github.com/realaravinth/gists"
+documentation = "https://github.con/realaravinth/gists"
+readme = "https://github.com/realaravinth/gists/blob/master/README.md"
+license = "AGPLv3 or later version"
+authors = ["realaravinth <realaravinth@batsense.net>"]
+include = ["./mgrations/"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sqlx = { version = "0.5.10", features = [ "sqlite", "time", "offline" ] }
+db-core = {path = "../db-core"}
+async-trait = "0.1.51"
+
+[dev-dependencies]
+actix-rt = "2"
+sqlx = { version = "0.5.10", features = [ "runtime-actix-rustls", "postgres", "time", "offline" ] }
+db-core = {path = "../db-core", features = ["test"]}

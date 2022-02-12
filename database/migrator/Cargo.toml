@@ -1,0 +1,12 @@
+[package]
+name = "migrator"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace]
+
+[dependencies]
+sqlx = { version = "0.5.10", features = [ "runtime-actix-rustls", "sqlite", "postgres", "time", "offline" ] }
+actix-rt = "2"

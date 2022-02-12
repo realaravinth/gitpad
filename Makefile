@@ -4,8 +4,8 @@ default: ## Debug build
 clean: ## Clean all build artifacts and dependencies
 	@cargo clean
 
-coverage: ## Generate HTML code coverage
-	cargo tarpaulin -t 1200 --out Html
+coverage: migrate ## Generate coverage report in HTML format
+	cargo tarpaulin -t 1200 --out Html --skip-clean  --all-features --no-fail-fast --workspace=database/db-sqlx-postgres,database/db-sqlx-sqlite,.
 
 dev-env: ## Download development dependencies
 	cargo fetch
@@ -30,11 +30,21 @@ release: ## Release build
 run: default ## Run debug build
 	cargo run
 
-test: ## Run tests
-	cargo test --all-features --no-fail-fast
+migrate: ## run migrations
+	@-rm -rf database/db-sqlx-sqlite/tmp && mkdir database/db-sqlx-sqlite/tmp
+	cd database/migrator && cargo run
 
-xml-test-coverage: ## Generate cobertura.xml test coverage
-	cargo tarpaulin -t 1200 --out Xml
+test: migrate ## Run tests
+	cd database/db-sqlx-postgres &&\
+		DATABASE_URL=${POSTGRES_DATABASE_URL}\
+		cargo test --no-fail-fast
+	cd database/db-sqlx-sqlite &&\
+		DATABASE_URL=${SQLITE_DATABASE_URL}\
+		cargo test --no-fail-fast
+	cargo test
+
+xml-test-coverage: migrate ## Generate cobertura.xml test coverage
+	cargo tarpaulin -t 1200 --out Xml --skip-clean --all-features --no-fail-fast --workspace=database/db-sqlx-postgres,database/db-sqlx-sqlite,.
 
 help: ## Prints help for targets with comments
 	@cat $(MAKEFILE_LIST) | grep -E '^[a-zA-Z_-]+:.*?## .*$$' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -11,11 +11,22 @@ license = "AGPLv3 or later version"
 authors = ["realaravinth <realaravinth@batsense.net>"]
 build = "build.rs"
 
+[workspace]
+exclude = ["database/migrator"]
+members = [
+    ".", 
+    "database/db-core",
+    "database/db-sqlx-postgres",
+    "database/db-sqlx-sqlite",
+]
+
 [dependencies]
 actix-web = "4.0.0-rc.3"
 actix-http = "3.0.0-rc.2"
 actix-rt = "2.6.0"
+argon2-creds = { branch = "master", git = "https://github.com/realaravinth/argon2-creds"}
 config = "0.11"
+db-core = {path = "./database/db-core"}
 derive_more = "0.99"
 git2 = "0.13.25"
 lazy_static = "1.4"
@@ -23,6 +34,9 @@ log = "0.4"
 my-codegen = {package = "actix-web-codegen", git ="https://github.com/realaravinth/actix-web"}
 num_cpus = "1.13"
 pretty_env_logger = "0.4"
+rand = "0.8.4"
 serde = { version = "1", features = ["derive"]}
 serde_json = "1"
+tokio = "1.16.1"
 url = "2.2"
+validator = { version = "0.14.0", features = ["derive"] }

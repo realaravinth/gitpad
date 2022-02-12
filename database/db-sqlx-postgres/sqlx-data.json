@@ -1,0 +1,202 @@
+{
+  "db": "PostgreSQL",
+  "08e90ce06e795bdb9bf0ea5b18df3b69b107764ad9d224de601b3588fbeac211": {
+    "query": "UPDATE admin_users set secret = $1\n        WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "150c8d182ca90bd50fdd419e5b1b2bb48c8eb5d060d7ab0207dfc04e8eda6fee": {
+    "query": "INSERT INTO admin_users \n        (username , password,  secret) VALUES ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1c6e0ac5913665e512c5d6c8b99af61e6adbac6482de651ff8aeab4210ba4120": {
+    "query": "UPDATE admin_users set email = $1\n        WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "29f35f75a0ddedaabdfecd6a22ee16747f91b2b928641361fe43738eb21e7607": {
+    "query": "DELETE FROM admin_users WHERE username = ($1)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "2f9e7d2c4e5335a1c221f8162f5c47c44efbea37cc41670873303f6892e62375": {
+    "query": "UPDATE admin_users set password = $1\n        WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "3e91a474c261bae1ca27f1a5fcf9a276b5fa000039f5118b6daf5640b8708894": {
+    "query": "SELECT secret  FROM admin_users WHERE username = ($1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "secret",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "4899a9845675082afcfca09d016da313f09932882f5e71ca7da26db94aa14dc1": {
+    "query": "UPDATE admin_users set username = $1 WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "524065157b7c8e0a2ff02eb8efd7ddf79f585b2f1428f9d2bab92b3d2b2b9b71": {
+    "query": "insert into admin_users \n        (username , password, email, secret) values ($1, $2, $3, $4)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "583d7cf4a5a111471f7898bea0001c2e4c18200d8840456a3b28fedf6d7c1359": {
+    "query": "SELECT EXISTS (SELECT 1 from admin_users WHERE username = $1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "677c618882d6b7e621f9f2b040671d8260518383796efad120a8ffdb596e9d7a": {
+    "query": "SELECT username, password  FROM admin_users WHERE email = ($1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "username",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "password",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "9b53b26143e9583dac3454eafb34fdfb5976144b64cdc0504138b74f8b950ccd": {
+    "query": "SELECT EXISTS (SELECT 1 from admin_users WHERE email = $1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "dadfd47b8d33b0b636a79716afa5c8afdf9873304ff9fe883de7eae3aa5e8504": {
+    "query": "SELECT password  FROM admin_users WHERE username = ($1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "password",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  }
+}
