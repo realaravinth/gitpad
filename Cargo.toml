@@ -21,13 +21,18 @@ members = [
 ]
 
 [dependencies]
+actix-auth-middleware = { branch="v4", version = "0.2", git = "https://github.com/realaravinth/actix-auth-middleware", features = ["actix_identity_backend"] }
 actix-web = "4.0.0-rc.3"
 actix-http = "3.0.0-rc.2"
+actix-identity = "0.4.0-beta.8"
 actix-rt = "2.6.0"
 argon2-creds = { branch = "master", git = "https://github.com/realaravinth/argon2-creds"}
 config = "0.11"
 db-core = {path = "./database/db-core"}
+db-sqlx-postgres = {path = "./database/db-sqlx-postgres"}
+db-sqlx-sqlite = {path = "./database/db-sqlx-sqlite"}
 derive_more = "0.99"
+futures = "0.3.21"
 git2 = "0.13.25"
 lazy_static = "1.4"
 log = "0.4"
@@ -37,12 +42,13 @@ pretty_env_logger = "0.4"
 rand = "0.8.4"
 serde = { version = "1", features = ["derive"]}
 serde_json = "1"
+sqlx = { version = "0.5.10", features = [ "runtime-actix-rustls", "uuid", "postgres", "time", "offline", "sqlite" ] }
 tokio = "1.16.1"
 url = "2.2"
+urlencoding = "2.1.0"
 validator = { version = "0.14.0", features = ["derive"] }
 
+
+
 [dev-dependencies]
-db-sqlx-postgres = {path = "./database/db-sqlx-postgres"}
-db-sqlx-sqlite = {path = "./database/db-sqlx-sqlite"}
 actix-rt = "2"
-sqlx = { version = "0.5.10", features = [ "runtime-actix-rustls", "uuid", "postgres", "time", "offline", "sqlite" ] }
