@@ -49,9 +49,9 @@ async fn protected_routes_work(data: Arc<Data>, db: BoxDB) {
 
     let get_protected_urls = ["/logout"];
 
-    let  _ = data.delete_user(db, NAME, PASSWORD).await;
+    let _ = data.delete_user(db, NAME, PASSWORD).await;
 
-    let ( _, signin_resp) = data.register_and_signin(db, NAME, EMAIL, PASSWORD).await;
+    let (_, signin_resp) = data.register_and_signin(db, NAME, EMAIL, PASSWORD).await;
     let cookies = get_cookie!(signin_resp);
     let app = get_app!(data, db).await;
 
