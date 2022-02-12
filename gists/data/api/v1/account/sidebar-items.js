@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AccountCheckResp","Data structure used in `*_exists` methods"],["ChangePasswordReqest","Data structure used to change password of a registered user"],["Secret","Data structure used to represent account secret"]]});

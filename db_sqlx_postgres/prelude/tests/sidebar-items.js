@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["duplicate_secret_guard_works","test duplicate secret errors"],["duplicate_username_and_email","check if duplicate username and duplicate email guards are working on update workflows"],["email_register_works","test email registration implementation"],["username_register_works","test username registration implementation"]]});

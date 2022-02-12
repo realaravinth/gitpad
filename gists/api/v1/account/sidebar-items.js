@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["services",""]],"struct":[["AccountCheckPayload",""],["Email",""],["Username",""],["delete_account",""],["email_exists",""],["get_secret",""],["set_email","update email"],["set_username","update username"],["update_user_password",""],["update_user_secret",""],["username_exists",""]]});

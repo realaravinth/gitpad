@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["map_register_err",""]]});

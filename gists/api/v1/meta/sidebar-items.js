@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["services",""]],"mod":[["routes",""]],"struct":[["BuildDetails",""],["Health","Health check return datatype"],["build_details","emmits build details of the bninary"],["health","emmits build details of the bninary"]]});
