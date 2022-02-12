@@ -7,6 +7,7 @@ pub fn map_register_err(e: Error) -> DBError {
     if let Error::Database(err) = e {
         if err.code() == Some(Cow::from("2067")) {
             let msg = err.message();
+            println!("{}", msg);
             if msg.contains("admin_users.username") {
                 DBError::DuplicateUsername
             } else if msg.contains("admin_users.email") {

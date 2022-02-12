@@ -14,6 +14,7 @@ pub mod tests;
 
 /// Database pool. All database functionallity(`libadmin` traits) are implemented on this
 /// data structure
+#[derive(Clone)]
 pub struct Database {
     /// database pool
     pub pool: PgPool,
@@ -268,5 +269,16 @@ impl GistDatabase for Database {
         })?;
 
         Ok(secret.secret)
+    }
+
+    /// ping DB
+    async fn ping(&self) -> bool {
+        use sqlx::Connection;
+
+        if let Ok(mut con) = self.pool.acquire().await {
+            con.ping().await.is_ok()
+        } else {
+            false
+        }
     }
 }

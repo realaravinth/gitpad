@@ -7,6 +7,7 @@ pub mod errors;
 #[cfg(test)]
 pub mod tests;
 
+#[derive(Clone)]
 pub struct Database {
     pub pool: SqlitePool,
 }
@@ -237,5 +238,16 @@ impl GistDatabase for Database {
         })?;
 
         Ok(secret.secret)
+    }
+
+    /// ping DB
+    async fn ping(&self) -> bool {
+        use sqlx::Connection;
+
+        if let Ok(mut con) = self.pool.acquire().await {
+            con.ping().await.is_ok()
+        } else {
+            false
+        }
     }
 }

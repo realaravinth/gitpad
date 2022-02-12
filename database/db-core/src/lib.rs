@@ -93,7 +93,7 @@ pub struct UpdateUsernamePayload<'a> {
 use dev::*;
 /// foo
 #[async_trait]
-pub trait GistDatabase: std::marker::Send + std::marker::Sync {
+pub trait GistDatabase: std::marker::Send + std::marker::Sync + CloneGistDatabase {
     /// Update email of specified user in database
     async fn update_email(&self, payload: &UpdateEmailPayload) -> DBResult<()>;
     /// Update password of specified user in database
@@ -118,10 +118,13 @@ pub trait GistDatabase: std::marker::Send + std::marker::Sync {
     async fn email_register(&self, payload: &EmailRegisterPayload) -> DBResult<()>;
     /// register with username
     async fn username_register(&self, payload: &UsernameRegisterPayload) -> DBResult<()>;
+
+    /// ping DB
+    async fn ping(&self) -> bool;
 }
 
 #[async_trait]
-impl<T: GistDatabase + ?Sized> GistDatabase for Box<T> {
+impl GistDatabase for Box<dyn GistDatabase> {
     async fn update_email(&self, payload: &UpdateEmailPayload) -> DBResult<()> {
         (**self).update_email(payload).await
     }
@@ -168,5 +171,31 @@ impl<T: GistDatabase + ?Sized> GistDatabase for Box<T> {
     /// register with username
     async fn username_register(&self, payload: &UsernameRegisterPayload) -> DBResult<()> {
         (**self).username_register(payload).await
+    }
+
+    /// ping DB
+    async fn ping(&self) -> bool {
+        (**self).ping().await
+    }
+}
+
+/// Trait to clone GistDatabase
+pub trait CloneGistDatabase {
+    /// clone DB
+    fn clone_db<'a>(&self) -> Box<dyn GistDatabase>;
+}
+
+impl<T> CloneGistDatabase for T
+where
+    T: GistDatabase + Clone + 'static,
+{
+    fn clone_db(&self) -> Box<dyn GistDatabase> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn GistDatabase> {
+    fn clone(&self) -> Self {
+        (**self).clone_db()
     }
 }
