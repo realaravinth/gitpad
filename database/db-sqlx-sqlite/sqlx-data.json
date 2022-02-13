@@ -1,79 +1,21 @@
 {
   "db": "SQLite",
-  "08e90ce06e795bdb9bf0ea5b18df3b69b107764ad9d224de601b3588fbeac211": {
-    "query": "UPDATE admin_users set secret = $1\n        WHERE username = $2",
+  "0b6e7311c44fa5278b5279b1ecfb8eba57a80f5ddc5f0e1a78f126113a31187b": {
+    "query": "insert into gists_users \n        (username , password, email, secret) values ($1, $2, $3, $4)",
     "describe": {
       "columns": [],
       "parameters": {
-        "Right": 2
+        "Right": 4
       },
       "nullable": []
     }
   },
-  "09381773667052a357cc51fec91a4004e09ba5ce7ebce2b7378ff637a5cb89a1": {
-    "query": "SELECT id from admin_users WHERE email = $1",
+  "405772009a7aee0194b6b25c42955c2674c3ff92b812d7f15c4075d243879c60": {
+    "query": "SELECT password  FROM gists_users WHERE username = ($1)",
     "describe": {
       "columns": [
         {
-          "name": "ID",
-          "ordinal": 0,
-          "type_info": "Int64"
-        }
-      ],
-      "parameters": {
-        "Right": 1
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
-  "150c8d182ca90bd50fdd419e5b1b2bb48c8eb5d060d7ab0207dfc04e8eda6fee": {
-    "query": "INSERT INTO admin_users \n        (username , password,  secret) VALUES ($1, $2, $3)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Right": 3
-      },
-      "nullable": []
-    }
-  },
-  "1c6e0ac5913665e512c5d6c8b99af61e6adbac6482de651ff8aeab4210ba4120": {
-    "query": "UPDATE admin_users set email = $1\n        WHERE username = $2",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Right": 2
-      },
-      "nullable": []
-    }
-  },
-  "29f35f75a0ddedaabdfecd6a22ee16747f91b2b928641361fe43738eb21e7607": {
-    "query": "DELETE FROM admin_users WHERE username = ($1)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Right": 1
-      },
-      "nullable": []
-    }
-  },
-  "2f9e7d2c4e5335a1c221f8162f5c47c44efbea37cc41670873303f6892e62375": {
-    "query": "UPDATE admin_users set password = $1\n        WHERE username = $2",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Right": 2
-      },
-      "nullable": []
-    }
-  },
-  "3e91a474c261bae1ca27f1a5fcf9a276b5fa000039f5118b6daf5640b8708894": {
-    "query": "SELECT secret  FROM admin_users WHERE username = ($1)",
-    "describe": {
-      "columns": [
-        {
-          "name": "secret",
+          "name": "password",
           "ordinal": 0,
           "type_info": "Text"
         }
@@ -86,8 +28,8 @@
       ]
     }
   },
-  "4899a9845675082afcfca09d016da313f09932882f5e71ca7da26db94aa14dc1": {
-    "query": "UPDATE admin_users set username = $1 WHERE username = $2",
+  "4eb5627f85e0395422df67fb6d9bb8a1325bb751293b55a370f3906b42fec554": {
+    "query": "UPDATE gists_users set password = $1\n        WHERE username = $2",
     "describe": {
       "columns": [],
       "parameters": {
@@ -96,18 +38,18 @@
       "nullable": []
     }
   },
-  "524065157b7c8e0a2ff02eb8efd7ddf79f585b2f1428f9d2bab92b3d2b2b9b71": {
-    "query": "insert into admin_users \n        (username , password, email, secret) values ($1, $2, $3, $4)",
+  "7cc18cdd39aa42dcbb75b0b0d06b6df05ac654654b86db71be07344e3f09510d": {
+    "query": "UPDATE gists_users set username = $1 WHERE username = $2",
     "describe": {
       "columns": [],
       "parameters": {
-        "Right": 4
+        "Right": 2
       },
       "nullable": []
     }
   },
-  "677c618882d6b7e621f9f2b040671d8260518383796efad120a8ffdb596e9d7a": {
-    "query": "SELECT username, password  FROM admin_users WHERE email = ($1)",
+  "87e92bd84adbe95b27200a84c861d30b7c09b0a7976df7a02caa645b46cdf7dd": {
+    "query": "SELECT username, password  FROM gists_users WHERE email = ($1)",
     "describe": {
       "columns": [
         {
@@ -130,8 +72,28 @@
       ]
     }
   },
-  "c020b4503f7869c5f32cce9a871c99a19e5000bc9aa03ebb0ce8176397367cd3": {
-    "query": "SELECT id from admin_users WHERE username = $1",
+  "9aaf3a384bf79f278bf79c99b34fadcc172cfa4e7857111502782e6ad7110b7b": {
+    "query": "UPDATE gists_users set email = $1\n        WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 2
+      },
+      "nullable": []
+    }
+  },
+  "aa899a667f05d021e1d537f1ab53289edcec5fc76a88b56abb08909bbc5b8478": {
+    "query": "UPDATE gists_users set secret = $1\n        WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 2
+      },
+      "nullable": []
+    }
+  },
+  "abb03ed8bb0c881539d518d4585689b9511d0eedec683007916eaaac3db9eefa": {
+    "query": "SELECT id from gists_users WHERE email = $1",
     "describe": {
       "columns": [
         {
@@ -148,12 +110,50 @@
       ]
     }
   },
-  "dadfd47b8d33b0b636a79716afa5c8afdf9873304ff9fe883de7eae3aa5e8504": {
-    "query": "SELECT password  FROM admin_users WHERE username = ($1)",
+  "b3c2a524999bb13149704c53c059a856c5003ef537b9e966548123a52c01802b": {
+    "query": "DELETE FROM gists_users WHERE username = ($1)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 1
+      },
+      "nullable": []
+    }
+  },
+  "d4762a0b958e06f8d2837d43e8138a560c9c966cbe12d1f10ec12da09866f8eb": {
+    "query": "SELECT id from gists_users WHERE username = $1",
     "describe": {
       "columns": [
         {
-          "name": "password",
+          "name": "ID",
+          "ordinal": 0,
+          "type_info": "Int64"
+        }
+      ],
+      "parameters": {
+        "Right": 1
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "e3604664ce429e2f49c0c4cc2601c5336be3f8690c06b9883b64b53085c9c9a6": {
+    "query": "INSERT INTO gists_users \n        (username , password,  secret) VALUES ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 3
+      },
+      "nullable": []
+    }
+  },
+  "e7aadec10bcf05eeac542b2f89ce27fcf2efd5d5e8c4ff929fce35c47d7feed1": {
+    "query": "SELECT secret  FROM gists_users WHERE username = ($1)",
+    "describe": {
+      "columns": [
+        {
+          "name": "secret",
           "ordinal": 0,
           "type_info": "Text"
         }
