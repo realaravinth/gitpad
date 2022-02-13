@@ -67,15 +67,17 @@ async fn health(db: DB) -> impl Responder {
 }
 
 pub fn services(cfg: &mut web::ServiceConfig) {
-    cfg.service(build_details);
     cfg.service(health);
+    cfg.service(build_details);
 }
 
 #[cfg(test)]
 mod tests {
     use actix_web::{http::StatusCode, test, App};
 
+    use crate::api::v1::meta::Health;
     use crate::routes::services;
+    use crate::tests::*;
     use crate::*;
 
     #[actix_rt::test]
@@ -90,5 +92,23 @@ mod tests {
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[actix_rt::test]
+    async fn health_works() {
+        let config = [
+            sqlx_postgres::get_data().await,
+            sqlx_sqlite::get_data().await,
+        ];
+
+        for (db, data) in config.iter() {
+            let app = get_app!(data, db).await;
+            let resp =
+                get_request!(&app, &V1_API_ROUTES.meta.health);
+            assert_eq!(resp.status(), StatusCode::OK);
+
+            let health: Health = test::read_body_json(resp).await;
+            assert!(health.db);
+        }
     }
 }

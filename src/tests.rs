@@ -104,11 +104,9 @@ macro_rules! post_request {
 }
 
 #[macro_export]
-macro_rules! get_works {
+macro_rules! get_request {
     ($app:expr,$route:expr ) => {
-        let list_sitekey_resp =
-            test::call_service(&$app, test::TestRequest::get().uri($route).to_request()).await;
-        assert_eq!(list_sitekey_resp.status(), StatusCode::OK);
+            test::call_service(&$app, test::TestRequest::get().uri($route).to_request()).await
     };
 }
 
