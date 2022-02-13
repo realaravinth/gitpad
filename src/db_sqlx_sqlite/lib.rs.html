@@ -329,7 +329,7 @@
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">email_login</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">email</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">Creds</span><span class="op">&gt;</span> {
         <span class="macro">sqlx::query_as!</span>(
             <span class="ident">Creds</span>,
-            <span class="string">r#&quot;SELECT username, password  FROM admin_users WHERE email = ($1)&quot;#</span>,
+            <span class="string">r#&quot;SELECT username, password  FROM gists_users WHERE email = ($1)&quot;#</span>,
             <span class="ident">email</span>,
         )
         .<span class="ident">fetch_one</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pool</span>)
@@ -343,7 +343,7 @@
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">username_login</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">Password</span><span class="op">&gt;</span> {
         <span class="macro">sqlx::query_as!</span>(
             <span class="ident">Password</span>,
-            <span class="string">r#&quot;SELECT password  FROM admin_users WHERE username = ($1)&quot;#</span>,
+            <span class="string">r#&quot;SELECT password  FROM gists_users WHERE username = ($1)&quot;#</span>,
             <span class="ident">username</span>,
         )
         .<span class="ident">fetch_one</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pool</span>)
@@ -356,7 +356,7 @@
 
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">email_register</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">EmailRegisterPayload</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">sqlx::query!</span>(
-            <span class="string">&quot;insert into admin_users 
+            <span class="string">&quot;insert into gists_users 
         (username , password, email, secret) values ($1, $2, $3, $4)&quot;</span>,
             <span class="ident">payload</span>.<span class="ident">username</span>,
             <span class="ident">payload</span>.<span class="ident">password</span>,
@@ -371,7 +371,7 @@
 
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">username_register</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">UsernameRegisterPayload</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">sqlx::query!</span>(
-            <span class="string">&quot;INSERT INTO admin_users 
+            <span class="string">&quot;INSERT INTO gists_users 
         (username , password,  secret) VALUES ($1, $2, $3)&quot;</span>,
             <span class="ident">payload</span>.<span class="ident">username</span>,
             <span class="ident">payload</span>.<span class="ident">password</span>,
@@ -385,7 +385,7 @@
 
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">update_email</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">UpdateEmailPayload</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="macro">sqlx::query!</span>(
-            <span class="string">&quot;UPDATE admin_users set email = $1
+            <span class="string">&quot;UPDATE gists_users set email = $1
         WHERE username = $2&quot;</span>,
             <span class="ident">payload</span>.<span class="ident">email</span>,
             <span class="ident">payload</span>.<span class="ident">username</span>,
@@ -400,7 +400,7 @@
     }
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">update_password</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">Creds</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="macro">sqlx::query!</span>(
-            <span class="string">&quot;UPDATE admin_users set password = $1
+            <span class="string">&quot;UPDATE gists_users set password = $1
         WHERE username = $2&quot;</span>,
             <span class="ident">payload</span>.<span class="ident">password</span>,
             <span class="ident">payload</span>.<span class="ident">username</span>,
@@ -415,7 +415,7 @@
     }
 
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">email_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">email</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="macro">sqlx::query!</span>(<span class="string">&quot;SELECT id from admin_users WHERE email = $1&quot;</span>, <span class="ident">email</span>)
+        <span class="kw">match</span> <span class="macro">sqlx::query!</span>(<span class="string">&quot;SELECT id from gists_users WHERE email = $1&quot;</span>, <span class="ident">email</span>)
             .<span class="ident">fetch_one</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pool</span>)
             .<span class="kw">await</span>
         {
@@ -426,7 +426,7 @@
     }
 
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">delete_account</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">sqlx::query!</span>(<span class="string">&quot;DELETE FROM admin_users WHERE username = ($1)&quot;</span>, <span class="ident">username</span>,)
+        <span class="macro">sqlx::query!</span>(<span class="string">&quot;DELETE FROM gists_users WHERE username = ($1)&quot;</span>, <span class="ident">username</span>,)
             .<span class="ident">execute</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pool</span>)
             .<span class="kw">await</span>
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DBError::DBError</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)))<span class="question-mark">?</span>;
@@ -434,7 +434,7 @@
     }
 
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">username_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="macro">sqlx::query!</span>(<span class="string">&quot;SELECT id from admin_users WHERE username = $1&quot;</span>, <span class="ident">username</span>)
+        <span class="kw">match</span> <span class="macro">sqlx::query!</span>(<span class="string">&quot;SELECT id from gists_users WHERE username = $1&quot;</span>, <span class="ident">username</span>)
             .<span class="ident">fetch_one</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pool</span>)
             .<span class="kw">await</span>
         {
@@ -446,7 +446,7 @@
 
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">update_username</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">UpdateUsernamePayload</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="macro">sqlx::query!</span>(
-            <span class="string">&quot;UPDATE admin_users set username = $1 WHERE username = $2&quot;</span>,
+            <span class="string">&quot;UPDATE gists_users set username = $1 WHERE username = $2&quot;</span>,
             <span class="ident">payload</span>.<span class="ident">new_username</span>,
             <span class="ident">payload</span>.<span class="ident">old_username</span>,
         )
@@ -460,7 +460,7 @@
     }
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">update_secret</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">secret</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="macro">sqlx::query!</span>(
-            <span class="string">&quot;UPDATE admin_users set secret = $1
+            <span class="string">&quot;UPDATE gists_users set secret = $1
         WHERE username = $2&quot;</span>,
             <span class="ident">secret</span>,
             <span class="ident">username</span>,
@@ -481,7 +481,7 @@
         }
         <span class="kw">let</span> <span class="ident">secret</span> <span class="op">=</span> <span class="macro">sqlx::query_as!</span>(
             <span class="ident">Secret</span>,
-            <span class="string">r#&quot;SELECT secret  FROM admin_users WHERE username = ($1)&quot;#</span>,
+            <span class="string">r#&quot;SELECT secret  FROM gists_users WHERE username = ($1)&quot;#</span>,
             <span class="ident">username</span>,
         )
         .<span class="ident">fetch_one</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pool</span>)

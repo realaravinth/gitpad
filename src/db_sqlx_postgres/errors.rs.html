@@ -37,11 +37,11 @@
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Error::Database</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="ident">e</span> {
         <span class="kw">if</span> <span class="ident">err</span>.<span class="ident">code</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">Cow::from</span>(<span class="string">&quot;23505&quot;</span>)) {
             <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">err</span>.<span class="ident">message</span>();
-            <span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">contains</span>(<span class="string">&quot;admin_users_username_key&quot;</span>) {
+            <span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">contains</span>(<span class="string">&quot;gists_users_username_key&quot;</span>) {
                 <span class="ident">DBError::DuplicateUsername</span>
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">contains</span>(<span class="string">&quot;admin_users_email_key&quot;</span>) {
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">contains</span>(<span class="string">&quot;gists_users_email_key&quot;</span>) {
                 <span class="ident">DBError::DuplicateEmail</span>
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">contains</span>(<span class="string">&quot;admin_users_secret_key&quot;</span>) {
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">contains</span>(<span class="string">&quot;gists_users_secret_key&quot;</span>) {
                 <span class="ident">DBError::DuplicateSecret</span>
             } <span class="kw">else</span> {
                 <span class="ident">DBError::DBError</span>(<span class="ident">Box::new</span>(<span class="ident">Error::Database</span>(<span class="ident">err</span>)))
