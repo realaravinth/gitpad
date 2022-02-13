@@ -88,7 +88,7 @@ impl GistDatabase for Database {
     async fn email_login(&self, email: &str) -> DBResult<Creds> {
         sqlx::query_as!(
             Creds,
-            r#"SELECT username, password  FROM admin_users WHERE email = ($1)"#,
+            r#"SELECT username, password  FROM gists_users WHERE email = ($1)"#,
             email,
         )
         .fetch_one(&self.pool)
@@ -102,7 +102,7 @@ impl GistDatabase for Database {
     async fn username_login(&self, username: &str) -> DBResult<Password> {
         sqlx::query_as!(
             Password,
-            r#"SELECT password  FROM admin_users WHERE username = ($1)"#,
+            r#"SELECT password  FROM gists_users WHERE username = ($1)"#,
             username,
         )
         .fetch_one(&self.pool)
@@ -115,7 +115,7 @@ impl GistDatabase for Database {
 
     async fn email_register(&self, payload: &EmailRegisterPayload) -> DBResult<()> {
         sqlx::query!(
-            "insert into admin_users 
+            "insert into gists_users 
         (username , password, email, secret) values ($1, $2, $3, $4)",
             &payload.username,
             &payload.password,
@@ -130,7 +130,7 @@ impl GistDatabase for Database {
 
     async fn username_register(&self, payload: &UsernameRegisterPayload) -> DBResult<()> {
         sqlx::query!(
-            "INSERT INTO admin_users 
+            "INSERT INTO gists_users 
         (username , password,  secret) VALUES ($1, $2, $3)",
             &payload.username,
             &payload.password,
@@ -144,7 +144,7 @@ impl GistDatabase for Database {
 
     async fn update_email(&self, payload: &UpdateEmailPayload) -> DBResult<()> {
         let x = sqlx::query!(
-            "UPDATE admin_users set email = $1
+            "UPDATE gists_users set email = $1
         WHERE username = $2",
             &payload.email,
             &payload.username,
@@ -160,7 +160,7 @@ impl GistDatabase for Database {
     }
     async fn update_password(&self, payload: &Creds) -> DBResult<()> {
         let x = sqlx::query!(
-            "UPDATE admin_users set password = $1
+            "UPDATE gists_users set password = $1
         WHERE username = $2",
             &payload.password,
             &payload.username,
@@ -177,7 +177,7 @@ impl GistDatabase for Database {
 
     async fn email_exists(&self, email: &str) -> DBResult<bool> {
         let res = sqlx::query!(
-            "SELECT EXISTS (SELECT 1 from admin_users WHERE email = $1)",
+            "SELECT EXISTS (SELECT 1 from gists_users WHERE email = $1)",
             &email
         )
         .fetch_one(&self.pool)
@@ -195,7 +195,7 @@ impl GistDatabase for Database {
     }
 
     async fn delete_account(&self, username: &str) -> DBResult<()> {
-        sqlx::query!("DELETE FROM admin_users WHERE username = ($1)", username,)
+        sqlx::query!("DELETE FROM gists_users WHERE username = ($1)", username,)
             .execute(&self.pool)
             .await
             .map_err(|e| DBError::DBError(Box::new(e)))?;
@@ -204,7 +204,7 @@ impl GistDatabase for Database {
 
     async fn username_exists(&self, username: &str) -> DBResult<bool> {
         let res = sqlx::query!(
-            "SELECT EXISTS (SELECT 1 from admin_users WHERE username = $1)",
+            "SELECT EXISTS (SELECT 1 from gists_users WHERE username = $1)",
             &username
         )
         .fetch_one(&self.pool)
@@ -223,7 +223,7 @@ impl GistDatabase for Database {
 
     async fn update_username(&self, payload: &UpdateUsernamePayload) -> DBResult<()> {
         let x = sqlx::query!(
-            "UPDATE admin_users set username = $1 WHERE username = $2",
+            "UPDATE gists_users set username = $1 WHERE username = $2",
             &payload.new_username,
             &payload.old_username,
         )
@@ -237,7 +237,7 @@ impl GistDatabase for Database {
     }
     async fn update_secret(&self, username: &str, secret: &str) -> DBResult<()> {
         let x = sqlx::query!(
-            "UPDATE admin_users set secret = $1
+            "UPDATE gists_users set secret = $1
         WHERE username = $2",
             secret,
             username,
@@ -258,7 +258,7 @@ impl GistDatabase for Database {
         }
         let secret = sqlx::query_as!(
             Secret,
-            r#"SELECT secret  FROM admin_users WHERE username = ($1)"#,
+            r#"SELECT secret  FROM gists_users WHERE username = ($1)"#,
             username,
         )
         .fetch_one(&self.pool)

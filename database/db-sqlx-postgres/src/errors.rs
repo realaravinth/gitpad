@@ -9,11 +9,11 @@ pub fn map_register_err(e: Error) -> DBError {
     if let Error::Database(err) = e {
         if err.code() == Some(Cow::from("23505")) {
             let msg = err.message();
-            if msg.contains("admin_users_username_key") {
+            if msg.contains("gists_users_username_key") {
                 DBError::DuplicateUsername
-            } else if msg.contains("admin_users_email_key") {
+            } else if msg.contains("gists_users_email_key") {
                 DBError::DuplicateEmail
-            } else if msg.contains("admin_users_secret_key") {
+            } else if msg.contains("gists_users_secret_key") {
                 DBError::DuplicateSecret
             } else {
                 DBError::DBError(Box::new(Error::Database(err)))

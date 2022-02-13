@@ -1,3 +1,202 @@
 {
-  "db": "PostgreSQL"
+  "db": "PostgreSQL",
+  "0b6e7311c44fa5278b5279b1ecfb8eba57a80f5ddc5f0e1a78f126113a31187b": {
+    "query": "insert into gists_users \n        (username , password, email, secret) values ($1, $2, $3, $4)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "405772009a7aee0194b6b25c42955c2674c3ff92b812d7f15c4075d243879c60": {
+    "query": "SELECT password  FROM gists_users WHERE username = ($1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "password",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "4eb5627f85e0395422df67fb6d9bb8a1325bb751293b55a370f3906b42fec554": {
+    "query": "UPDATE gists_users set password = $1\n        WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "7cc18cdd39aa42dcbb75b0b0d06b6df05ac654654b86db71be07344e3f09510d": {
+    "query": "UPDATE gists_users set username = $1 WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "87e92bd84adbe95b27200a84c861d30b7c09b0a7976df7a02caa645b46cdf7dd": {
+    "query": "SELECT username, password  FROM gists_users WHERE email = ($1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "username",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "password",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "8c7af53d14214f2bd23b089d3c9134909c2d1cc13cd42e88778bfb20f497c2dd": {
+    "query": "SELECT EXISTS (SELECT 1 from gists_users WHERE email = $1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "9aaf3a384bf79f278bf79c99b34fadcc172cfa4e7857111502782e6ad7110b7b": {
+    "query": "UPDATE gists_users set email = $1\n        WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "aa899a667f05d021e1d537f1ab53289edcec5fc76a88b56abb08909bbc5b8478": {
+    "query": "UPDATE gists_users set secret = $1\n        WHERE username = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "b3c2a524999bb13149704c53c059a856c5003ef537b9e966548123a52c01802b": {
+    "query": "DELETE FROM gists_users WHERE username = ($1)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "e3604664ce429e2f49c0c4cc2601c5336be3f8690c06b9883b64b53085c9c9a6": {
+    "query": "INSERT INTO gists_users \n        (username , password,  secret) VALUES ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "e7aadec10bcf05eeac542b2f89ce27fcf2efd5d5e8c4ff929fce35c47d7feed1": {
+    "query": "SELECT secret  FROM gists_users WHERE username = ($1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "secret",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "fdd95c62a27eab173de335225e9e319b901832962b7a562ec4d1749ff74f8fd4": {
+    "query": "SELECT EXISTS (SELECT 1 from gists_users WHERE username = $1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  }
 }
