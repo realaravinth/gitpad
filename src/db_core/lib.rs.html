@@ -429,13 +429,13 @@
     <span class="kw">pub</span> <span class="ident">description</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="doccomment">/// public ID of the gist</span>
     <span class="kw">pub</span> <span class="ident">public_id</span>: <span class="ident">String</span>,
-    <span class="doccomment">/// gist privacy</span>
-    <span class="kw">pub</span> <span class="ident">privacy</span>: <span class="ident">GistPrivacy</span>,
+    <span class="doccomment">/// gist visibility</span>
+    <span class="kw">pub</span> <span class="ident">visibility</span>: <span class="ident">GistVisibility</span>,
 }
 
-<span class="doccomment">/// Gist privacy</span>
+<span class="doccomment">/// Gist visibility</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">GistPrivacy</span> {
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">GistVisibility</span> {
     <span class="doccomment">/// Everyone can see the gist, will be displayed on /explore and</span>
     <span class="doccomment">/// search engines might index it too</span>
     <span class="ident">Public</span>,
@@ -446,33 +446,33 @@
     <span class="ident">Private</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">GistPrivacy</span> {
-    <span class="doccomment">/// Convert [GistPrivacy] to [str]</span>
+<span class="kw">impl</span> <span class="ident">GistVisibility</span> {
+    <span class="doccomment">/// Convert [GistVisibility] to [str]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">to_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">GistPrivacy::Private</span> =&gt; <span class="string">&quot;private&quot;</span>,
-            <span class="ident">GistPrivacy::Unlisted</span> =&gt; <span class="string">&quot;unlisted&quot;</span>,
-            <span class="ident">GistPrivacy::Public</span> =&gt; <span class="string">&quot;public&quot;</span>,
+            <span class="ident">GistVisibility::Private</span> =&gt; <span class="string">&quot;private&quot;</span>,
+            <span class="ident">GistVisibility::Unlisted</span> =&gt; <span class="string">&quot;unlisted&quot;</span>,
+            <span class="ident">GistVisibility::Public</span> =&gt; <span class="string">&quot;public&quot;</span>,
         }
     }
 
-    <span class="doccomment">/// Convert [str] to [GistPrivacy]</span>
+    <span class="doccomment">/// Convert [str] to [GistVisibility]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">const</span> <span class="ident">PRIVATE</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="ident">GistPrivacy::Private</span>.<span class="ident">to_str</span>();
-        <span class="kw">const</span> <span class="ident">PUBLIC</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="ident">GistPrivacy::Public</span>.<span class="ident">to_str</span>();
-        <span class="kw">const</span> <span class="ident">UNLISTED</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="ident">GistPrivacy::Unlisted</span>.<span class="ident">to_str</span>();
+        <span class="kw">const</span> <span class="ident">PRIVATE</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="ident">GistVisibility::Private</span>.<span class="ident">to_str</span>();
+        <span class="kw">const</span> <span class="ident">PUBLIC</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="ident">GistVisibility::Public</span>.<span class="ident">to_str</span>();
+        <span class="kw">const</span> <span class="ident">UNLISTED</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="ident">GistVisibility::Unlisted</span>.<span class="ident">to_str</span>();
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">trim</span>();
         <span class="kw">match</span> <span class="ident">s</span> {
             <span class="ident">PRIVATE</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Private</span>),
             <span class="ident">PUBLIC</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Public</span>),
             <span class="ident">UNLISTED</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Unlisted</span>),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DBError::UnknownPrivacySpecifier</span>(<span class="ident">s</span>.<span class="ident">to_owned</span>())),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DBError::UnknownVisibilitySpecifier</span>(<span class="ident">s</span>.<span class="ident">to_owned</span>())),
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">GistPrivacy</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">String</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">gp</span>: <span class="ident">GistPrivacy</span>) -&gt; <span class="ident">String</span> {
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">GistVisibility</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">String</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">gp</span>: <span class="ident">GistVisibility</span>) -&gt; <span class="ident">String</span> {
         <span class="ident">gp</span>.<span class="ident">to_str</span>().<span class="ident">into</span>()
     }
 }
@@ -490,8 +490,8 @@
     <span class="kw">pub</span> <span class="ident">created</span>: <span class="ident">i64</span>,
     <span class="doccomment">/// gist updated time</span>
     <span class="kw">pub</span> <span class="ident">updated</span>: <span class="ident">i64</span>,
-    <span class="doccomment">/// gist privacy</span>
-    <span class="kw">pub</span> <span class="ident">privacy</span>: <span class="ident">GistPrivacy</span>,
+    <span class="doccomment">/// gist visibility</span>
+    <span class="kw">pub</span> <span class="ident">visibility</span>: <span class="ident">GistVisibility</span>,
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
@@ -613,8 +613,8 @@
     <span class="doccomment">/// Delete comment</span>
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">delete_comment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">owner</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">id</span>: <span class="ident">i64</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
-    <span class="doccomment">/// check if privacy mode exists</span>
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">privacy_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">privacy</span>: <span class="kw-2">&amp;</span><span class="ident">GistPrivacy</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// check if visibility mode exists</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">visibility_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">visibility</span>: <span class="kw-2">&amp;</span><span class="ident">GistVisibility</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">async_trait</span>]</span>
@@ -708,8 +708,8 @@
         (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">delete_comment</span>(<span class="ident">owner</span>, <span class="ident">id</span>).<span class="kw">await</span>
     }
 
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">privacy_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">privacy</span>: <span class="kw-2">&amp;</span><span class="ident">GistPrivacy</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-        (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">privacy_exists</span>(<span class="ident">privacy</span>).<span class="kw">await</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">visibility_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">visibility</span>: <span class="kw-2">&amp;</span><span class="ident">GistVisibility</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+        (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">visibility_exists</span>(<span class="ident">visibility</span>).<span class="kw">await</span>
     }
 }
 

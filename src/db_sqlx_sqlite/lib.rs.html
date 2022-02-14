@@ -535,6 +535,9 @@
 <span id="534">534</span>
 <span id="535">535</span>
 <span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">db_core::dev</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="ident">sqlx::sqlite::SqlitePool</span>;
@@ -802,19 +805,19 @@
     <span class="doccomment">/// Create new gists</span>
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">new_gist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">gist</span>: <span class="kw-2">&amp;</span><span class="ident">CreateGist</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">now_unix_time_stamp</span>();
-        <span class="kw">let</span> <span class="ident">privacy</span> <span class="op">=</span> <span class="ident">gist</span>.<span class="ident">privacy</span>.<span class="ident">to_str</span>();
+        <span class="kw">let</span> <span class="ident">visibility</span> <span class="op">=</span> <span class="ident">gist</span>.<span class="ident">visibility</span>.<span class="ident">to_str</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">description</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">gist</span>.<span class="ident">description</span> {
             <span class="macro">sqlx::query!</span>(
                 <span class="string">&quot;INSERT INTO gists_gists 
-        (owner_id , description, public_id, privacy, created, updated)
+        (owner_id , description, public_id, visibility, created, updated)
         VALUES (
             (SELECT ID FROM gists_users WHERE username = $1),
-            $2, $3, (SELECT ID FROM gists_privacy WHERE name = $4), $5, $6
+            $2, $3, (SELECT ID FROM gists_visibility WHERE name = $4), $5, $6
         )&quot;</span>,
                 <span class="ident">gist</span>.<span class="ident">owner</span>,
                 <span class="ident">description</span>,
                 <span class="ident">gist</span>.<span class="ident">public_id</span>,
-                <span class="ident">privacy</span>,
+                <span class="ident">visibility</span>,
                 <span class="ident">now</span>,
                 <span class="ident">now</span>
             )
@@ -824,14 +827,14 @@
         } <span class="kw">else</span> {
             <span class="macro">sqlx::query!</span>(
                 <span class="string">&quot;INSERT INTO gists_gists 
-        (owner_id , public_id, privacy, created, updated)
+        (owner_id , public_id, visibility, created, updated)
         VALUES (
             (SELECT ID FROM gists_users WHERE username = $1),
-            $2, (SELECT ID FROM gists_privacy WHERE name = $3), $4, $5
+            $2, (SELECT ID FROM gists_visibility WHERE name = $3), $4, $5
         )&quot;</span>,
                 <span class="ident">gist</span>.<span class="ident">owner</span>,
                 <span class="ident">gist</span>.<span class="ident">public_id</span>,
-                <span class="ident">privacy</span>,
+                <span class="ident">visibility</span>,
                 <span class="ident">now</span>,
                 <span class="ident">now</span>
             )
@@ -847,7 +850,7 @@
             <span class="ident">InnerGist</span>,
             <span class="string">&quot;SELECT
                 owner,
-                privacy,
+                visibility,
                 created,
                 updated,
                 public_id,
@@ -873,7 +876,7 @@
             <span class="ident">InnerGist</span>,
             <span class="string">&quot;SELECT
                 owner,
-                privacy,
+                visibility,
                 created,
                 updated,
                 public_id,
@@ -1012,11 +1015,14 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">privacy_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">privacy</span>: <span class="kw-2">&amp;</span><span class="ident">GistPrivacy</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">privacy</span> <span class="op">=</span> <span class="ident">privacy</span>.<span class="ident">to_str</span>();
-        <span class="kw">match</span> <span class="macro">sqlx::query!</span>(<span class="string">&quot;SELECT ID from gists_privacy WHERE name = $1&quot;</span>, <span class="ident">privacy</span>)
-            .<span class="ident">fetch_one</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pool</span>)
-            .<span class="kw">await</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">visibility_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">visibility</span>: <span class="kw-2">&amp;</span><span class="ident">GistVisibility</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">visibility</span> <span class="op">=</span> <span class="ident">visibility</span>.<span class="ident">to_str</span>();
+        <span class="kw">match</span> <span class="macro">sqlx::query!</span>(
+            <span class="string">&quot;SELECT ID from gists_visibility WHERE name = $1&quot;</span>,
+            <span class="ident">visibility</span>
+        )
+        .<span class="ident">fetch_one</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pool</span>)
+        .<span class="kw">await</span>
         {
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
             <span class="prelude-val">Err</span>(<span class="ident">Error::RowNotFound</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
@@ -1035,7 +1041,7 @@
     <span class="ident">public_id</span>: <span class="ident">String</span>,
     <span class="ident">created</span>: <span class="ident">i64</span>,
     <span class="ident">updated</span>: <span class="ident">i64</span>,
-    <span class="ident">privacy</span>: <span class="ident">String</span>,
+    <span class="ident">visibility</span>: <span class="ident">String</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">InnerGist</span> {
@@ -1046,7 +1052,7 @@
             <span class="ident">public_id</span>: <span class="self">self</span>.<span class="ident">public_id</span>,
             <span class="ident">created</span>: <span class="self">self</span>.<span class="ident">created</span>,
             <span class="ident">updated</span>: <span class="self">self</span>.<span class="ident">updated</span>,
-            <span class="ident">privacy</span>: <span class="ident">GistPrivacy::from_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">privacy</span>)<span class="question-mark">?</span>,
+            <span class="ident">visibility</span>: <span class="ident">GistVisibility::from_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">visibility</span>)<span class="question-mark">?</span>,
         })
     }
 }
