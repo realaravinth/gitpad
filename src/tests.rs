@@ -106,7 +106,7 @@ macro_rules! post_request {
 #[macro_export]
 macro_rules! get_request {
     ($app:expr,$route:expr ) => {
-            test::call_service(&$app, test::TestRequest::get().uri($route).to_request()).await
+        test::call_service(&$app, test::TestRequest::get().uri($route).to_request()).await
     };
 }
 
