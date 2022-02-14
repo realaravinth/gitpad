@@ -44,23 +44,6 @@
       ]
     }
   },
-  "19c04856cfeaa552b1fbf5fb1dc5172c1329d88f39f771c83d3ca104f23a59b8": {
-    "query": "INSERT INTO gists_gists \n        (owner_id , description, public_id, privacy, created, updated)\n        VALUES (\n            (SELECT ID FROM gists_users WHERE username = $1),\n            $2, $3, (SELECT ID FROM gists_privacy WHERE name = $4), $5, $6\n        )",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Varchar",
-          "Text",
-          "Timestamptz",
-          "Timestamptz"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "1ea7ea0bb1a6f4b84a2b9c6b1741c6bf9f1938f107133bd80e72a82fb44d5c8a": {
     "query": "INSERT INTO gists_comments (owner_id, gist_id, comment, created)\n            VALUES (\n                (SELECT ID FROM gists_users WHERE username = $1),\n                (SELECT ID FROM gists_gists WHERE public_id = $2),\n                $3,\n                $4\n            )",
     "describe": {
@@ -76,8 +59,21 @@
       "nullable": []
     }
   },
-  "2e627e47d7dce8da4aebfc39f3baf02cbb471d514410cbe82ef442b7de9dfc55": {
-    "query": "SELECT\n                owner,\n                privacy,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE owner = $1\n            ",
+  "340413dd6062e88bf2db846a05f600d6d0384f8b7038445653c3156b997232a8": {
+    "query": "DELETE FROM gists_gists \n        WHERE \n            public_id = $1\n        AND\n            owner_id = (SELECT ID FROM gists_users WHERE username = $2)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "38409cc4e1e1edf0a5f15160d54a59b741fc668795bcdc11570e3963661c77e0": {
+    "query": "SELECT\n                owner,\n                visibility,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE public_id = $1\n            ",
     "describe": {
       "columns": [
         {
@@ -87,7 +83,7 @@
         },
         {
           "ordinal": 1,
-          "name": "privacy",
+          "name": "visibility",
           "type_info": "Varchar"
         },
         {
@@ -124,19 +120,6 @@
         true,
         true
       ]
-    }
-  },
-  "340413dd6062e88bf2db846a05f600d6d0384f8b7038445653c3156b997232a8": {
-    "query": "DELETE FROM gists_gists \n        WHERE \n            public_id = $1\n        AND\n            owner_id = (SELECT ID FROM gists_users WHERE username = $2)\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "405772009a7aee0194b6b25c42955c2674c3ff92b812d7f15c4075d243879c60": {
@@ -170,56 +153,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "71e74dfde93b42fb7cc064e439f3067ddd49db646b9837a66938c43474b34233": {
-    "query": "SELECT\n                owner,\n                privacy,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE public_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 1,
-          "name": "privacy",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "created",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "public_id",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 5,
-          "name": "description",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      ]
     }
   },
   "7cc18cdd39aa42dcbb75b0b0d06b6df05ac654654b86db71be07344e3f09510d": {
@@ -259,22 +192,6 @@
         false,
         false
       ]
-    }
-  },
-  "8ba77aab32a3b71ee10bde66676396263fd1bb41cf5d270dcb813c0c0e089bc7": {
-    "query": "INSERT INTO gists_gists \n        (owner_id , public_id, privacy, created, updated)\n        VALUES (\n            (SELECT ID FROM gists_users WHERE username = $1),\n            $2, (SELECT ID FROM gists_privacy WHERE name = $3), $4, $5\n        )",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Varchar",
-          "Text",
-          "Timestamptz",
-          "Timestamptz"
-        ]
-      },
-      "nullable": []
     }
   },
   "8c7af53d14214f2bd23b089d3c9134909c2d1cc13cd42e88778bfb20f497c2dd": {
@@ -394,8 +311,25 @@
       "nullable": []
     }
   },
-  "bc934d97678a5fef7a55f10657e1cefcdfe51a11b8755aa635cda0be468dc9dd": {
-    "query": "SELECT EXISTS (SELECT 1 from gists_privacy WHERE name = $1)",
+  "c2ab0ea9f4f409a089d9bf845a6102d7acae88fab627b77cf906852c6feb4aeb": {
+    "query": "INSERT INTO gists_gists \n        (owner_id , description, public_id, visibility, created, updated)\n        VALUES (\n            (SELECT ID FROM gists_users WHERE username = $1),\n            $2, $3, (SELECT ID FROM gists_visibility WHERE name = $4), $5, $6\n        )",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Varchar",
+          "Text",
+          "Timestamptz",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "cc05f1d7f840a39b445abc687e904f7ef0633a637b638c5b72b560d73c6b0067": {
+    "query": "SELECT EXISTS (SELECT 1 from gists_visibility WHERE name = $1)",
     "describe": {
       "columns": [
         {
@@ -425,6 +359,56 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "d96deddee5298f86c6938eeb12ee6ad130a2d6217629533c0400689065ab7a08": {
+    "query": "SELECT\n                owner,\n                visibility,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE owner = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "visibility",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "public_id",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     }
   },
   "e0a12b823159b7e2a3667bbb4c9dd22dd52b9ffb618f3464a2d61b11ad068821": {
@@ -479,6 +463,22 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "fbeb7f634647d0082b9a083590b027ba668e59f2173e0699b78c2261ace2638f": {
+    "query": "INSERT INTO gists_gists \n        (owner_id , public_id, visibility, created, updated)\n        VALUES (\n            (SELECT ID FROM gists_users WHERE username = $1),\n            $2, (SELECT ID FROM gists_visibility WHERE name = $3), $4, $5\n        )",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Varchar",
+          "Text",
+          "Timestamptz",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
     }
   },
   "fdd95c62a27eab173de335225e9e319b901832962b7a562ec4d1749ff74f8fd4": {

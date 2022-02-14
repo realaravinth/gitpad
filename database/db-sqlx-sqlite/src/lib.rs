@@ -265,19 +265,19 @@ impl GistDatabase for Database {
     /// Create new gists
     async fn new_gist(&self, gist: &CreateGist) -> DBResult<()> {
         let now = now_unix_time_stamp();
-        let privacy = gist.privacy.to_str();
+        let visibility = gist.visibility.to_str();
         if let Some(description) = &gist.description {
             sqlx::query!(
                 "INSERT INTO gists_gists 
-        (owner_id , description, public_id, privacy, created, updated)
+        (owner_id , description, public_id, visibility, created, updated)
         VALUES (
             (SELECT ID FROM gists_users WHERE username = $1),
-            $2, $3, (SELECT ID FROM gists_privacy WHERE name = $4), $5, $6
+            $2, $3, (SELECT ID FROM gists_visibility WHERE name = $4), $5, $6
         )",
                 gist.owner,
                 description,
                 gist.public_id,
-                privacy,
+                visibility,
                 now,
                 now
             )
@@ -287,14 +287,14 @@ impl GistDatabase for Database {
         } else {
             sqlx::query!(
                 "INSERT INTO gists_gists 
-        (owner_id , public_id, privacy, created, updated)
+        (owner_id , public_id, visibility, created, updated)
         VALUES (
             (SELECT ID FROM gists_users WHERE username = $1),
-            $2, (SELECT ID FROM gists_privacy WHERE name = $3), $4, $5
+            $2, (SELECT ID FROM gists_visibility WHERE name = $3), $4, $5
         )",
                 gist.owner,
                 gist.public_id,
-                privacy,
+                visibility,
                 now,
                 now
             )
@@ -310,7 +310,7 @@ impl GistDatabase for Database {
             InnerGist,
             "SELECT
                 owner,
-                privacy,
+                visibility,
                 created,
                 updated,
                 public_id,
@@ -336,7 +336,7 @@ impl GistDatabase for Database {
             InnerGist,
             "SELECT
                 owner,
-                privacy,
+                visibility,
                 created,
                 updated,
                 public_id,
@@ -475,11 +475,14 @@ impl GistDatabase for Database {
         Ok(())
     }
 
-    async fn privacy_exists(&self, privacy: &GistPrivacy) -> DBResult<bool> {
-        let privacy = privacy.to_str();
-        match sqlx::query!("SELECT ID from gists_privacy WHERE name = $1", privacy)
-            .fetch_one(&self.pool)
-            .await
+    async fn visibility_exists(&self, visibility: &GistVisibility) -> DBResult<bool> {
+        let visibility = visibility.to_str();
+        match sqlx::query!(
+            "SELECT ID from gists_visibility WHERE name = $1",
+            visibility
+        )
+        .fetch_one(&self.pool)
+        .await
         {
             Ok(_) => Ok(true),
             Err(Error::RowNotFound) => Ok(false),
@@ -498,7 +501,7 @@ struct InnerGist {
     public_id: String,
     created: i64,
     updated: i64,
-    privacy: String,
+    visibility: String,
 }
 
 impl InnerGist {
@@ -509,7 +512,7 @@ impl InnerGist {
             public_id: self.public_id,
             created: self.created,
             updated: self.updated,
-            privacy: GistPrivacy::from_str(&self.privacy)?,
+            visibility: GistVisibility::from_str(&self.visibility)?,
         })
     }
 }

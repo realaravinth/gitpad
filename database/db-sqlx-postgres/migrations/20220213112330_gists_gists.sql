@@ -1,15 +1,15 @@
-CREATE TABLE IF NOT EXISTS gists_privacy (
+CREATE TABLE IF NOT EXISTS gists_visibility (
     name VARCHAR(15) NOT NULL UNIQUE,
 	ID SERIAL PRIMARY KEY NOT NULL
 );
 
-INSERT INTO gists_privacy (name) VALUES('private') ON CONFLICT (name) DO NOTHING;
-INSERT INTO gists_privacy (name) VALUES('unlisted') ON CONFLICT (name) DO NOTHING;
-INSERT INTO gists_privacy (name) VALUES('public') ON CONFLICT (name) DO NOTHING;
+INSERT INTO gists_visibility (name) VALUES('private') ON CONFLICT (name) DO NOTHING;
+INSERT INTO gists_visibility (name) VALUES('unlisted') ON CONFLICT (name) DO NOTHING;
+INSERT INTO gists_visibility (name) VALUES('public') ON CONFLICT (name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS gists_gists (
 	owner_id INTEGER NOT NULL references gists_users(ID) ON DELETE CASCADE,
-    privacy INTEGER NOT NULL references gists_privacy(ID),
+    visibility INTEGER NOT NULL references gists_visibility(ID),
 	description TEXT DEFAULT NULL,
 	created timestamptz NOT NULL,
 	updated timestamptz NOT NULL,

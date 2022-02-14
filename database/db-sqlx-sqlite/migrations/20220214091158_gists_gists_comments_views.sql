@@ -6,9 +6,9 @@ CREATE VIEW gists_gists_view AS
         gists.updated,
         gists.public_id,
         gists_users.username as owner,
-        gists_privacy.name as privacy
+        gists_visibility.name as visibility
     FROM gists_gists gists
-    INNER JOIN gists_privacy ON gists_privacy.ID = gists.privacy
+    INNER JOIN gists_visibility ON gists_visibility.ID = gists.visibility
     INNER JOIN gists_users ON gists_users.ID = gists.owner_id;
 
 

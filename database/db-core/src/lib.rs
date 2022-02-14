@@ -61,13 +61,13 @@ pub struct CreateGist {
     pub description: Option<String>,
     /// public ID of the gist
     pub public_id: String,
-    /// gist privacy
-    pub privacy: GistPrivacy,
+    /// gist visibility
+    pub visibility: GistVisibility,
 }
 
-/// Gist privacy
+/// Gist visibility
 #[derive(Clone, PartialEq, Debug)]
-pub enum GistPrivacy {
+pub enum GistVisibility {
     /// Everyone can see the gist, will be displayed on /explore and
     /// search engines might index it too
     Public,
@@ -78,33 +78,33 @@ pub enum GistPrivacy {
     Private,
 }
 
-impl GistPrivacy {
-    /// Convert [GistPrivacy] to [str]
+impl GistVisibility {
+    /// Convert [GistVisibility] to [str]
     pub const fn to_str(&self) -> &'static str {
         match self {
-            GistPrivacy::Private => "private",
-            GistPrivacy::Unlisted => "unlisted",
-            GistPrivacy::Public => "public",
+            GistVisibility::Private => "private",
+            GistVisibility::Unlisted => "unlisted",
+            GistVisibility::Public => "public",
         }
     }
 
-    /// Convert [str] to [GistPrivacy]
+    /// Convert [str] to [GistVisibility]
     pub fn from_str(s: &str) -> DBResult<Self> {
-        const PRIVATE: &str = GistPrivacy::Private.to_str();
-        const PUBLIC: &str = GistPrivacy::Public.to_str();
-        const UNLISTED: &str = GistPrivacy::Unlisted.to_str();
+        const PRIVATE: &str = GistVisibility::Private.to_str();
+        const PUBLIC: &str = GistVisibility::Public.to_str();
+        const UNLISTED: &str = GistVisibility::Unlisted.to_str();
         let s = s.trim();
         match s {
             PRIVATE => Ok(Self::Private),
             PUBLIC => Ok(Self::Public),
             UNLISTED => Ok(Self::Unlisted),
-            _ => Err(DBError::UnknownPrivacySpecifier(s.to_owned())),
+            _ => Err(DBError::UnknownVisibilitySpecifier(s.to_owned())),
         }
     }
 }
 
-impl From<GistPrivacy> for String {
-    fn from(gp: GistPrivacy) -> String {
+impl From<GistVisibility> for String {
+    fn from(gp: GistVisibility) -> String {
         gp.to_str().into()
     }
 }
@@ -122,8 +122,8 @@ pub struct Gist {
     pub created: i64,
     /// gist updated time
     pub updated: i64,
-    /// gist privacy
-    pub privacy: GistPrivacy,
+    /// gist visibility
+    pub visibility: GistVisibility,
 }
 
 #[derive(Clone, Debug)]
@@ -245,8 +245,8 @@ pub trait GistDatabase: std::marker::Send + std::marker::Sync + CloneGistDatabas
     /// Delete comment
     async fn delete_comment(&self, owner: &str, id: i64) -> DBResult<()>;
 
-    /// check if privacy mode exists
-    async fn privacy_exists(&self, privacy: &GistPrivacy) -> DBResult<bool>;
+    /// check if visibility mode exists
+    async fn visibility_exists(&self, visibility: &GistVisibility) -> DBResult<bool>;
 }
 
 #[async_trait]
@@ -340,8 +340,8 @@ impl GistDatabase for Box<dyn GistDatabase> {
         (**self).delete_comment(owner, id).await
     }
 
-    async fn privacy_exists(&self, privacy: &GistPrivacy) -> DBResult<bool> {
-        (**self).privacy_exists(privacy).await
+    async fn visibility_exists(&self, visibility: &GistVisibility) -> DBResult<bool> {
+        (**self).visibility_exists(visibility).await
     }
 }
 

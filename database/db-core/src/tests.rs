@@ -39,17 +39,17 @@ pub async fn email_register_works<T: GistDatabase>(
     assert!(matches!(err, Some(DBError::DuplicateEmail)));
 }
 
-/// test if all privacy modes are available on database
-pub async fn privacy_works<T: GistDatabase>(db: &T) {
+/// test if all visibility modes are available on database
+pub async fn visibility_works<T: GistDatabase>(db: &T) {
     for p in [
-        GistPrivacy::Public,
-        GistPrivacy::Unlisted,
-        GistPrivacy::Private,
+        GistVisibility::Public,
+        GistVisibility::Unlisted,
+        GistVisibility::Private,
     ]
     .iter()
     {
-        println!("Testing privacy: {}", p.to_str());
-        assert!(db.privacy_exists(p).await.unwrap());
+        println!("Testing visibility: {}", p.to_str());
+        assert!(db.visibility_exists(p).await.unwrap());
     }
 }
 
@@ -72,7 +72,7 @@ pub async fn gists_work<T: GistDatabase>(
         assert_eq!(lhs.description, rhs.description);
         assert_eq!(lhs.owner, rhs.owner);
         assert_eq!(lhs.public_id, rhs.public_id);
-        assert_eq!(lhs.privacy, rhs.privacy);
+        assert_eq!(lhs.visibility, rhs.visibility);
     }
 
     let _ = db.delete_account(username).await;
@@ -88,7 +88,7 @@ pub async fn gists_work<T: GistDatabase>(
         owner: username.into(),
         description: Some("foo".to_string()),
         public_id: public_id.to_string(),
-        privacy: GistPrivacy::Public,
+        visibility: GistVisibility::Public,
     };
 
     assert!(!db.gist_exists(&create_gist.public_id).await.unwrap());

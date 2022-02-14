@@ -33,7 +33,7 @@ pub enum DBError {
 
     /// email is already taken
     #[error("Unknown privacy specifier {}", _0)]
-    UnknownPrivacySpecifier(String),
+    UnknownVisibilitySpecifier(String),
 
     /// Gist with specified characteristics not found
     #[error("Gist with specified characteristics not found")]

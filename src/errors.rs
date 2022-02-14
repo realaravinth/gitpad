@@ -16,6 +16,7 @@
  */
 //! represents all the ways a trait can fail using this crate
 use std::convert::From;
+use std::io::Error as FSErrorInner;
 
 use argon2_creds::errors::CredsError;
 use db_core::errors::DBError;
@@ -23,6 +24,21 @@ use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
 use url::ParseError;
 use validator::ValidationErrors;
+
+#[derive(Debug, Display, Error)]
+pub struct FSError(#[display(fmt = "File System Error {}", _0)] pub FSErrorInner);
+
+impl PartialEq for FSError {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.kind() == other.0.kind()
+    }
+}
+
+impl From<FSErrorInner> for ServiceError {
+    fn from(e: FSErrorInner) -> Self {
+        Self::FSError(FSError(e))
+    }
+}
 
 #[derive(Debug, PartialEq, Display, Error)]
 #[cfg(not(tarpaulin_include))]
@@ -96,6 +112,9 @@ pub enum ServiceError {
     /// email is already taken
     #[display(fmt = "Email not available")]
     EmailTaken,
+
+    #[display(fmt = "File System Error {}", _0)]
+    FSError(FSError),
 }
 
 impl From<CredsError> for ServiceError {
@@ -140,7 +159,7 @@ impl From<DBError> for ServiceError {
             DBError::GistNotFound => ServiceError::GistNotFound,
             DBError::CommentNotFound => ServiceError::CommentNotFound,
             DBError::GistIDTaken => ServiceError::InternalServerError,
-            DBError::UnknownPrivacySpecifier(_) => ServiceError::InternalServerError,
+            DBError::UnknownVisibilitySpecifier(_) => ServiceError::InternalServerError,
         }
     }
 }
@@ -197,6 +216,7 @@ impl ResponseError for ServiceError {
 
             ServiceError::UsernameTaken => 400, //BADREQUEST,
             ServiceError::EmailTaken => 400,    //BADREQUEST,
+            ServiceError::FSError(_) => 500,
 
             ServiceError::GistNotFound => 404,
             ServiceError::CommentNotFound => 404,

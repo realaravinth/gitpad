@@ -306,15 +306,15 @@ impl GistDatabase for Database {
         if let Some(description) = &gist.description {
             sqlx::query!(
                 "INSERT INTO gists_gists 
-        (owner_id , description, public_id, privacy, created, updated)
+        (owner_id , description, public_id, visibility, created, updated)
         VALUES (
             (SELECT ID FROM gists_users WHERE username = $1),
-            $2, $3, (SELECT ID FROM gists_privacy WHERE name = $4), $5, $6
+            $2, $3, (SELECT ID FROM gists_visibility WHERE name = $4), $5, $6
         )",
                 &gist.owner,
                 description,
                 &gist.public_id,
-                gist.privacy.to_str(),
+                gist.visibility.to_str(),
                 &now,
                 &now
             )
@@ -324,14 +324,14 @@ impl GistDatabase for Database {
         } else {
             sqlx::query!(
                 "INSERT INTO gists_gists 
-        (owner_id , public_id, privacy, created, updated)
+        (owner_id , public_id, visibility, created, updated)
         VALUES (
             (SELECT ID FROM gists_users WHERE username = $1),
-            $2, (SELECT ID FROM gists_privacy WHERE name = $3), $4, $5
+            $2, (SELECT ID FROM gists_visibility WHERE name = $3), $4, $5
         )",
                 &gist.owner,
                 &gist.public_id,
-                gist.privacy.to_str(),
+                gist.visibility.to_str(),
                 &now,
                 &now
             )
@@ -347,7 +347,7 @@ impl GistDatabase for Database {
             InnerGist,
             "SELECT
                 owner,
-                privacy,
+                visibility,
                 created,
                 updated,
                 public_id,
@@ -373,7 +373,7 @@ impl GistDatabase for Database {
             InnerGist,
             "SELECT
                 owner,
-                privacy,
+                visibility,
                 created,
                 updated,
                 public_id,
@@ -512,10 +512,10 @@ impl GistDatabase for Database {
         Ok(())
     }
 
-    async fn privacy_exists(&self, privacy: &GistPrivacy) -> DBResult<bool> {
+    async fn visibility_exists(&self, visibility: &GistVisibility) -> DBResult<bool> {
         let res = sqlx::query!(
-            "SELECT EXISTS (SELECT 1 from gists_privacy WHERE name = $1)",
-            privacy.to_str()
+            "SELECT EXISTS (SELECT 1 from gists_visibility WHERE name = $1)",
+            visibility.to_str()
         )
         .fetch_one(&self.pool)
         .await
@@ -535,7 +535,7 @@ struct InnerGist {
     public_id: Option<String>,
     created: Option<OffsetDateTime>,
     updated: Option<OffsetDateTime>,
-    privacy: Option<String>,
+    visibility: Option<String>,
 }
 
 impl InnerGist {
@@ -546,7 +546,7 @@ impl InnerGist {
             public_id: self.public_id.unwrap(),
             created: self.created.as_ref().unwrap().unix_timestamp(),
             updated: self.updated.as_ref().unwrap().unix_timestamp(),
-            privacy: GistPrivacy::from_str(self.privacy.as_ref().unwrap())?,
+            visibility: GistVisibility::from_str(self.visibility.as_ref().unwrap())?,
         })
     }
 }
