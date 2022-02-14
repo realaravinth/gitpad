@@ -12,7 +12,7 @@ include = ["./mgrations/"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sqlx = { version = "0.5.10", features = [ "sqlite", "time", "offline" ] }
+sqlx = { version = "0.5.10", features = [ "sqlite", "time", "offline", "runtime-actix-rustls" ] }
 db-core = {path = "../db-core"}
 async-trait = "0.1.51"
 

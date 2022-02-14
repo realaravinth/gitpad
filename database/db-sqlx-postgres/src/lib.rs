@@ -6,6 +6,7 @@
 use db_core::dev::*;
 
 use sqlx::postgres::PgPoolOptions;
+use sqlx::types::time::OffsetDateTime;
 use sqlx::PgPool;
 
 mod errors;
@@ -115,8 +116,8 @@ impl GistDatabase for Database {
 
     async fn email_register(&self, payload: &EmailRegisterPayload) -> DBResult<()> {
         sqlx::query!(
-            "insert into gists_users 
-        (username , password, email, secret) values ($1, $2, $3, $4)",
+            "INSERT INTO gists_users 
+        (username , password, email, secret) VALUES ($1, $2, $3, $4)",
             &payload.username,
             &payload.password,
             &payload.email,
@@ -279,6 +280,293 @@ impl GistDatabase for Database {
             con.ping().await.is_ok()
         } else {
             false
+        }
+    }
+
+    /// Check if a Gist with the given ID exists
+    async fn gist_exists(&self, public_id: &str) -> DBResult<bool> {
+        let res = sqlx::query!(
+            "SELECT EXISTS (SELECT 1 from gists_gists WHERE public_id = $1)",
+            public_id,
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| DBError::DBError(Box::new(e)))?;
+
+        let mut exists = false;
+        if let Some(x) = res.exists {
+            exists = x;
+        };
+
+        Ok(exists)
+    }
+    /// Create new gists
+    async fn new_gist(&self, gist: &CreateGist) -> DBResult<()> {
+        let now = OffsetDateTime::now_utc();
+        if let Some(description) = &gist.description {
+            sqlx::query!(
+                "INSERT INTO gists_gists 
+        (owner_id , description, public_id, privacy, created, updated)
+        VALUES (
+            (SELECT ID FROM gists_users WHERE username = $1),
+            $2, $3, (SELECT ID FROM gists_privacy WHERE name = $4), $5, $6
+        )",
+                &gist.owner,
+                description,
+                &gist.public_id,
+                gist.privacy.to_str(),
+                &now,
+                &now
+            )
+            .execute(&self.pool)
+            .await
+            .map_err(map_register_err)?;
+        } else {
+            sqlx::query!(
+                "INSERT INTO gists_gists 
+        (owner_id , public_id, privacy, created, updated)
+        VALUES (
+            (SELECT ID FROM gists_users WHERE username = $1),
+            $2, (SELECT ID FROM gists_privacy WHERE name = $3), $4, $5
+        )",
+                &gist.owner,
+                &gist.public_id,
+                gist.privacy.to_str(),
+                &now,
+                &now
+            )
+            .execute(&self.pool)
+            .await
+            .map_err(map_register_err)?;
+        }
+        Ok(())
+    }
+    /// Retrieve gist from database
+    async fn get_gist(&self, public_id: &str) -> DBResult<Gist> {
+        let res = sqlx::query_as!(
+            InnerGist,
+            "SELECT
+                owner,
+                privacy,
+                created,
+                updated,
+                public_id,
+                description
+            FROM
+                gists_gists_view
+            WHERE public_id = $1
+            ",
+            public_id
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| match e {
+            Error::RowNotFound => DBError::GistNotFound,
+            e => DBError::DBError(Box::new(e)),
+        })?;
+        res.to_gist()
+    }
+
+    /// Retrieve gists belonging to user from database
+    async fn get_user_gists(&self, owner: &str) -> DBResult<Vec<Gist>> {
+        let mut res = sqlx::query_as!(
+            InnerGist,
+            "SELECT
+                owner,
+                privacy,
+                created,
+                updated,
+                public_id,
+                description
+            FROM
+                gists_gists_view
+            WHERE owner = $1
+            ",
+            owner
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|e| match e {
+            Error::RowNotFound => DBError::GistNotFound,
+            e => DBError::DBError(Box::new(e)),
+        })?;
+
+        let mut gists = Vec::with_capacity(res.len());
+        for r in res.drain(..) {
+            gists.push(r.to_gist()?);
+        }
+        Ok(gists)
+    }
+
+    async fn delete_gist(&self, owner: &str, public_id: &str) -> DBResult<()> {
+        sqlx::query!(
+            "DELETE FROM gists_gists 
+        WHERE 
+            public_id = $1
+        AND
+            owner_id = (SELECT ID FROM gists_users WHERE username = $2)
+        ",
+            public_id,
+            owner
+        )
+        .execute(&self.pool)
+        .await
+        .map_err(map_register_err)?;
+        Ok(())
+    }
+
+    /// Create new comment
+    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<()> {
+        let now = OffsetDateTime::now_utc();
+        sqlx::query!(
+            "INSERT INTO gists_comments (owner_id, gist_id, comment, created)
+            VALUES (
+                (SELECT ID FROM gists_users WHERE username = $1),
+                (SELECT ID FROM gists_gists WHERE public_id = $2),
+                $3,
+                $4
+            )",
+            comment.owner,
+            comment.gist_public_id,
+            comment.comment,
+            &now,
+        )
+        .execute(&self.pool)
+        .await
+        .map_err(map_register_err)?;
+        Ok(())
+    }
+    /// Get comments on a gist
+    async fn get_comments_on_gist(&self, public_id: &str) -> DBResult<Vec<GistComment>> {
+        let mut res = sqlx::query_as!(
+            InnerGistComment,
+            "
+            SELECT
+                ID,
+                comment,
+                owner,
+                created,
+                gist_public_id
+            FROM
+                gists_comments_view
+            WHERE
+                gist_public_id = $1
+            ORDER BY created;
+            ",
+            public_id,
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|e| match e {
+            Error::RowNotFound => DBError::CommentNotFound,
+            e => DBError::DBError(Box::new(e)),
+        })?;
+
+        let mut comments: Vec<GistComment> = Vec::with_capacity(res.len());
+        res.drain(..).for_each(|r| comments.push(r.into()));
+        Ok(comments)
+    }
+    /// Get a specific comment using its database assigned ID
+    async fn get_comment_by_id(&self, id: i64) -> DBResult<GistComment> {
+        let res = sqlx::query_as!(
+            InnerGistComment,
+            "
+            SELECT
+                ID,
+                comment,
+                owner,
+                created,
+                gist_public_id
+            FROM
+                gists_comments_view
+            WHERE
+                ID = $1
+            ",
+            id as i32
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| match e {
+            Error::RowNotFound => DBError::CommentNotFound,
+            e => DBError::DBError(Box::new(e)),
+        })?;
+
+        Ok(res.into())
+    }
+
+    /// Delete comment
+    async fn delete_comment(&self, owner: &str, id: i64) -> DBResult<()> {
+        sqlx::query!(
+            "DELETE FROM gists_comments
+                    WHERE
+                        ID = $1
+                    AND
+                        owner_id = (SELECT ID FROM gists_users WHERE username = $2)
+                    ",
+            id as i32,
+            owner,
+        )
+        .execute(&self.pool)
+        .await
+        .map_err(|e| DBError::DBError(Box::new(e)))?;
+        Ok(())
+    }
+
+    async fn privacy_exists(&self, privacy: &GistPrivacy) -> DBResult<bool> {
+        let res = sqlx::query!(
+            "SELECT EXISTS (SELECT 1 from gists_privacy WHERE name = $1)",
+            privacy.to_str()
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| DBError::DBError(Box::new(e)))?;
+
+        let mut exists = false;
+        if let Some(x) = res.exists {
+            exists = x
+        };
+
+        Ok(exists)
+    }
+}
+struct InnerGist {
+    owner: Option<String>,
+    description: Option<String>,
+    public_id: Option<String>,
+    created: Option<OffsetDateTime>,
+    updated: Option<OffsetDateTime>,
+    privacy: Option<String>,
+}
+
+impl InnerGist {
+    fn to_gist(self) -> DBResult<Gist> {
+        Ok(Gist {
+            owner: self.owner.unwrap(),
+            description: self.description,
+            public_id: self.public_id.unwrap(),
+            created: self.created.as_ref().unwrap().unix_timestamp(),
+            updated: self.updated.as_ref().unwrap().unix_timestamp(),
+            privacy: GistPrivacy::from_str(self.privacy.as_ref().unwrap())?,
+        })
+    }
+}
+
+struct InnerGistComment {
+    id: Option<i32>,
+    owner: Option<String>,
+    comment: Option<String>,
+    gist_public_id: Option<String>,
+    created: Option<OffsetDateTime>,
+}
+
+impl From<InnerGistComment> for GistComment {
+    fn from(g: InnerGistComment) -> Self {
+        Self {
+            id: g.id.unwrap() as i64,
+            owner: g.owner.unwrap(),
+            comment: g.comment.unwrap(),
+            gist_public_id: g.gist_public_id.unwrap(),
+            created: g.created.unwrap().unix_timestamp(),
         }
     }
 }

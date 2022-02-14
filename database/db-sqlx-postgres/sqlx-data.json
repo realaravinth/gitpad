@@ -1,15 +1,139 @@
 {
   "db": "PostgreSQL",
-  "0b6e7311c44fa5278b5279b1ecfb8eba57a80f5ddc5f0e1a78f126113a31187b": {
-    "query": "insert into gists_users \n        (username , password, email, secret) values ($1, $2, $3, $4)",
+  "1516ec34202a21239aa8275d5637007d4c2c54ada5ed346dcebfb4b7b3cdf019": {
+    "query": "\n            SELECT\n                ID,\n                comment,\n                owner,\n                created,\n                gist_public_id\n            FROM\n                gists_comments_view\n            WHERE\n                gist_public_id = $1\n            ORDER BY created;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "comment",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "owner",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "gist_public_id",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "19c04856cfeaa552b1fbf5fb1dc5172c1329d88f39f771c83d3ca104f23a59b8": {
+    "query": "INSERT INTO gists_gists \n        (owner_id , description, public_id, privacy, created, updated)\n        VALUES (\n            (SELECT ID FROM gists_users WHERE username = $1),\n            $2, $3, (SELECT ID FROM gists_privacy WHERE name = $4), $5, $6\n        )",
     "describe": {
       "columns": [],
       "parameters": {
         "Left": [
-          "Varchar",
+          "Text",
           "Text",
           "Varchar",
-          "Varchar"
+          "Text",
+          "Timestamptz",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1ea7ea0bb1a6f4b84a2b9c6b1741c6bf9f1938f107133bd80e72a82fb44d5c8a": {
+    "query": "INSERT INTO gists_comments (owner_id, gist_id, comment, created)\n            VALUES (\n                (SELECT ID FROM gists_users WHERE username = $1),\n                (SELECT ID FROM gists_gists WHERE public_id = $2),\n                $3,\n                $4\n            )",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "2e627e47d7dce8da4aebfc39f3baf02cbb471d514410cbe82ef442b7de9dfc55": {
+    "query": "SELECT\n                owner,\n                privacy,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE owner = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "privacy",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "public_id",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "340413dd6062e88bf2db846a05f600d6d0384f8b7038445653c3156b997232a8": {
+    "query": "DELETE FROM gists_gists \n        WHERE \n            public_id = $1\n        AND\n            owner_id = (SELECT ID FROM gists_users WHERE username = $2)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
         ]
       },
       "nullable": []
@@ -46,6 +170,56 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "71e74dfde93b42fb7cc064e439f3067ddd49db646b9837a66938c43474b34233": {
+    "query": "SELECT\n                owner,\n                privacy,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE public_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "privacy",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "public_id",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "description",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     }
   },
   "7cc18cdd39aa42dcbb75b0b0d06b6df05ac654654b86db71be07344e3f09510d": {
@@ -87,6 +261,22 @@
       ]
     }
   },
+  "8ba77aab32a3b71ee10bde66676396263fd1bb41cf5d270dcb813c0c0e089bc7": {
+    "query": "INSERT INTO gists_gists \n        (owner_id , public_id, privacy, created, updated)\n        VALUES (\n            (SELECT ID FROM gists_users WHERE username = $1),\n            $2, (SELECT ID FROM gists_privacy WHERE name = $3), $4, $5\n        )",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Varchar",
+          "Text",
+          "Timestamptz",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "8c7af53d14214f2bd23b089d3c9134909c2d1cc13cd42e88778bfb20f497c2dd": {
     "query": "SELECT EXISTS (SELECT 1 from gists_users WHERE email = $1)",
     "describe": {
@@ -120,6 +310,65 @@
       "nullable": []
     }
   },
+  "9e09535aa7dd7be208c23776acd97e418cb6a2dcf3822ba535a087b8730d8954": {
+    "query": "INSERT INTO gists_users \n        (username , password, email, secret) VALUES ($1, $2, $3, $4)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "a123bde2c6da21bc9b98036b4c68c34dc5e1fbe73564e9f64d832b8d9a2b667d": {
+    "query": "\n            SELECT\n                ID,\n                comment,\n                owner,\n                created,\n                gist_public_id\n            FROM\n                gists_comments_view\n            WHERE\n                ID = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "comment",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "owner",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "gist_public_id",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "aa899a667f05d021e1d537f1ab53289edcec5fc76a88b56abb08909bbc5b8478": {
     "query": "UPDATE gists_users set secret = $1\n        WHERE username = $2",
     "describe": {
@@ -143,6 +392,59 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "bc934d97678a5fef7a55f10657e1cefcdfe51a11b8755aa635cda0be468dc9dd": {
+    "query": "SELECT EXISTS (SELECT 1 from gists_privacy WHERE name = $1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "d5ad01498e65415f65a3c30e327b60c61b016a89050ff3fb2e853d0b0632f964": {
+    "query": "DELETE FROM gists_comments\n                    WHERE\n                        ID = $1\n                    AND\n                        owner_id = (SELECT ID FROM gists_users WHERE username = $2)\n                    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "e0a12b823159b7e2a3667bbb4c9dd22dd52b9ffb618f3464a2d61b11ad068821": {
+    "query": "SELECT EXISTS (SELECT 1 from gists_gists WHERE public_id = $1)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "e3604664ce429e2f49c0c4cc2601c5336be3f8690c06b9883b64b53085c9c9a6": {

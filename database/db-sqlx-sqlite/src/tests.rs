@@ -38,3 +38,30 @@ async fn everyting_works() {
     };
     db.update_password(&creds).await.unwrap();
 }
+
+#[actix_rt::test]
+async fn privacy_test() {
+    let url = env::var("SQLITE_DATABASE_URL").expect("Set SQLITE_DATABASE_URL env var");
+    let pool_options = SqlitePoolOptions::new().max_connections(2);
+    let connection_options = ConnectionOptions::Fresh(Fresh { pool_options, url });
+    let db = connection_options.connect().await.unwrap();
+
+    db.migrate().await.unwrap();
+    privacy_works(&db).await;
+}
+
+#[actix_rt::test]
+async fn gist_test() {
+    const NAME: &str = "postgisttest";
+    const PASSWORD: &str = "pasdfasdfasdfadf";
+    const SECRET: &str = "postgisttestsecret";
+    const PUBLIC_ID: &str = "postgisttestsecret";
+
+    let url = env::var("SQLITE_DATABASE_URL").expect("Set SQLITE_DATABASE_URL env var");
+    let pool_options = SqlitePoolOptions::new().max_connections(2);
+    let connection_options = ConnectionOptions::Fresh(Fresh { pool_options, url });
+    let db = connection_options.connect().await.unwrap();
+
+    db.migrate().await.unwrap();
+    gists_work(&db, NAME, PASSWORD, SECRET, PUBLIC_ID).await;
+}

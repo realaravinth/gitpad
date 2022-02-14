@@ -14,6 +14,8 @@ pub fn map_register_err(e: Error) -> DBError {
                 DBError::DuplicateEmail
             } else if msg.contains("gists_users.secret") {
                 DBError::DuplicateSecret
+            } else if msg.contains("gists_gists.public_id") {
+                DBError::GistIDTaken
             } else {
                 DBError::DBError(Box::new(Error::Database(err)))
             }

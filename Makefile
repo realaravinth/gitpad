@@ -5,6 +5,7 @@ clean: ## Clean all build artifacts and dependencies
 	@-/bin/rm -rf target/
 	@-/bin/rm -rf database/migrator/target/
 	@-/bin/rm -rf database/*/target/
+	@-/bin/rm -rf database/*/tmp/
 	@cargo clean
 
 coverage: migrate ## Generate coverage report in HTML format

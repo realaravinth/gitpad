@@ -39,6 +39,121 @@ pub async fn email_register_works<T: GistDatabase>(
     assert!(matches!(err, Some(DBError::DuplicateEmail)));
 }
 
+/// test if all privacy modes are available on database
+pub async fn privacy_works<T: GistDatabase>(db: &T) {
+    for p in [
+        GistPrivacy::Public,
+        GistPrivacy::Unlisted,
+        GistPrivacy::Private,
+    ]
+    .iter()
+    {
+        println!("Testing privacy: {}", p.to_str());
+        assert!(db.privacy_exists(p).await.unwrap());
+    }
+}
+
+/// test all gist methods
+pub async fn gists_work<T: GistDatabase>(
+    db: &T,
+    username: &str,
+    password: &str,
+    secret: &str,
+    public_id: &str,
+) {
+    fn assert_comments(lhs: &CreateGistComment, rhs: &GistComment) {
+        println!("lhs: {:?} rhs: {:?}", lhs, rhs);
+        assert_eq!(rhs.owner, lhs.owner);
+        assert_eq!(rhs.comment, lhs.comment);
+        assert_eq!(rhs.gist_public_id, lhs.gist_public_id);
+    }
+
+    fn assert_gists(lhs: &CreateGist, rhs: &Gist) {
+        assert_eq!(lhs.description, rhs.description);
+        assert_eq!(lhs.owner, rhs.owner);
+        assert_eq!(lhs.public_id, rhs.public_id);
+        assert_eq!(lhs.privacy, rhs.privacy);
+    }
+
+    let _ = db.delete_account(username).await;
+    let register_payload = UsernameRegisterPayload {
+        username,
+        password,
+        secret,
+    };
+
+    db.username_register(&register_payload).await.unwrap();
+
+    let create_gist = CreateGist {
+        owner: username.into(),
+        description: Some("foo".to_string()),
+        public_id: public_id.to_string(),
+        privacy: GistPrivacy::Public,
+    };
+
+    assert!(!db.gist_exists(&create_gist.public_id).await.unwrap());
+    // create gist
+    assert!(db.get_user_gists(username).await.unwrap().is_empty());
+
+    db.new_gist(&create_gist).await.unwrap();
+    assert!(matches!(
+        db.new_gist(&create_gist).await.err(),
+        Some(DBError::GistIDTaken)
+    ));
+
+    assert!(db.gist_exists(&create_gist.public_id).await.unwrap());
+    // get gist
+    let db_gist = db.get_gist(&create_gist.public_id).await.unwrap();
+    assert_gists(&create_gist, &db_gist);
+
+    let mut gists = db.get_user_gists(username).await.unwrap();
+    assert_eq!(gists.len(), 1);
+    let gist = gists.pop().unwrap();
+    assert_gists(&create_gist, &gist);
+
+    // comment on gist
+    let create_comment = CreateGistComment {
+        owner: username.into(),
+        gist_public_id: create_gist.public_id.clone(),
+        comment: "foo".into(),
+    };
+    db.new_comment(&create_comment).await.unwrap();
+    // get all comments on gist
+    let mut comments = db
+        .get_comments_on_gist(&create_gist.public_id)
+        .await
+        .unwrap();
+    assert!(comments.len() == 1);
+    let comment = comments.pop().unwrap();
+    assert_comments(&create_comment, &comment);
+
+    // get all comments by ID
+    let comment = db.get_comment_by_id(comment.id).await.unwrap();
+    assert_comments(&create_comment, &comment);
+
+    // delete comment
+    db.delete_comment(username, comment.id).await.unwrap();
+
+    assert!(matches!(
+        db.get_comment_by_id(comment.id).await.err().unwrap(),
+        DBError::CommentNotFound
+    ));
+
+    //  delete gist
+    db.delete_gist(username, &create_gist.public_id)
+        .await
+        .unwrap();
+    assert!(matches!(
+        db.get_gist(&create_gist.public_id).await.err().unwrap(),
+        DBError::GistNotFound
+    ));
+    assert!(db
+        .get_comments_on_gist(&create_gist.public_id)
+        .await
+        .unwrap()
+        .is_empty());
+}
+
 /// test username registration implementation
 pub async fn username_register_works<T: GistDatabase>(
     db: &T,

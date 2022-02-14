@@ -2,7 +2,7 @@
 <h1> Gists </h1>
 <p>
 
-**Self-Hosted GitHub Gists\***
+**Self-Hosted GitHub Gists**
 
 </p>
 
@@ -33,4 +33,4 @@ can rival GitHub Gists.
 
 1. All configuration is done through
    [./config/default.toml](./config/default.toml)(can be moved to
-   `/etc/static-gists/config.toml`).
+   `/etc/gists/config.toml`).

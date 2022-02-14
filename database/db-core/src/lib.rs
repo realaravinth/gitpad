@@ -51,6 +51,108 @@ pub struct Password {
     pub password: String,
 }
 
+#[derive(Clone, Debug)]
+/// Data required to create a gist in DB
+/// creation date defaults to time at which creation method is called
+pub struct CreateGist {
+    /// owner of the gist
+    pub owner: String,
+    /// description of the gist
+    pub description: Option<String>,
+    /// public ID of the gist
+    pub public_id: String,
+    /// gist privacy
+    pub privacy: GistPrivacy,
+}
+
+/// Gist privacy
+#[derive(Clone, PartialEq, Debug)]
+pub enum GistPrivacy {
+    /// Everyone can see the gist, will be displayed on /explore and
+    /// search engines might index it too
+    Public,
+    /// Everyone with the link can see it, won't be listed on /explore and
+    /// search engines won't index them
+    Unlisted,
+    /// Only the owner can see gist
+    Private,
+}
+
+impl GistPrivacy {
+    /// Convert [GistPrivacy] to [str]
+    pub const fn to_str(&self) -> &'static str {
+        match self {
+            GistPrivacy::Private => "private",
+            GistPrivacy::Unlisted => "unlisted",
+            GistPrivacy::Public => "public",
+        }
+    }
+
+    /// Convert [str] to [GistPrivacy]
+    pub fn from_str(s: &str) -> DBResult<Self> {
+        const PRIVATE: &str = GistPrivacy::Private.to_str();
+        const PUBLIC: &str = GistPrivacy::Public.to_str();
+        const UNLISTED: &str = GistPrivacy::Unlisted.to_str();
+        let s = s.trim();
+        match s {
+            PRIVATE => Ok(Self::Private),
+            PUBLIC => Ok(Self::Public),
+            UNLISTED => Ok(Self::Unlisted),
+            _ => Err(DBError::UnknownPrivacySpecifier(s.to_owned())),
+        }
+    }
+}
+
+impl From<GistPrivacy> for String {
+    fn from(gp: GistPrivacy) -> String {
+        gp.to_str().into()
+    }
+}
+
+#[derive(Clone, Debug)]
+/// Represents a gist
+pub struct Gist {
+    /// owner of the gist
+    pub owner: String,
+    /// description of the gist
+    pub description: Option<String>,
+    /// public ID of the gist
+    pub public_id: String,
+    /// gist creation time
+    pub created: i64,
+    /// gist updated time
+    pub updated: i64,
+    /// gist privacy
+    pub privacy: GistPrivacy,
+}
+
+#[derive(Clone, Debug)]
+/// Represents a comment on a Gist
+pub struct GistComment {
+    /// Unique identifier, possible database assigned, auto-incremented ID
+    pub id: i64,
+    /// owner of the comment
+    pub owner: String,
+    /// public ID of the gist on which this comment was made
+    pub gist_public_id: String,
+    /// comment text
+    pub comment: String,
+    /// comment creation time
+    pub created: i64,
+}
+
+#[derive(Clone, Debug)]
+/// Data required to create a comment on a Gist
+/// creation date defaults to time at which creation method is called
+pub struct CreateGistComment {
+    /// owner of the comment
+    pub owner: String,
+    /// public ID of the gist on which this comment was made
+    pub gist_public_id: String,
+    /// comment text
+    pub comment: String,
+}
+
 /// payload to register a user with username _and_ email
 pub struct EmailRegisterPayload<'a> {
     /// username of new user
@@ -118,9 +220,33 @@ pub trait GistDatabase: std::marker::Send + std::marker::Sync + CloneGistDatabas
     async fn email_register(&self, payload: &EmailRegisterPayload) -> DBResult<()>;
     /// register with username
     async fn username_register(&self, payload: &UsernameRegisterPayload) -> DBResult<()>;
-
     /// ping DB
     async fn ping(&self) -> bool;
+
+    /// Check if a Gist with the given ID exists
+    async fn gist_exists(&self, public_id: &str) -> DBResult<bool>;
+    /// Create new gists
+    async fn new_gist(&self, gist: &CreateGist) -> DBResult<()>;
+    /// Retrieve gist from database
+    async fn get_gist(&self, public_id: &str) -> DBResult<Gist>;
+
+    /// Retrieve gists belonging to user
+    async fn get_user_gists(&self, owner: &str) -> DBResult<Vec<Gist>>;
+
+    /// Delete gist
+    async fn delete_gist(&self, owner: &str, public_id: &str) -> DBResult<()>;
+
+    /// Create new comment
+    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<()>;
+    /// Get comments on a gist
+    async fn get_comments_on_gist(&self, public_id: &str) -> DBResult<Vec<GistComment>>;
+    /// Get a specific comment using its database assigned ID
+    async fn get_comment_by_id(&self, id: i64) -> DBResult<GistComment>;
+    /// Delete comment
+    async fn delete_comment(&self, owner: &str, id: i64) -> DBResult<()>;
+
+    /// check if privacy mode exists
+    async fn privacy_exists(&self, privacy: &GistPrivacy) -> DBResult<bool>;
 }
 
 #[async_trait]
@@ -176,6 +302,46 @@ impl GistDatabase for Box<dyn GistDatabase> {
     /// ping DB
     async fn ping(&self) -> bool {
         (**self).ping().await
+    }
+
+    async fn gist_exists(&self, public_id: &str) -> DBResult<bool> {
+        (**self).gist_exists(public_id).await
+    }
+
+    async fn new_gist(&self, gist: &CreateGist) -> DBResult<()> {
+        (**self).new_gist(gist).await
+    }
+
+    async fn get_gist(&self, public_id: &str) -> DBResult<Gist> {
+        (**self).get_gist(public_id).await
+    }
+
+    async fn get_user_gists(&self, owner: &str) -> DBResult<Vec<Gist>> {
+        (**self).get_user_gists(owner).await
+    }
+
+    async fn delete_gist(&self, owner: &str, public_id: &str) -> DBResult<()> {
+        (**self).delete_gist(owner, public_id).await
+    }
+
+    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<()> {
+        (**self).new_comment(comment).await
+    }
+
+    async fn get_comments_on_gist(&self, public_id: &str) -> DBResult<Vec<GistComment>> {
+        (**self).get_comments_on_gist(public_id).await
+    }
+
+    async fn get_comment_by_id(&self, id: i64) -> DBResult<GistComment> {
+        (**self).get_comment_by_id(id).await
+    }
+
+    async fn delete_comment(&self, owner: &str, id: i64) -> DBResult<()> {
+        (**self).delete_comment(owner, id).await
+    }
+
+    async fn privacy_exists(&self, privacy: &GistPrivacy) -> DBResult<bool> {
+        (**self).privacy_exists(privacy).await
     }
 }
 

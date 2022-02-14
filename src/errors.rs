@@ -58,6 +58,14 @@ pub enum ServiceError {
     /// account not found
     AccountNotFound,
 
+    #[display(fmt = "Gist not found")]
+    /// gist not found
+    GistNotFound,
+
+    #[display(fmt = "comment not found")]
+    /// comment not found
+    CommentNotFound,
+
     /// when the value passed contains profainity
     #[display(fmt = "Can't allow profanity in usernames")]
     ProfainityError,
@@ -129,6 +137,10 @@ impl From<DBError> for ServiceError {
             DBError::DuplicateUsername => ServiceError::UsernameTaken,
             DBError::AccountNotFound => ServiceError::AccountNotFound,
             DBError::DuplicateSecret => ServiceError::InternalServerError,
+            DBError::GistNotFound => ServiceError::GistNotFound,
+            DBError::CommentNotFound => ServiceError::CommentNotFound,
+            DBError::GistIDTaken => ServiceError::InternalServerError,
+            DBError::UnknownPrivacySpecifier(_) => ServiceError::InternalServerError,
         }
     }
 }
@@ -185,6 +197,9 @@ impl ResponseError for ServiceError {
 
             ServiceError::UsernameTaken => 400, //BADREQUEST,
             ServiceError::EmailTaken => 400,    //BADREQUEST,
+
+            ServiceError::GistNotFound => 404,
+            ServiceError::CommentNotFound => 404,
         };
 
         StatusCode::from_u16(status_code).unwrap()

@@ -19,16 +19,29 @@ pub enum DBError {
     #[error("Email not available")]
     DuplicateEmail,
 
+    /// Gist public ID taken
+    #[error("Gist ID not available")]
+    GistIDTaken,
+
     /// Account with specified characteristics not found
     #[error("Account with specified characteristics not found")]
     AccountNotFound,
 
-    //    /// errors that are specific to a database implementation
-    //    #[error("Database error: {:?}", _0)]
-    //    DBError(#[error(not(source))] String),
     /// errors that are specific to a database implementation
     #[error("{0}")]
     DBError(#[source] BoxDynError),
+
+    /// email is already taken
+    #[error("Unknown privacy specifier {}", _0)]
+    UnknownPrivacySpecifier(String),
+
+    /// Gist with specified characteristics not found
+    #[error("Gist with specified characteristics not found")]
+    GistNotFound,
+
+    /// Comment with specified characteristics not found
+    #[error("Comment with specified characteristics not found")]
+    CommentNotFound,
 }
 
 /// Convenience type alias for grouping driver-specific errors
