@@ -422,15 +422,15 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="doccomment">/// Data required to create a gist in DB</span>
 <span class="doccomment">/// creation date defaults to time at which creation method is called</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CreateGist</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CreateGist</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// owner of the gist</span>
-    <span class="kw">pub</span> <span class="ident">owner</span>: <span class="ident">String</span>,
+    <span class="kw">pub</span> <span class="ident">owner</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
     <span class="doccomment">/// description of the gist</span>
-    <span class="kw">pub</span> <span class="ident">description</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">description</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
     <span class="doccomment">/// public ID of the gist</span>
-    <span class="kw">pub</span> <span class="ident">public_id</span>: <span class="ident">String</span>,
+    <span class="kw">pub</span> <span class="ident">public_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
     <span class="doccomment">/// gist visibility</span>
-    <span class="kw">pub</span> <span class="ident">visibility</span>: <span class="ident">GistVisibility</span>,
+    <span class="kw">pub</span> <span class="ident">visibility</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">GistVisibility</span>,
 }
 
 <span class="doccomment">/// Gist visibility</span>
@@ -512,13 +512,13 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="doccomment">/// Data required to create a comment on a Gist</span>
 <span class="doccomment">/// creation date defaults to time at which creation method is called</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CreateGistComment</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CreateGistComment</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// owner of the comment</span>
-    <span class="kw">pub</span> <span class="ident">owner</span>: <span class="ident">String</span>,
+    <span class="kw">pub</span> <span class="ident">owner</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
     <span class="doccomment">/// public ID of the gist on which this comment was made</span>
-    <span class="kw">pub</span> <span class="ident">gist_public_id</span>: <span class="ident">String</span>,
+    <span class="kw">pub</span> <span class="ident">gist_public_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
     <span class="doccomment">/// comment text</span>
-    <span class="kw">pub</span> <span class="ident">comment</span>: <span class="ident">String</span>,
+    <span class="kw">pub</span> <span class="ident">comment</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
 }
 
 <span class="doccomment">/// payload to register a user with username _and_ email</span>
