@@ -16,5 +16,6 @@
  */
 pub mod account;
 pub mod auth;
+pub mod gists;
 
 pub(crate) use crate::utils::get_random;

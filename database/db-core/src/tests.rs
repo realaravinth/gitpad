@@ -69,7 +69,10 @@ pub async fn gists_work<T: GistDatabase>(
     }
 
     fn assert_gists(lhs: &CreateGist, rhs: &Gist) {
-        assert_eq!(lhs.description.as_ref().unwrap(), rhs.description.as_ref().unwrap());
+        assert_eq!(
+            lhs.description.as_ref().unwrap(),
+            rhs.description.as_ref().unwrap()
+        );
         assert_eq!(lhs.owner, rhs.owner);
         assert_eq!(lhs.public_id, rhs.public_id);
         assert_eq!(lhs.visibility, &rhs.visibility);
@@ -114,7 +117,7 @@ pub async fn gists_work<T: GistDatabase>(
     // comment on gist
     let create_comment = CreateGistComment {
         owner: username.into(),
-        gist_public_id: create_gist.public_id.clone(),
+        gist_public_id: create_gist.public_id,
         comment: "foo".into(),
     };
     db.new_comment(&create_comment).await.unwrap();
