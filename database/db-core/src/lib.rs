@@ -54,15 +54,15 @@ pub struct Password {
 #[derive(Clone, Debug)]
 /// Data required to create a gist in DB
 /// creation date defaults to time at which creation method is called
-pub struct CreateGist {
+pub struct CreateGist<'a> {
     /// owner of the gist
-    pub owner: String,
+    pub owner: &'a str,
     /// description of the gist
-    pub description: Option<String>,
+    pub description: Option<&'a str>,
     /// public ID of the gist
-    pub public_id: String,
+    pub public_id: &'a str,
     /// gist visibility
-    pub visibility: GistVisibility,
+    pub visibility: &'a GistVisibility,
 }
 
 /// Gist visibility
@@ -144,13 +144,13 @@ pub struct GistComment {
 #[derive(Clone, Debug)]
 /// Data required to create a comment on a Gist
 /// creation date defaults to time at which creation method is called
-pub struct CreateGistComment {
+pub struct CreateGistComment<'a> {
     /// owner of the comment
-    pub owner: String,
+    pub owner: &'a str,
     /// public ID of the gist on which this comment was made
-    pub gist_public_id: String,
+    pub gist_public_id: &'a str,
     /// comment text
-    pub comment: String,
+    pub comment: &'a str,
 }
 
 /// payload to register a user with username _and_ email

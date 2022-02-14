@@ -69,10 +69,10 @@ pub async fn gists_work<T: GistDatabase>(
     }
 
     fn assert_gists(lhs: &CreateGist, rhs: &Gist) {
-        assert_eq!(lhs.description, rhs.description);
+        assert_eq!(lhs.description.as_ref().unwrap(), rhs.description.as_ref().unwrap());
         assert_eq!(lhs.owner, rhs.owner);
         assert_eq!(lhs.public_id, rhs.public_id);
-        assert_eq!(lhs.visibility, rhs.visibility);
+        assert_eq!(lhs.visibility, &rhs.visibility);
     }
 
     let _ = db.delete_account(username).await;
@@ -86,9 +86,9 @@ pub async fn gists_work<T: GistDatabase>(
 
     let create_gist = CreateGist {
         owner: username.into(),
-        description: Some("foo".to_string()),
-        public_id: public_id.to_string(),
-        visibility: GistVisibility::Public,
+        description: Some("foo"),
+        public_id,
+        visibility: &GistVisibility::Public,
     };
 
     assert!(!db.gist_exists(&create_gist.public_id).await.unwrap());
