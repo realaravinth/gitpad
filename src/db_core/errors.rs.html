@@ -37,6 +37,23 @@
 <span id="36">36</span>
 <span id="37">37</span>
 <span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
 </pre><pre class="rust"><code><span class="doccomment">//! represents all the ways a trait can fail using this crate</span>
 <span class="kw">use</span> <span class="ident">std::error::Error</span> <span class="kw">as</span> <span class="ident">StdError</span>;
 
@@ -58,16 +75,33 @@
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Email not available&quot;</span>)]</span>
     <span class="ident">DuplicateEmail</span>,
 
+    <span class="doccomment">/// Gist public ID taken</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Gist ID not available&quot;</span>)]</span>
+    <span class="ident">GistIDTaken</span>,
+
     <span class="doccomment">/// Account with specified characteristics not found</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Account with specified characteristics not found&quot;</span>)]</span>
     <span class="ident">AccountNotFound</span>,
 
-    <span class="comment">//    /// errors that are specific to a database implementation</span>
-    <span class="comment">//    #[error(&quot;Database error: {:?}&quot;, _0)]</span>
-    <span class="comment">//    DBError(#[error(not(source))] String),</span>
+
     <span class="doccomment">/// errors that are specific to a database implementation</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;{0}&quot;</span>)]</span>
     <span class="ident">DBError</span>(<span class="attribute">#[<span class="ident">source</span>]</span> <span class="ident">BoxDynError</span>),
+
+    <span class="doccomment">/// email is already taken</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Unknown privacy specifier {}&quot;</span>, <span class="ident">_0</span>)]</span>
+    <span class="ident">UnknownPrivacySpecifier</span>(<span class="ident">String</span>),
+
+
+    <span class="doccomment">/// Gist with specified characteristics not found</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Gist with specified characteristics not found&quot;</span>)]</span>
+    <span class="ident">GistNotFound</span>,
+
+    <span class="doccomment">/// Comment with specified characteristics not found</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Comment with specified characteristics not found&quot;</span>)]</span>
+    <span class="ident">CommentNotFound</span>,
+
+
 }
 
 <span class="doccomment">/// Convenience type alias for grouping driver-specific errors</span>

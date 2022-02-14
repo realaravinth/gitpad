@@ -26,6 +26,8 @@
 <span id="25">25</span>
 <span id="26">26</span>
 <span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Error-handling utilities</span>
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 
@@ -43,6 +45,8 @@
                 <span class="ident">DBError::DuplicateEmail</span>
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">contains</span>(<span class="string">&quot;gists_users_secret_key&quot;</span>) {
                 <span class="ident">DBError::DuplicateSecret</span>
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">contains</span>(<span class="string">&quot;gists_gists_public_id&quot;</span>) {
+                <span class="ident">DBError::GistIDTaken</span>
             } <span class="kw">else</span> {
                 <span class="ident">DBError::DBError</span>(<span class="ident">Box::new</span>(<span class="ident">Error::Database</span>(<span class="ident">err</span>)))
             }
