@@ -366,6 +366,9 @@
 <span id="365">365</span>
 <span id="366">366</span>
 <span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
 <span class="doccomment">//! # `gists` database operations</span>
 <span class="doccomment">//!</span>
@@ -382,6 +385,8 @@
 <span class="doccomment">//! - [errors](crate::auth): error data structures used in this crate</span>
 <span class="doccomment">//! - [ops](crate::ops): meta operations like connection pool creation, migrations and getting</span>
 <span class="doccomment">//! connection from pool</span>
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">errors</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ops</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test&quot;</span>)]</span>
@@ -434,7 +439,8 @@
 }
 
 <span class="doccomment">/// Gist visibility</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;lowercase&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">GistVisibility</span> {
     <span class="doccomment">/// Everyone can see the gist, will be displayed on /explore and</span>
     <span class="doccomment">/// search engines might index it too</span>
@@ -477,7 +483,7 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="doccomment">/// Represents a gist</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Gist</span> {
     <span class="doccomment">/// owner of the gist</span>
@@ -494,7 +500,7 @@
     <span class="kw">pub</span> <span class="ident">visibility</span>: <span class="ident">GistVisibility</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="doccomment">/// Represents a comment on a Gist</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GistComment</span> {
     <span class="doccomment">/// Unique identifier, possible database assigned, auto-incremented ID</span>
