@@ -21,7 +21,6 @@ use git2::*;
 use serde::{Deserialize, Serialize};
 use tokio::fs;
 
-use super::*;
 use crate::errors::*;
 use crate::utils::*;
 use crate::*;
@@ -41,6 +40,11 @@ pub struct CreateGist<'a> {
 pub struct File {
     pub filename: String,
     pub content: String,
+}
+
+pub enum GistID<'a> {
+    Repository(&'a mut git2::Repository),
+    ID(&'a str),
 }
 
 impl Data {
@@ -89,52 +93,64 @@ impl Data {
     pub async fn write_file<T: GistDatabase>(
         &self,
         _db: &T,
-        gist_id: &str,
+        gist_id: GistID<'_>,
         files: &[File],
     ) -> ServiceResult<()> {
         // TODO change updated in DB
+        let inner = |repo: &mut Repository| -> ServiceResult<()> {
+            let mut tree_builder = repo.treebuilder(None).unwrap();
+            let odb = repo.odb().unwrap();
 
-        let repo = git2::Repository::open(self.get_repository_path(gist_id)).unwrap();
-        let mut tree_builder = repo.treebuilder(None).unwrap();
-        let odb = repo.odb().unwrap();
+            for file in files.iter() {
+                let escaped_filename = escape_spaces(&file.filename);
 
-        for file in files.iter() {
-            let escaped_filename = escape_spaces(&file.filename);
-
-            let obj = odb
-                .write(ObjectType::Blob, file.content.as_bytes())
-                .unwrap();
-            tree_builder
-                .insert(&escaped_filename, obj, 0o100644)
-                .unwrap();
-        }
-
-        let tree_hash = tree_builder.write().unwrap();
-        let author = Signature::now("gists", "admin@gists.batsense.net").unwrap();
-        let committer = Signature::now("gists", "admin@gists.batsense.net").unwrap();
-
-        let commit_tree = repo.find_tree(tree_hash).unwrap();
-        let msg = "";
-        if let Err(e) = repo.head() {
-            if e.code() == ErrorCode::UnbornBranch && e.class() == ErrorClass::Reference {
-                // fisrt commit ever; set parent commit(s) to empty array
-                repo.commit(Some("HEAD"), &author, &committer, msg, &commit_tree, &[])
+                let obj = odb
+                    .write(ObjectType::Blob, file.content.as_bytes())
                     .unwrap();
-            } else {
-                panic!("{:?}", e);
+                tree_builder
+                    .insert(&escaped_filename, obj, 0o100644)
+                    .unwrap();
             }
-        } else {
-            let head_ref = repo.head().unwrap();
-            let head_commit = head_ref.peel_to_commit().unwrap();
-            repo.commit(
-                Some("HEAD"),
-                &author,
-                &committer,
-                msg,
-                &commit_tree,
-                &[&head_commit],
-            )
-            .unwrap();
+
+            let tree_hash = tree_builder.write().unwrap();
+            let author = Signature::now("gists", "admin@gists.batsense.net").unwrap();
+            let committer = Signature::now("gists", "admin@gists.batsense.net").unwrap();
+
+            let commit_tree = repo.find_tree(tree_hash).unwrap();
+            let msg = "";
+            if let Err(e) = repo.head() {
+                if e.code() == ErrorCode::UnbornBranch && e.class() == ErrorClass::Reference {
+                    // fisrt commit ever; set parent commit(s) to empty array
+                    repo.commit(Some("HEAD"), &author, &committer, msg, &commit_tree, &[])
+                        .unwrap();
+                } else {
+                    panic!("{:?}", e);
+                }
+            } else {
+                let head_ref = repo.head().unwrap();
+                let head_commit = head_ref.peel_to_commit().unwrap();
+                repo.commit(
+                    Some("HEAD"),
+                    &author,
+                    &committer,
+                    msg,
+                    &commit_tree,
+                    &[&head_commit],
+                )
+                .unwrap();
+            };
+
+            Ok(())
+        };
+
+        match gist_id {
+            GistID::ID(path) => {
+                let mut repo = git2::Repository::open(self.get_repository_path(path)).unwrap();
+                inner(&mut repo)?;
+            }
+            GistID::Repository(repository) => {
+                inner(repository)?;
+            }
         };
 
         Ok(())
@@ -162,9 +178,40 @@ impl Data {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
     use crate::tests::*;
+
+    impl Data {
+        pub async fn gist_created_test_helper<T: GistDatabase>(
+            &self,
+            db: &T,
+            gist_id: &str,
+            owner: &str,
+        ) {
+            let path = self.get_repository_path(gist_id);
+            assert!(path.exists());
+            assert!(db.gist_exists(&gist_id).await.unwrap());
+            let repo = Repository::open(&path).unwrap();
+            assert!(repo.is_bare());
+            assert_eq!(db.get_gist(gist_id).await.unwrap().owner, owner);
+        }
+
+        pub async fn gist_files_written_helper<T: GistDatabase>(
+            &self,
+            db: &T,
+            gist_id: &str,
+            files: &[File],
+        ) {
+            for file in files.iter() {
+                let content = self
+                    .read_file(db, &gist_id, &escape_spaces(&file.filename))
+                    .await
+                    .unwrap();
+                assert_eq!(String::from_utf8_lossy(&content), file.content);
+            }
+        }
+    }
 
     #[actix_rt::test]
     async fn test_new_gist_works() {
@@ -182,42 +229,42 @@ mod tests {
 
             let _ = data.register_and_signin(db, NAME, EMAIL, PASSWORD).await;
 
-            let create_gist_msg = CreateGist {
-                owner: NAME,
-                description: None,
-                visibility: &GistVisibility::Public,
-            };
-            let gist = data.new_gist(db, &create_gist_msg).await.unwrap();
-            let path = data.get_repository_path(&gist.id);
-            assert!(path.exists());
-            assert!(db.gist_exists(&gist.id).await.unwrap());
-            let repo = Repository::open(&path).unwrap();
-            assert!(repo.is_bare());
-            assert!(repo.is_empty().unwrap());
+            for i in 0..2 {
+                let create_gist_msg = CreateGist {
+                    owner: NAME,
+                    description: None,
+                    visibility: &GistVisibility::Public,
+                };
+                let mut gist = data.new_gist(db, &create_gist_msg).await.unwrap();
+                assert!(gist.repository.is_empty().unwrap());
+                data.gist_created_test_helper(db, &gist.id, NAME).await;
 
-            // save  files
-            let files = [
-                File {
-                    filename: "foo".into(),
-                    content: "foobar".into(),
-                },
-                File {
-                    filename: "bar".into(),
-                    content: "foobar".into(),
-                },
-                File {
-                    filename: "foo bar".into(),
-                    content: "foobar".into(),
-                },
-            ];
+                // save  files
+                let files = [
+                    File {
+                        filename: "foo".into(),
+                        content: "foobar".into(),
+                    },
+                    File {
+                        filename: "bar".into(),
+                        content: "foobar".into(),
+                    },
+                    File {
+                        filename: "foo bar".into(),
+                        content: "foobar".into(),
+                    },
+                ];
 
-            data.write_file(db, &gist.id, &files).await.unwrap();
-            for file in files.iter() {
-                let content = data
-                    .read_file(db, &gist.id, &escape_spaces(&file.filename))
-                    .await
-                    .unwrap();
-                assert_eq!(String::from_utf8_lossy(&content), file.content);
+                if i == 0 {
+                    data.write_file(db, GistID::Repository(&mut gist.repository), &files)
+                        .await
+                        .unwrap();
+                } else {
+                    data.write_file(db, GistID::ID(&gist.id), &files)
+                        .await
+                        .unwrap();
+                }
+                data.gist_files_written_helper(db, &gist.id, &files).await;
             }
         }
     }
