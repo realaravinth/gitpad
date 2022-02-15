@@ -45,6 +45,19 @@ impl Auth {
     }
 }
 
+/// Authentication routes
+pub struct Gist {
+    /// logout route
+    pub new: &'static str,
+}
+impl Gist {
+    /// create new instance of Authentication route
+    pub const fn new() -> Gist {
+        let new = "/api/v1/gist/new";
+        Gist { new }
+    }
+}
+
 /// Account management routes
 pub struct Account {
     /// delete account route
@@ -95,9 +108,10 @@ pub struct Routes {
     pub auth: Auth,
     /// Account routes
     pub account: Account,
-
     /// Meta routes
     pub meta: Meta,
+    /// Gist routes
+    pub gist: Gist,
 }
 
 impl Routes {
@@ -107,6 +121,7 @@ impl Routes {
             auth: Auth::new(),
             account: Account::new(),
             meta: Meta::new(),
+            gist: Gist::new(),
         }
     }
 }

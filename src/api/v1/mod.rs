@@ -20,6 +20,7 @@ use serde::Deserialize;
 
 pub mod account;
 pub mod auth;
+pub mod gists;
 pub mod meta;
 pub mod routes;
 
@@ -29,6 +30,7 @@ pub fn services(cfg: &mut ServiceConfig) {
     auth::services(cfg);
     account::services(cfg);
     meta::services(cfg);
+    gists::services(cfg);
 }
 
 #[derive(Deserialize)]
