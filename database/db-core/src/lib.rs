@@ -14,6 +14,8 @@
 //! - [errors](crate::auth): error data structures used in this crate
 //! - [ops](crate::ops): meta operations like connection pool creation, migrations and getting
 //! connection from pool
+use serde::{Deserialize, Serialize};
+
 pub mod errors;
 pub mod ops;
 #[cfg(feature = "test")]
@@ -66,7 +68,8 @@ pub struct CreateGist<'a> {
 }
 
 /// Gist visibility
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum GistVisibility {
     /// Everyone can see the gist, will be displayed on /explore and
     /// search engines might index it too
@@ -109,7 +112,7 @@ impl From<GistVisibility> for String {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 /// Represents a gist
 pub struct Gist {
     /// owner of the gist
@@ -126,7 +129,7 @@ pub struct Gist {
     pub visibility: GistVisibility,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 /// Represents a comment on a Gist
 pub struct GistComment {
     /// Unique identifier, possible database assigned, auto-incremented ID

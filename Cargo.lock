@@ -683,6 +683,8 @@ name = "db-core"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "serde 1.0.136",
+ "serde_json",
  "thiserror",
 ]
 
