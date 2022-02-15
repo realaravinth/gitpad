@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["CreateGist",""],["Gist",""]]});
+initSidebarItems({"struct":[["CreateGist",""],["File",""],["Gist",""]]});
