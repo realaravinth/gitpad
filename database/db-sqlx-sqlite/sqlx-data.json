@@ -72,6 +72,54 @@
       "nullable": []
     }
   },
+  "36dec233992fb484e0ee86dac49197ddcea4e2ea47bb98a3aee89f857e13cc80": {
+    "query": "SELECT\n                owner,\n                visibility,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE \n                owner = $1\n            AND\n                visibility = $2\n            ",
+    "describe": {
+      "columns": [
+        {
+          "name": "owner",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "visibility",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "created",
+          "ordinal": 2,
+          "type_info": "Int64"
+        },
+        {
+          "name": "updated",
+          "ordinal": 3,
+          "type_info": "Int64"
+        },
+        {
+          "name": "public_id",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Right": 2
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "38409cc4e1e1edf0a5f15160d54a59b741fc668795bcdc11570e3963661c77e0": {
     "query": "SELECT\n                owner,\n                visibility,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE public_id = $1\n            ",
     "describe": {
@@ -419,6 +467,54 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "f8f0c9da439206cfc4df5f916d9c4cf731c19cbf6c005a5e7f56dac5d3b90b8e": {
+    "query": "SELECT\n                owner,\n                visibility,\n                created,\n                updated,\n                public_id,\n                description\n            FROM\n                gists_gists_view\n            WHERE \n                owner = $1\n            AND\n                visibility <> $2\n            ",
+    "describe": {
+      "columns": [
+        {
+          "name": "owner",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "visibility",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "created",
+          "ordinal": 2,
+          "type_info": "Int64"
+        },
+        {
+          "name": "updated",
+          "ordinal": 3,
+          "type_info": "Int64"
+        },
+        {
+          "name": "public_id",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Right": 2
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
       ]
     }
   },

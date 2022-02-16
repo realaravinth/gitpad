@@ -142,6 +142,49 @@ pub async fn gists_work<T: GistDatabase>(
         DBError::CommentNotFound
     ));
 
+    // visibility filters
+    let create_unlisted_gist = CreateGist {
+        owner: username.into(),
+        description: Some("foo"),
+        public_id: &format!("{}unlisted", public_id),
+        visibility: &GistVisibility::Unlisted,
+    };
+    db.new_gist(&create_unlisted_gist).await.unwrap();
+    let create_private_gist = CreateGist {
+        owner: username.into(),
+        description: Some("foo"),
+        public_id: &format!("{}private", public_id),
+        visibility: &GistVisibility::Private,
+    };
+    db.new_gist(&create_private_gist).await.unwrap();
+
+    let public_gists = db.get_user_public_gists(username).await.unwrap();
+    assert_eq!(public_gists.len(), 1);
+    assert_gists(&create_gist, &public_gists[0]);
+
+    let public_unlisted_gists = db.get_user_public_unlisted_gists(username).await.unwrap();
+    assert_eq!(public_unlisted_gists.len(), 2);
+    for gist in public_unlisted_gists {
+        assert_ne!(gist.visibility, GistVisibility::Private);
+        if gist.visibility == GistVisibility::Public {
+            assert_gists(&create_gist, &gist);
+        } else {
+            assert_gists(&create_unlisted_gist, &gist);
+        }
+    }
+
+    let all_gists = db.get_user_gists(username).await.unwrap();
+    assert_eq!(all_gists.len(), 3);
+    for gist in all_gists {
+        if gist.visibility == GistVisibility::Public {
+            assert_gists(&create_gist, &gist);
+        } else if gist.visibility == GistVisibility::Unlisted {
+            assert_gists(&create_unlisted_gist, &gist);
+        } else {
+            assert_gists(&create_private_gist, &gist);
+        }
+    }
+
     //  delete gist
     db.delete_gist(username, &create_gist.public_id)
         .await

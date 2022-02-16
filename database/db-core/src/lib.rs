@@ -236,6 +236,13 @@ pub trait GistDatabase: std::marker::Send + std::marker::Sync + CloneGistDatabas
     /// Retrieve gists belonging to user
     async fn get_user_gists(&self, owner: &str) -> DBResult<Vec<Gist>>;
 
+    /// Retrieve gists belonging to user that are [GistVisibility::Public]
+    async fn get_user_public_gists(&self, owner: &str) -> DBResult<Vec<Gist>>;
+
+    /// Retrieve gists belonging to user that are [GistVisibility::Public] and
+    /// [GistVisibility::UnliUnlisted]
+    async fn get_user_public_unlisted_gists(&self, owner: &str) -> DBResult<Vec<Gist>>;
+
     /// Delete gist
     async fn delete_gist(&self, owner: &str, public_id: &str) -> DBResult<()>;
 
@@ -321,6 +328,14 @@ impl GistDatabase for Box<dyn GistDatabase> {
 
     async fn get_user_gists(&self, owner: &str) -> DBResult<Vec<Gist>> {
         (**self).get_user_gists(owner).await
+    }
+
+    async fn get_user_public_gists(&self, owner: &str) -> DBResult<Vec<Gist>> {
+        (**self).get_user_public_gists(owner).await
+    }
+
+    async fn get_user_public_unlisted_gists(&self, owner: &str) -> DBResult<Vec<Gist>> {
+        (**self).get_user_public_unlisted_gists(owner).await
     }
 
     async fn delete_gist(&self, owner: &str, public_id: &str) -> DBResult<()> {

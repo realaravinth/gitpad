@@ -398,6 +398,78 @@ impl GistDatabase for Database {
         Ok(gists)
     }
 
+    /// Retrieve gists belonging to user from database
+    async fn get_user_public_gists(&self, owner: &str) -> DBResult<Vec<Gist>> {
+        const PUBLIC: &str = GistVisibility::Public.to_str();
+        let mut res = sqlx::query_as!(
+            InnerGist,
+            "SELECT
+                owner,
+                visibility,
+                created,
+                updated,
+                public_id,
+                description
+            FROM
+                gists_gists_view
+            WHERE 
+                owner = $1
+            AND
+                visibility = $2
+            ",
+            owner,
+            PUBLIC
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|e| match e {
+            Error::RowNotFound => DBError::GistNotFound,
+            e => DBError::DBError(Box::new(e)),
+        })?;
+
+        let mut gists = Vec::with_capacity(res.len());
+        for r in res.drain(..) {
+            gists.push(r.to_gist()?);
+        }
+        Ok(gists)
+    }
+
+    /// Retrieve gists belonging to user from database
+    async fn get_user_public_unlisted_gists(&self, owner: &str) -> DBResult<Vec<Gist>> {
+        const PRIVATE: &str = GistVisibility::Private.to_str();
+        let mut res = sqlx::query_as!(
+            InnerGist,
+            "SELECT
+                owner,
+                visibility,
+                created,
+                updated,
+                public_id,
+                description
+            FROM
+                gists_gists_view
+            WHERE 
+                owner = $1
+            AND
+                visibility <> $2
+            ",
+            owner,
+            PRIVATE
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|e| match e {
+            Error::RowNotFound => DBError::GistNotFound,
+            e => DBError::DBError(Box::new(e)),
+        })?;
+
+        let mut gists = Vec::with_capacity(res.len());
+        for r in res.drain(..) {
+            gists.push(r.to_gist()?);
+        }
+        Ok(gists)
+    }
+
     async fn delete_gist(&self, owner: &str, public_id: &str) -> DBResult<()> {
         sqlx::query!(
             "DELETE FROM gists_gists 
