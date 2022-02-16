@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["get_auth_middleware",""],["services",""]],"mod":[["account",""],["auth",""],["meta",""],["routes","V1 API Routes"]],"struct":[["RedirectQuery",""]]});
+initSidebarItems({"fn":[["get_auth_middleware",""],["services",""]],"mod":[["account",""],["auth",""],["gists",""],["meta",""],["routes","V1 API Routes"]],"struct":[["RedirectQuery",""]]});

@@ -43,6 +43,8 @@
 <span id="42">42</span>
 <span id="43">43</span>
 <span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -65,6 +67,7 @@
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">account</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">auth</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">gists</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">meta</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">routes</span>;
 
@@ -74,6 +77,7 @@
     <span class="ident">auth::services</span>(<span class="ident">cfg</span>);
     <span class="ident">account::services</span>(<span class="ident">cfg</span>);
     <span class="ident">meta::services</span>(<span class="ident">cfg</span>);
+    <span class="ident">gists::services</span>(<span class="ident">cfg</span>);
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Deserialize</span>)]</span>

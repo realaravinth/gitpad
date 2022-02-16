@@ -268,6 +268,49 @@
 <span id="267">267</span>
 <span id="268">268</span>
 <span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Test utilities</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
 
@@ -411,6 +454,49 @@
         <span class="ident">db</span>.<span class="ident">get_comment_by_id</span>(<span class="ident">comment</span>.<span class="ident">id</span>).<span class="kw">await</span>.<span class="ident">err</span>().<span class="ident">unwrap</span>(),
         <span class="ident">DBError::CommentNotFound</span>
     ));
+
+    <span class="comment">// visibility filters</span>
+    <span class="kw">let</span> <span class="ident">create_unlisted_gist</span> <span class="op">=</span> <span class="ident">CreateGist</span> {
+        <span class="ident">owner</span>: <span class="ident">username</span>.<span class="ident">into</span>(),
+        <span class="ident">description</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>),
+        <span class="ident">public_id</span>: <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}unlisted&quot;</span>, <span class="ident">public_id</span>),
+        <span class="ident">visibility</span>: <span class="kw-2">&amp;</span><span class="ident">GistVisibility::Unlisted</span>,
+    };
+    <span class="ident">db</span>.<span class="ident">new_gist</span>(<span class="kw-2">&amp;</span><span class="ident">create_unlisted_gist</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="ident">create_private_gist</span> <span class="op">=</span> <span class="ident">CreateGist</span> {
+        <span class="ident">owner</span>: <span class="ident">username</span>.<span class="ident">into</span>(),
+        <span class="ident">description</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>),
+        <span class="ident">public_id</span>: <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}private&quot;</span>, <span class="ident">public_id</span>),
+        <span class="ident">visibility</span>: <span class="kw-2">&amp;</span><span class="ident">GistVisibility::Private</span>,
+    };
+    <span class="ident">db</span>.<span class="ident">new_gist</span>(<span class="kw-2">&amp;</span><span class="ident">create_private_gist</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();
+
+    <span class="kw">let</span> <span class="ident">public_gists</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_user_public_gists</span>(<span class="ident">username</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();
+    <span class="macro">assert_eq!</span>(<span class="ident">public_gists</span>.<span class="ident">len</span>(), <span class="number">1</span>);
+    <span class="ident">assert_gists</span>(<span class="kw-2">&amp;</span><span class="ident">create_gist</span>, <span class="kw-2">&amp;</span><span class="ident">public_gists</span>[<span class="number">0</span>]);
+
+    <span class="kw">let</span> <span class="ident">public_unlisted_gists</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_user_public_unlisted_gists</span>(<span class="ident">username</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();
+    <span class="macro">assert_eq!</span>(<span class="ident">public_unlisted_gists</span>.<span class="ident">len</span>(), <span class="number">2</span>);
+    <span class="kw">for</span> <span class="ident">gist</span> <span class="kw">in</span> <span class="ident">public_unlisted_gists</span> {
+        <span class="macro">assert_ne!</span>(<span class="ident">gist</span>.<span class="ident">visibility</span>, <span class="ident">GistVisibility::Private</span>);
+        <span class="kw">if</span> <span class="ident">gist</span>.<span class="ident">visibility</span> <span class="op">==</span> <span class="ident">GistVisibility::Public</span> {
+            <span class="ident">assert_gists</span>(<span class="kw-2">&amp;</span><span class="ident">create_gist</span>, <span class="kw-2">&amp;</span><span class="ident">gist</span>);
+        } <span class="kw">else</span> {
+            <span class="ident">assert_gists</span>(<span class="kw-2">&amp;</span><span class="ident">create_unlisted_gist</span>, <span class="kw-2">&amp;</span><span class="ident">gist</span>);
+        }
+    }
+
+    <span class="kw">let</span> <span class="ident">all_gists</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_user_gists</span>(<span class="ident">username</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();
+    <span class="macro">assert_eq!</span>(<span class="ident">all_gists</span>.<span class="ident">len</span>(), <span class="number">3</span>);
+    <span class="kw">for</span> <span class="ident">gist</span> <span class="kw">in</span> <span class="ident">all_gists</span> {
+        <span class="kw">if</span> <span class="ident">gist</span>.<span class="ident">visibility</span> <span class="op">==</span> <span class="ident">GistVisibility::Public</span> {
+            <span class="ident">assert_gists</span>(<span class="kw-2">&amp;</span><span class="ident">create_gist</span>, <span class="kw-2">&amp;</span><span class="ident">gist</span>);
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">gist</span>.<span class="ident">visibility</span> <span class="op">==</span> <span class="ident">GistVisibility::Unlisted</span> {
+            <span class="ident">assert_gists</span>(<span class="kw-2">&amp;</span><span class="ident">create_unlisted_gist</span>, <span class="kw-2">&amp;</span><span class="ident">gist</span>);
+        } <span class="kw">else</span> {
+            <span class="ident">assert_gists</span>(<span class="kw-2">&amp;</span><span class="ident">create_private_gist</span>, <span class="kw-2">&amp;</span><span class="ident">gist</span>);
+        }
+    }
 
     <span class="comment">//  delete gist</span>
     <span class="ident">db</span>.<span class="ident">delete_gist</span>(<span class="ident">username</span>, <span class="kw-2">&amp;</span><span class="ident">create_gist</span>.<span class="ident">public_id</span>)
