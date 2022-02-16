@@ -39,12 +39,44 @@ pub struct CreateGist<'a> {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct File {
     pub filename: String,
-    pub content: String,
+    pub content: ContentType,
 }
 
 pub enum GistID<'a> {
     Repository(&'a mut git2::Repository),
     ID(&'a str),
+}
+
+#[derive(Serialize, PartialEq, Clone, Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ContentType {
+    Binary(Vec<u8>),
+    Text(String),
+}
+
+impl ContentType {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            Self::Text(text) => text.as_bytes(),
+            Self::Binary(bin) => bin.as_ref(),
+        }
+    }
+
+    pub fn from_blob(blob: &git2::Blob) -> Self {
+        if blob.is_binary() {
+            Self::Binary(blob.content().to_vec())
+        } else {
+            Self::Text(String::from_utf8_lossy(blob.content()).to_string())
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum FileType {
+    /// Contains file content
+    File(ContentType),
+    Dir,
 }
 
 impl Data {
@@ -167,13 +199,13 @@ impl Data {
         _db: &T,
         gist_id: &str,
         path: &str,
-    ) -> ServiceResult<Vec<u8>> {
+    ) -> ServiceResult<ContentType> {
         let repo = git2::Repository::open(self.get_repository_path(gist_id)).unwrap();
         let head = repo.head().unwrap();
         let tree = head.peel_to_tree().unwrap();
         let entry = tree.get_path(Path::new(path)).unwrap();
         let blob = repo.find_blob(entry.id()).unwrap();
-        Ok(blob.content().to_vec())
+        Ok(ContentType::from_blob(&blob))
     }
 }
 
@@ -208,7 +240,7 @@ pub mod tests {
                     .read_file(db, &gist_id, &escape_spaces(&file.filename))
                     .await
                     .unwrap();
-                assert_eq!(String::from_utf8_lossy(&content), file.content);
+                assert_eq!(content, file.content);
             }
         }
     }
@@ -229,43 +261,44 @@ pub mod tests {
 
             let _ = data.register_and_signin(db, NAME, EMAIL, PASSWORD).await;
 
-            for i in 0..2 {
-                let create_gist_msg = CreateGist {
-                    owner: NAME,
-                    description: None,
-                    visibility: &GistVisibility::Public,
-                };
-                let mut gist = data.new_gist(db, &create_gist_msg).await.unwrap();
-                assert!(gist.repository.is_empty().unwrap());
-                data.gist_created_test_helper(db, &gist.id, NAME).await;
+            let create_gist_msg = CreateGist {
+                owner: NAME,
+                description: None,
+                visibility: &GistVisibility::Public,
+            };
+            let mut gist = data.new_gist(db, &create_gist_msg).await.unwrap();
+            assert!(gist.repository.is_empty().unwrap());
+            data.gist_created_test_helper(db, &gist.id, NAME).await;
 
-                // save  files
-                let files = [
-                    File {
-                        filename: "foo".into(),
-                        content: "foobar".into(),
-                    },
-                    File {
-                        filename: "bar".into(),
-                        content: "foobar".into(),
-                    },
-                    File {
-                        filename: "foo bar".into(),
-                        content: "foobar".into(),
-                    },
-                ];
+            // save  files
+            let files = [
+                File {
+                    filename: "foo".into(),
+                    content: ContentType::Text("foobar".into()),
+                },
+                File {
+                    filename: "bar".into(),
+                    content: ContentType::Text("foobar".into()),
+                },
+                File {
+                    filename: "foo bar".into(),
+                    content: ContentType::Text("foobar".into()),
+                },
+            ];
 
-                if i == 0 {
-                    data.write_file(db, GistID::Repository(&mut gist.repository), &files)
-                        .await
-                        .unwrap();
-                } else {
-                    data.write_file(db, GistID::ID(&gist.id), &files)
-                        .await
-                        .unwrap();
-                }
-                data.gist_files_written_helper(db, &gist.id, &files).await;
-            }
+            data.write_file(db, GistID::Repository(&mut gist.repository), &files)
+                .await
+                .unwrap();
+            data.gist_files_written_helper(db, &gist.id, &files).await;
+            let files2 = [File {
+                filename: "notfirstcommit".into(),
+                content: ContentType::Text("foobar".into()),
+            }];
+
+            data.write_file(db, GistID::ID(&gist.id), &files2)
+                .await
+                .unwrap();
+            data.gist_files_written_helper(db, &gist.id, &files2).await;
         }
     }
 }

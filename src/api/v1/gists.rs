@@ -74,6 +74,7 @@ async fn new(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::data::api::v1::gists::ContentType;
     use crate::tests::*;
 
     #[actix_rt::test]
@@ -97,15 +98,15 @@ mod tests {
             let files = [
                 File {
                     filename: "foo".into(),
-                    content: "foobar".into(),
+                    content: ContentType::Text("foobar".into()),
                 },
                 File {
                     filename: "bar".into(),
-                    content: "foobar".into(),
+                    content: ContentType::Text("foobar".into()),
                 },
                 File {
                     filename: "foo bar".into(),
-                    content: "foobar".into(),
+                    content: ContentType::Text("foobar".into()),
                 },
             ];
 
