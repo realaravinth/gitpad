@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["gists"] = [{"text":"impl FromPrimitive for <a class=\"enum\" href=\"gists/data/api/v1/gists/enum.GitFileMode.html\" title=\"enum gists::data::api::v1::gists::GitFileMode\">GitFileMode</a>","synthetic":false,"types":["gists::data::api::v1::gists::GitFileMode"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

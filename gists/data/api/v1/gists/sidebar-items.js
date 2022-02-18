@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ContentType",""],["FileType",""],["GistID",""]],"struct":[["CreateGist",""],["File",""],["Gist",""]]});
+initSidebarItems({"enum":[["ContentType",""],["FileType",""],["GistID",""],["GitFileMode","A FileMode represents the kind of tree entries used by git. It resembles regular file systems modes, although FileModes are considerably simpler (there are not so many), and there are some, like Submodule that has no file system equivalent."]],"struct":[["CreateGist",""],["FileInfo",""],["Gist",""],["GistInfo",""]]});
