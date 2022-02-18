@@ -402,7 +402,7 @@
     <span class="ident">HttpResponse</span>, <span class="ident">HttpResponseBuilder</span>,
 };
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">tarpaulin_include</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ErrorToResponse</span> {
     <span class="kw">pub</span> <span class="ident">error</span>: <span class="ident">String</span>,
