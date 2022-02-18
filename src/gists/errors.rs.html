@@ -226,6 +226,10 @@
 <span id="225">225</span>
 <span id="226">226</span>
 <span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -343,6 +347,9 @@
 
     <span class="attribute">#[<span class="ident">display</span>(<span class="ident">fmt</span> <span class="op">=</span> <span class="string">&quot;File System Error {}&quot;</span>, <span class="ident">_0</span>)]</span>
     <span class="ident">FSError</span>(<span class="ident">FSError</span>),
+
+    <span class="attribute">#[<span class="ident">display</span>(<span class="ident">fmt</span> <span class="op">=</span> <span class="string">&quot;Comment is empty&quot;</span>)]</span>
+    <span class="ident">EmptyComment</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CredsError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ServiceError</span> {
@@ -448,6 +455,7 @@
 
             <span class="ident">ServiceError::GistNotFound</span> =&gt; <span class="number">404</span>,
             <span class="ident">ServiceError::CommentNotFound</span> =&gt; <span class="number">404</span>,
+            <span class="ident">ServiceError::EmptyComment</span> =&gt; <span class="number">400</span>,
         };
 
         <span class="ident">StatusCode::from_u16</span>(<span class="ident">status_code</span>).<span class="ident">unwrap</span>()

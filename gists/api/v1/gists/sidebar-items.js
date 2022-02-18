@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["services",""]],"struct":[["CreateGistRequest",""],["get_file",""],["new",""]]});
+initSidebarItems({"fn":[["services",""]],"struct":[["CreateGistRequest",""],["PostCommentRequest",""],["get_file",""],["new",""],["post_comment",""]]});
