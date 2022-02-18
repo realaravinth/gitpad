@@ -65,7 +65,7 @@ impl Gist {
     /// create new instance of Authentication route
     pub const fn new() -> Gist {
         let new = "/api/v1/gist/new";
-        let get_file = "/api/v1/gist/profile/{username}/{gist}/{file}";
+        let get_file = "/api/v1/gist/profile/{username}/{gist}/contents/{file}";
         Gist { new, get_file }
     }
 
