@@ -16,6 +16,7 @@
 */
 //! V1 API Routes
 use actix_auth_middleware::{Authentication, GetLoginRoute};
+use serde::*;
 
 use super::meta::routes::Meta;
 
@@ -44,17 +45,37 @@ impl Auth {
         }
     }
 }
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct GetFilePath {
+    pub username: String,
+    pub gist: String,
+    pub file: String,
+}
 
 /// Authentication routes
 pub struct Gist {
     /// logout route
     pub new: &'static str,
+
+    /// get fie route
+    pub get_file: &'static str,
 }
+
 impl Gist {
     /// create new instance of Authentication route
     pub const fn new() -> Gist {
         let new = "/api/v1/gist/new";
-        Gist { new }
+        let get_file = "/api/v1/gist/profile/{username}/{gist}/{file}";
+        Gist { new, get_file }
+    }
+
+    /// get file routes with placeholders replaced with values provided.
+    /// filename is auto-escaped using [urlencoding::encode]
+    pub fn get_file_route(&self, components: &GetFilePath) -> String {
+        self.get_file
+            .replace("{username}", &components.username)
+            .replace("{gist}", &components.gist)
+            .replace("{file}", &urlencoding::encode(&components.file))
     }
 }
 
