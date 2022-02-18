@@ -22,6 +22,7 @@
 -   [ ] Gist privacy: public, unlisted, private
 -   [ ] Git clone via HTTP and SSH
 -   [ ] Activity Pub implementation for publishing native gists and commenting
+-   [ ] Gitea OAuth integration
 
 ## Why?
 
