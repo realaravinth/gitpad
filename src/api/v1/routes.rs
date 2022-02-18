@@ -52,13 +52,22 @@ pub struct GetFilePath {
     pub file: String,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct PostCommentPath {
+    pub username: String,
+    pub gist: String,
+}
+
 /// Authentication routes
 pub struct Gist {
     /// logout route
     pub new: &'static str,
 
-    /// get fie route
+    /// get flie route
     pub get_file: &'static str,
+
+    /// post comment on gist
+    pub post_comment: &'static str,
 }
 
 impl Gist {
@@ -66,7 +75,12 @@ impl Gist {
     pub const fn new() -> Gist {
         let new = "/api/v1/gist/new";
         let get_file = "/api/v1/gist/profile/{username}/{gist}/contents/{file}";
-        Gist { new, get_file }
+        let post_comment = "/api/v1/gist/profile/{username}/{gist}/comments";
+        Gist {
+            new,
+            get_file,
+            post_comment,
+        }
     }
 
     /// get file routes with placeholders replaced with values provided.
@@ -76,6 +90,13 @@ impl Gist {
             .replace("{username}", &components.username)
             .replace("{gist}", &components.gist)
             .replace("{file}", &urlencoding::encode(&components.file))
+    }
+
+    /// get post_comment route with placeholders replaced with values provided.
+    pub fn get_post_comment_route(&self, components: &PostCommentPath) -> String {
+        self.post_comment
+            .replace("{username}", &components.username)
+            .replace("{gist}", &components.gist)
     }
 }
 

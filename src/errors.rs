@@ -115,6 +115,9 @@ pub enum ServiceError {
 
     #[display(fmt = "File System Error {}", _0)]
     FSError(FSError),
+
+    #[display(fmt = "Comment is empty")]
+    EmptyComment,
 }
 
 impl From<CredsError> for ServiceError {
@@ -220,6 +223,7 @@ impl ResponseError for ServiceError {
 
             ServiceError::GistNotFound => 404,
             ServiceError::CommentNotFound => 404,
+            ServiceError::EmptyComment => 400,
         };
 
         StatusCode::from_u16(status_code).unwrap()
