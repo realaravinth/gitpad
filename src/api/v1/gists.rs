@@ -20,16 +20,22 @@ use actix_web::*;
 use db_core::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::data::api::v1::gists::{CreateGist, File, GistID};
+use crate::data::api::v1::gists::{CreateGist, FileInfo, GistID};
 use crate::errors::*;
 use crate::*;
+
+//#[derive(Serialize, Deserialize, Debug, Clone)]
+//pub struct File {
+//    pub filename: String,
+//    pub content: ContentType,
+//}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateGistRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub visibility: GistVisibility,
-    pub files: Vec<File>,
+    pub files: Vec<FileInfo>,
 }
 
 impl CreateGistRequest {
@@ -74,7 +80,7 @@ async fn new(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::data::api::v1::gists::ContentType;
+    use crate::data::api::v1::gists::{ContentType, FileType};
     use crate::tests::*;
 
     #[actix_rt::test]
@@ -96,17 +102,17 @@ mod tests {
             let app = get_app!(data, db).await;
 
             let files = [
-                File {
+                FileInfo {
                     filename: "foo".into(),
-                    content: ContentType::Text("foobar".into()),
+                    content: FileType::File(ContentType::Text("foobar".into())),
                 },
-                File {
+                FileInfo {
                     filename: "bar".into(),
-                    content: ContentType::Text("foobar".into()),
+                    content: FileType::File(ContentType::Text("foobar".into())),
                 },
-                File {
+                FileInfo {
                     filename: "foo bar".into(),
-                    content: ContentType::Text("foobar".into()),
+                    content: FileType::File(ContentType::Text("foobar".into())),
                 },
             ];
 

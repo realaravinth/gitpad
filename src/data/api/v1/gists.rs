@@ -18,12 +18,60 @@ use std::path::{Path, PathBuf};
 
 use db_core::prelude::*;
 use git2::*;
+use num_enum::FromPrimitive;
 use serde::{Deserialize, Serialize};
 use tokio::fs;
 
 use crate::errors::*;
 use crate::utils::*;
 use crate::*;
+
+/// A FileMode represents the kind of tree entries used by git. It
+/// resembles regular file systems modes, although FileModes are
+/// considerably simpler (there are not so many), and there are some,
+/// like Submodule that has no file system equivalent.
+// Adapted from https://github.com/go-git/go-git/blob/master/plumbing/filemode/filemode.go(Apache-2.0 License)
+#[derive(Debug, PartialEq, Clone, FromPrimitive)]
+#[repr(isize)]
+pub enum GitFileMode {
+    /// Empty is used as the GitFileMode of tree elements when comparing
+    /// trees in the following situations:
+    ///
+    /// - the mode of tree elements before their creation.  
+    /// - the mode of tree elements after their deletion.  
+    /// - the mode of unmerged elements when checking the index.
+    ///
+    /// Empty has no file system equivalent.  As Empty is the zero value
+    /// of [GitFileMode]
+    Empty = 0,
+    /// Regular represent non-executable files.
+    Regular = 0o100644,
+    /// Dir represent a Directory.
+    Dir = 0o40000,
+    /// Deprecated represent non-executable files with the group writable bit set.  This mode was
+    /// supported by the first versions of git, but it has been deprecated nowadays.  This
+    /// library(github.com/go-git/go-git uses it, not realaravinth/gists at the moment) uses them
+    /// internally, so you can read old packfiles, but will treat them as Regulars when interfacing
+    /// with the outside world.  This is the standard git behaviour.
+    Deprecated = 0o100664,
+    /// Executable represents executable files.
+    Executable = 0o100755,
+    /// Symlink represents symbolic links to files.
+    Symlink = 0o120000,
+    /// Submodule represents git submodules.  This mode has no file system
+    /// equivalent.
+    Submodule = 0o160000,
+
+    /// Unsupported file mode
+    #[num_enum(default)]
+    Unsupported = -1,
+}
+
+impl From<&'_ TreeEntry<'_>> for GitFileMode {
+    fn from(t: &TreeEntry) -> Self {
+        GitFileMode::from(t.filemode() as isize)
+    }
+}
 
 pub struct Gist {
     pub id: String,
@@ -36,15 +84,24 @@ pub struct CreateGist<'a> {
     pub visibility: &'a GistVisibility,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct File {
-    pub filename: String,
-    pub content: ContentType,
-}
-
 pub enum GistID<'a> {
     Repository(&'a mut git2::Repository),
     ID(&'a str),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct FileInfo {
+    pub filename: String,
+    pub content: FileType,
+}
+
+pub struct GistInfo {
+    pub files: Vec<FileInfo>,
+    pub description: String,
+    pub owner: String,
+    pub created: i64,
+    pub updated: i64,
+    pub visibility: GistVisibility,
 }
 
 #[derive(Serialize, PartialEq, Clone, Debug, Deserialize)]
@@ -71,12 +128,12 @@ impl ContentType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum FileType {
     /// Contains file content
     File(ContentType),
-    Dir,
+    Dir(Vec<FileInfo>),
 }
 
 impl Data {
@@ -126,7 +183,7 @@ impl Data {
         &self,
         _db: &T,
         gist_id: GistID<'_>,
-        files: &[File],
+        files: &[FileInfo],
     ) -> ServiceResult<()> {
         // TODO change updated in DB
         let inner = |repo: &mut Repository| -> ServiceResult<()> {
@@ -136,12 +193,15 @@ impl Data {
             for file in files.iter() {
                 let escaped_filename = escape_spaces(&file.filename);
 
-                let obj = odb
-                    .write(ObjectType::Blob, file.content.as_bytes())
-                    .unwrap();
-                tree_builder
-                    .insert(&escaped_filename, obj, 0o100644)
-                    .unwrap();
+                match &file.content {
+                    FileType::Dir(dir_contents) => unimplemented!(),
+                    FileType::File(f) => {
+                        let obj = odb.write(ObjectType::Blob, f.as_bytes()).unwrap();
+                        tree_builder
+                            .insert(&escaped_filename, obj, 0o100644)
+                            .unwrap();
+                    }
+                }
             }
 
             let tree_hash = tree_builder.write().unwrap();
@@ -178,14 +238,10 @@ impl Data {
         match gist_id {
             GistID::ID(path) => {
                 let mut repo = git2::Repository::open(self.get_repository_path(path)).unwrap();
-                inner(&mut repo)?;
+                inner(&mut repo)
             }
-            GistID::Repository(repository) => {
-                inner(repository)?;
-            }
-        };
-
-        Ok(())
+            GistID::Repository(repository) => inner(repository),
+        }
     }
 
     /// Please note that this method expects path to not contain any spaces
@@ -197,15 +253,73 @@ impl Data {
     pub async fn read_file<T: GistDatabase>(
         &self,
         _db: &T,
-        gist_id: &str,
+        gist_id: GistID<'_>,
         path: &str,
-    ) -> ServiceResult<ContentType> {
-        let repo = git2::Repository::open(self.get_repository_path(gist_id)).unwrap();
-        let head = repo.head().unwrap();
-        let tree = head.peel_to_tree().unwrap();
-        let entry = tree.get_path(Path::new(path)).unwrap();
-        let blob = repo.find_blob(entry.id()).unwrap();
-        Ok(ContentType::from_blob(&blob))
+    ) -> ServiceResult<FileInfo> {
+        let inner = |repo: &git2::Repository| -> ServiceResult<FileInfo> {
+            let head = repo.head().unwrap();
+            let tree = head.peel_to_tree().unwrap();
+            let entry = tree.get_path(Path::new(path)).unwrap();
+            GitFileMode::Regular as i32;
+
+            fn read_file(id: Oid, repo: &git2::Repository) -> FileType {
+                let blob = repo.find_blob(id).unwrap();
+                FileType::File(ContentType::from_blob(&blob))
+            }
+
+            fn read_dir(id: Oid, repo: &Repository) -> FileType {
+                let tree = repo.find_tree(id).unwrap();
+                let mut items = Vec::with_capacity(tree.len());
+                for item in tree.iter() {
+                    println!("{:?}", &item.name());
+                    if let Some(name) = item.name() {
+                        let mode: GitFileMode = (&item).into();
+                        let file = match mode {
+                            GitFileMode::Dir => read_dir(item.id(), repo),
+                            GitFileMode::Submodule => unimplemented!(),
+                            GitFileMode::Empty => unimplemented!(),
+                            GitFileMode::Deprecated => unimplemented!(),
+                            GitFileMode::Unsupported => unimplemented!(),
+                            GitFileMode::Symlink => unimplemented!(),
+                            GitFileMode::Executable => read_file(item.id(), repo),
+                            GitFileMode::Regular => read_file(item.id(), repo),
+                        };
+                        items.push(FileInfo {
+                            filename: name.to_owned(),
+                            content: file,
+                        });
+                    }
+                }
+                FileType::Dir(items)
+            }
+            let mode: GitFileMode = (&entry).into();
+            if let Some(name) = entry.name() {
+                let file = match mode {
+                    GitFileMode::Dir => read_dir(entry.id(), repo),
+                    GitFileMode::Submodule => unimplemented!(),
+                    GitFileMode::Empty => unimplemented!(),
+                    GitFileMode::Deprecated => unimplemented!(),
+                    GitFileMode::Unsupported => unimplemented!(),
+                    GitFileMode::Symlink => unimplemented!(),
+                    GitFileMode::Executable => read_file(entry.id(), repo),
+                    GitFileMode::Regular => read_file(entry.id(), repo),
+                };
+                Ok(FileInfo {
+                    filename: name.to_string(),
+                    content: file,
+                })
+            } else {
+                unimplemented!();
+            }
+        };
+
+        match gist_id {
+            GistID::ID(path) => {
+                let repo = git2::Repository::open(self.get_repository_path(path)).unwrap();
+                inner(&repo)
+            }
+            GistID::Repository(repository) => inner(repository),
+        }
     }
 }
 
@@ -233,14 +347,18 @@ pub mod tests {
             &self,
             db: &T,
             gist_id: &str,
-            files: &[File],
+            files: &[FileInfo],
         ) {
             for file in files.iter() {
                 let content = self
-                    .read_file(db, &gist_id, &escape_spaces(&file.filename))
+                    .read_file(db, GistID::ID(&gist_id), &escape_spaces(&file.filename))
                     .await
                     .unwrap();
-                assert_eq!(content, file.content);
+                let req_escaped_file = FileInfo {
+                    filename: escape_spaces(&file.filename),
+                    content: file.content.clone(),
+                };
+                assert_eq!(&content, &req_escaped_file);
             }
         }
     }
@@ -272,17 +390,17 @@ pub mod tests {
 
             // save  files
             let files = [
-                File {
+                FileInfo {
                     filename: "foo".into(),
-                    content: ContentType::Text("foobar".into()),
+                    content: FileType::File(ContentType::Text("foobar".into())),
                 },
-                File {
+                FileInfo {
                     filename: "bar".into(),
-                    content: ContentType::Text("foobar".into()),
+                    content: FileType::File(ContentType::Text("foobar".into())),
                 },
-                File {
+                FileInfo {
                     filename: "foo bar".into(),
-                    content: ContentType::Text("foobar".into()),
+                    content: FileType::File(ContentType::Text("foobar".into())),
                 },
             ];
 
@@ -290,9 +408,9 @@ pub mod tests {
                 .await
                 .unwrap();
             data.gist_files_written_helper(db, &gist.id, &files).await;
-            let files2 = [File {
+            let files2 = [FileInfo {
                 filename: "notfirstcommit".into(),
-                content: ContentType::Text("foobar".into()),
+                content: FileType::File(ContentType::Text("foobar".into())),
             }];
 
             data.write_file(db, GistID::ID(&gist.id), &files2)

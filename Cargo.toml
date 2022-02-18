@@ -47,6 +47,7 @@ tokio = { version = "1.16.1", features = ["fs"] }
 url = "2.2"
 urlencoding = "2.1.0"
 validator = { version = "0.14.0", features = ["derive"] }
+num_enum = "0.5.6"
 
 [dev-dependencies]
 actix-rt = "2"
