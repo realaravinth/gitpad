@@ -174,7 +174,7 @@ use actix_web::{
     HttpResponse, HttpResponseBuilder,
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[cfg(not(tarpaulin_include))]
 pub struct ErrorToResponse {
     pub error: String,

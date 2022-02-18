@@ -108,6 +108,17 @@ macro_rules! get_request {
     ($app:expr,$route:expr ) => {
         test::call_service(&$app, test::TestRequest::get().uri($route).to_request()).await
     };
+
+    ($app:expr, $route:expr, $cookies:expr) => {
+        test::call_service(
+            &$app,
+            test::TestRequest::get()
+                .uri($route)
+                .cookie($cookies)
+                .to_request(),
+        )
+        .await
+    };
 }
 
 #[macro_export]
