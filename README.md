@@ -14,12 +14,12 @@
 
 ## Features
 
--   [ ] Upload code snippets
+-   [ ] Upload code snippets(&check; REST API)
 -   [ ] Syntax Highlighting
 -   [ ] Comments
--   [ ] Versioning through Git
+-   [x] Versioning through Git
 -   [ ] Fork gists
--   [ ] Gist privacy: public, unlisted, private
+-   [x] Gist privacy: public, unlisted, private
 -   [ ] Git clone via HTTP and SSH
 -   [ ] Activity Pub implementation for publishing native gists and commenting
 -   [ ] Gitea OAuth integration
