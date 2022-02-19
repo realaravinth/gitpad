@@ -77,6 +77,8 @@ pub struct Gist {
     pub get_comment: &'static str,
     /// get gist comments
     pub get_gist_comments: &'static str,
+    /// delete comment
+    pub delete_comment: &'static str,
 }
 
 impl Gist {
@@ -86,6 +88,7 @@ impl Gist {
         let get_file = "/api/v1/gist/profile/{username}/{gist}/contents/{file}";
         let post_comment = "/api/v1/gist/profile/{username}/{gist}/comments";
         let get_comment = "/api/v1/gist/profile/{username}/{gist}/comment/{comment_id}";
+        let delete_comment = get_comment;
         let get_gist_comments = post_comment;
         Gist {
             new,
@@ -93,6 +96,7 @@ impl Gist {
             post_comment,
             get_comment,
             get_gist_comments,
+            delete_comment,
         }
     }
 
@@ -117,12 +121,17 @@ impl Gist {
         self.get_post_comment_route(components)
     }
 
-    /// get post_comment route with placeholders replaced with values provided.
+    /// get get_comment route with placeholders replaced with values provided.
     pub fn get_get_comment_route(&self, components: &GetCommentPath) -> String {
         self.get_comment
             .replace("{username}", &components.username)
             .replace("{gist}", &components.gist)
             .replace("{comment_id}", &components.comment_id.to_string())
+    }
+
+    /// get delete_comment route with placeholders replaced with values provided.
+    pub fn get_delete_comment_route(&self, components: &GetCommentPath) -> String {
+        self.get_get_comment_route(components)
     }
 }
 
@@ -225,6 +234,7 @@ mod tests {
         let post_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comments");
         let get_gist_comments = format!("/api/v1/gist/profile/{NAME}/{GIST}/comments");
         let get_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comment/{COMMENT_ID}");
+        let delete_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comment/{COMMENT_ID}");
 
         let get_file_component = GetFilePath {
             file: FILE.into(),
@@ -259,6 +269,16 @@ mod tests {
         assert_eq!(
             get_gist_comments,
             ROUTES.gist.get_post_comment_route(&get_gist_comments_path)
+        );
+
+        let delete_comment_path = GetCommentPath {
+            gist: GIST.into(),
+            username: NAME.into(),
+            comment_id: COMMENT_ID,
+        };
+        assert_eq!(
+            delete_comment,
+            ROUTES.gist.get_delete_comment_route(&delete_comment_path)
         );
     }
 }

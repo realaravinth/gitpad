@@ -50,6 +50,7 @@ pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(post_comment);
     cfg.service(get_comment);
     cfg.service(get_gist_comments);
+    cfg.service(delete_comment);
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -209,6 +210,33 @@ async fn get_gist_comments(
             };
             Err(ServiceError::GistNotFound)
         }
+    }
+}
+
+#[my_codegen::delete(
+    path = "crate::V1_API_ROUTES.gist.delete_comment",
+    wrap = "super::get_auth_middleware()"
+)]
+async fn delete_comment(
+    path: web::Path<GetCommentPath>,
+    id: Identity,
+    db: crate::DB,
+) -> ServiceResult<impl Responder> {
+    let gist = db.get_gist(&path.gist).await?;
+    let comment = db.get_comment_by_id(path.comment_id).await?;
+    let username = id.identity().unwrap();
+    if username != comment.owner {
+        match gist.visibility {
+            GistVisibility::Public | GistVisibility::Unlisted => {
+                Err(ServiceError::UnauthorizedOperation(
+                    "This user is not the owner of the comment to delete it".into(),
+                ))
+            }
+            GistVisibility::Private => Err(ServiceError::GistNotFound),
+        }
+    } else {
+        db.delete_comment(&username, comment.id).await?;
+        Ok(HttpResponse::Ok())
     }
 }
 
@@ -684,5 +712,72 @@ mod tests {
                 );
             }
         }
+
+        /*
+         * +++++++++++++++++++++++++++++++++++
+         *          DELETE COMMENT
+         * +++++++++++++++++++++++++++++++++++
+         */
+
+        let mut delete_comment_component = GetCommentPath {
+            gist: "gistdoesntexist".into(),
+            username: NAME.into(),
+            comment_id: 34234234,
+        };
+
+        println!("delete comments; unauthenticated, gist does't exist");
+        let del_comment_path = V1_API_ROUTES
+            .gist
+            .get_delete_comment_route(&delete_comment_component);
+        let resp = delete_request!(&app, &del_comment_path);
+        assert_eq!(resp.status(), StatusCode::FOUND);
+
+        println!("delete comments; authenticated, gist does't exist");
+        let resp = delete_request!(&app, &del_comment_path, cookies.clone());
+        assert_eq!(resp.status(), ServiceError::GistNotFound.status_code());
+        let err: ErrorToResponse = test::read_body_json(resp).await;
+        assert_eq!(err.error, format!("{}", ServiceError::GistNotFound));
+
+        println!("delete comments; authenticated, comment doesn't exist");
+        delete_comment_component.gist = gist_id.clone();
+        let del_comment_path = V1_API_ROUTES
+            .gist
+            .get_delete_comment_route(&delete_comment_component);
+        let resp = delete_request!(&app, &del_comment_path, cookies.clone());
+        assert_eq!(resp.status(), ServiceError::CommentNotFound.status_code());
+        let err: ErrorToResponse = test::read_body_json(resp).await;
+        assert_eq!(err.error, format!("{}", ServiceError::CommentNotFound));
+
+        println!("delete comments; authenticated but comment_owner != user and gist is public");
+        delete_comment_component.gist = gist_id.clone();
+        delete_comment_component.comment_id = comment_ids.get(0).as_ref().unwrap().0.id;
+        let del_comment_path = V1_API_ROUTES
+            .gist
+            .get_delete_comment_route(&delete_comment_component);
+        let resp = delete_request!(&app, &del_comment_path, cookies2.clone());
+        assert_eq!(
+            resp.status(),
+            ServiceError::UnauthorizedOperation("".into()).status_code()
+        );
+        let err: ErrorToResponse = test::read_body_json(resp).await;
+        assert!(err.error.contains(&format!(
+            "{}",
+            ServiceError::UnauthorizedOperation("".into())
+        )));
+
+        println!("delete comments; authenticated but comment_owner != user and gist is private");
+        delete_comment_component.gist = private.clone();
+        delete_comment_component.comment_id = comment_ids.last().as_ref().unwrap().0.id;
+        let del_comment_path = V1_API_ROUTES
+            .gist
+            .get_delete_comment_route(&delete_comment_component);
+        let resp = delete_request!(&app, &del_comment_path, cookies2.clone());
+        assert_eq!(resp.status(), ServiceError::GistNotFound.status_code());
+        let err: ErrorToResponse = test::read_body_json(resp).await;
+        assert_eq!(err.error, format!("{}", ServiceError::GistNotFound));
+
+        println!("delete comments; authenticated  comment_owner == owner");
+        let resp = delete_request!(&app, &del_comment_path, cookies.clone());
+        assert_eq!(resp.status(), StatusCode::OK);
     }
 }
