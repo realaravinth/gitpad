@@ -122,6 +122,11 @@ pub struct PostCommentRequest {
     pub comment: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PostCommentResp {
+    pub id: i64,
+}
+
 #[my_codegen::post(
     path = "crate::V1_API_ROUTES.gist.post_comment",
     wrap = "super::get_auth_middleware()"
@@ -149,8 +154,10 @@ async fn post_comment(
         comment: &payload.comment,
     };
 
-    db.new_comment(&msg).await?; //  TODO get comment ID
-    Ok(HttpResponse::Ok().finish())
+    let resp = PostCommentResp {
+        id: db.new_comment(&msg).await?,
+    };
+    Ok(HttpResponse::Ok().json(resp))
 }
 
 #[cfg(test)]
@@ -370,6 +377,11 @@ mod tests {
             gist: gist_id.clone(),
         };
 
+        /* +++++++++++++++++++++++++++++++
+         *              COMMENTS
+         * +++++++++++++++++++++++++++++++
+         */
+
         let mut comment = PostCommentRequest { comment: "".into() };
         println!("empty comment");
         // empty comment
@@ -398,6 +410,8 @@ mod tests {
         )
         .await;
 
+        let mut comment_ids = Vec::with_capacity(2);
+
         println!("comment OK");
         create_comment.gist = gist_id;
         let post_comment_path = V1_API_ROUTES.gist.get_post_comment_route(&create_comment);
@@ -409,6 +423,8 @@ mod tests {
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
+        let comment_resp: PostCommentResp = test::read_body_json(resp).await;
+        comment_ids.push(comment_resp);
 
         println!("comment OK");
         create_comment.gist = unlisted;
@@ -421,6 +437,8 @@ mod tests {
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
+        let comment_resp: PostCommentResp = test::read_body_json(resp).await;
+        comment_ids.push(comment_resp);
 
         println!("comment OK");
         create_comment.gist = private.clone();
@@ -433,6 +451,7 @@ mod tests {
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
+        let _comment_resp: PostCommentResp = test::read_body_json(resp).await;
 
         // commenting on private gist
         println!("private gist, not OK");
