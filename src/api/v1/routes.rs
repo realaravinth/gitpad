@@ -75,6 +75,8 @@ pub struct Gist {
     pub post_comment: &'static str,
     /// get comment
     pub get_comment: &'static str,
+    /// get gist comments
+    pub get_gist_comments: &'static str,
 }
 
 impl Gist {
@@ -84,11 +86,13 @@ impl Gist {
         let get_file = "/api/v1/gist/profile/{username}/{gist}/contents/{file}";
         let post_comment = "/api/v1/gist/profile/{username}/{gist}/comments";
         let get_comment = "/api/v1/gist/profile/{username}/{gist}/comment/{comment_id}";
+        let get_gist_comments = post_comment;
         Gist {
             new,
             get_file,
             post_comment,
             get_comment,
+            get_gist_comments,
         }
     }
 
@@ -106,6 +110,11 @@ impl Gist {
         self.post_comment
             .replace("{username}", &components.username)
             .replace("{gist}", &components.gist)
+    }
+
+    /// get post_comment route with placeholders replaced with values provided.
+    pub fn get_gist_comments(&self, components: &PostCommentPath) -> String {
+        self.get_post_comment_route(components)
     }
 
     /// get post_comment route with placeholders replaced with values provided.
@@ -214,6 +223,7 @@ mod tests {
         const COMMENT_ID: i64 = 5;
         let get_file = format!("/api/v1/gist/profile/{NAME}/{GIST}/contents/{FILE}");
         let post_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comments");
+        let get_gist_comments = format!("/api/v1/gist/profile/{NAME}/{GIST}/comments");
         let get_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comment/{COMMENT_ID}");
 
         let get_file_component = GetFilePath {
@@ -240,6 +250,15 @@ mod tests {
         assert_eq!(
             get_comment,
             ROUTES.gist.get_get_comment_route(&get_comment_path)
+        );
+
+        let get_gist_comments_path = PostCommentPath {
+            gist: GIST.into(),
+            username: NAME.into(),
+        };
+        assert_eq!(
+            get_gist_comments,
+            ROUTES.gist.get_post_comment_route(&get_gist_comments_path)
         );
     }
 }
