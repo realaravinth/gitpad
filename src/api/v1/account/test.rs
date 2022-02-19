@@ -21,10 +21,8 @@ use actix_web::test;
 
 use super::*;
 use crate::api::v1::ROUTES;
-use crate::data::api::v1::account::*;
 use crate::data::api::v1::auth::Password;
 use crate::data::Data;
-use crate::errors::*;
 use crate::*;
 
 use crate::tests::*;

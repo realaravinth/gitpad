@@ -103,7 +103,7 @@ mod tests {
 
         for (db, data) in config.iter() {
             let app = get_app!(data, db).await;
-            let resp = get_request!(&app, &V1_API_ROUTES.meta.health);
+            let resp = get_request!(&app, V1_API_ROUTES.meta.health);
             assert_eq!(resp.status(), StatusCode::OK);
 
             let health: Health = test::read_body_json(resp).await;

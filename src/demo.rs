@@ -20,8 +20,6 @@ use std::time::Duration;
 use tokio::spawn;
 use tokio::time::sleep;
 
-use db_core::GistDatabase;
-
 use crate::data::api::v1::auth::Register;
 use crate::db::BoxDB;
 use crate::*;
@@ -90,21 +88,17 @@ mod tests {
     async fn postgrest_demo_works() {
         let (db, data) = sqlx_postgres::get_data().await;
         let (db2, _) = sqlx_postgres::get_data().await;
-        demo_account_works(data, &db, db2).await;
+        demo_account_works(data, &db, &db2).await;
     }
 
     #[actix_rt::test]
     async fn sqlite_demo_works() {
         let (db, data) = sqlx_sqlite::get_data().await;
         let (db2, _) = sqlx_sqlite::get_data().await;
-        demo_account_works(data, &db, db2).await;
+        demo_account_works(data, &db, &db2).await;
     }
 
-    async fn demo_account_works(
-        data: Arc<Data>,
-        db: &Box<dyn GistDatabase>,
-        db2: Box<dyn GistDatabase>,
-    ) {
+    async fn demo_account_works(data: Arc<Data>, db: &BoxDB, db2: &BoxDB) {
         let _ = data.delete_user(db, DEMO_USER, DEMO_PASSWORD).await;
         let data = AppData::new(data);
         let duration = Duration::from_secs(DURATION);
@@ -121,7 +115,7 @@ mod tests {
         // deletion works
         assert!(super::delete_demo_user(db, &data).await.is_ok());
         assert!(!data.username_exists(db, DEMO_USER).await.unwrap().exists);
-        run(db2, data.clone(), duration).await.unwrap();
+        run(db2.clone(), data.clone(), duration).await.unwrap();
 
         sleep(Duration::from_secs(DURATION)).await;
         assert!(data.username_exists(db, DEMO_USER).await.unwrap().exists);

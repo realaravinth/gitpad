@@ -2,6 +2,7 @@
 //! # `libadmin` database operations implemented using sqlx postgres
 //!
 //! [`GistDatabase`](GistDatabase) is implemented on [Database].
+use std::str::FromStr;
 
 use db_core::dev::*;
 
@@ -364,7 +365,7 @@ impl GistDatabase for Database {
             Error::RowNotFound => DBError::GistNotFound,
             e => DBError::DBError(Box::new(e)),
         })?;
-        res.to_gist()
+        res.into_gist()
     }
 
     /// Retrieve gists belonging to user from database
@@ -393,7 +394,7 @@ impl GistDatabase for Database {
 
         let mut gists = Vec::with_capacity(res.len());
         for r in res.drain(..) {
-            gists.push(r.to_gist()?);
+            gists.push(r.into_gist()?);
         }
         Ok(gists)
     }
@@ -429,7 +430,7 @@ impl GistDatabase for Database {
 
         let mut gists = Vec::with_capacity(res.len());
         for r in res.drain(..) {
-            gists.push(r.to_gist()?);
+            gists.push(r.into_gist()?);
         }
         Ok(gists)
     }
@@ -465,7 +466,7 @@ impl GistDatabase for Database {
 
         let mut gists = Vec::with_capacity(res.len());
         for r in res.drain(..) {
-            gists.push(r.to_gist()?);
+            gists.push(r.into_gist()?);
         }
         Ok(gists)
     }
@@ -611,7 +612,7 @@ struct InnerGist {
 }
 
 impl InnerGist {
-    fn to_gist(self) -> DBResult<Gist> {
+    fn into_gist(self) -> DBResult<Gist> {
         Ok(Gist {
             owner: self.owner.unwrap(),
             description: self.description,

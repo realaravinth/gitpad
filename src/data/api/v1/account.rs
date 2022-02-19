@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 //! Account management utility datastructures and methods
-use core::panic;
-
 use db_core::prelude::*;
 use serde::{Deserialize, Serialize};
 

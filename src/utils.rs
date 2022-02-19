@@ -14,12 +14,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use std::path::Path;
-
-use tokio::fs;
-
-use crate::errors::*;
-
 /// Get random string of specific length
 pub(crate) fn get_random(len: usize) -> String {
     use rand::{distributions::Alphanumeric, rngs::ThreadRng, thread_rng, Rng};
@@ -32,13 +26,6 @@ pub(crate) fn get_random(len: usize) -> String {
         .map(char::from)
         .take(len)
         .collect::<String>()
-}
-
-pub async fn create_dir_all_if_not_exists(path: &Path) -> ServiceResult<()> {
-    if !path.exists() {
-        fs::create_dir_all(&path).await?;
-    }
-    Ok(())
 }
 
 pub fn escape_spaces(name: &str) -> String {

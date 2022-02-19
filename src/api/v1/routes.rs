@@ -15,7 +15,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 //! V1 API Routes
-use actix_auth_middleware::{Authentication, GetLoginRoute};
+use actix_auth_middleware::GetLoginRoute;
 use serde::*;
 
 use super::meta::routes::Meta;
@@ -168,9 +168,9 @@ impl Routes {
     }
 }
 
-pub fn get_auth_middleware() -> Authentication<Routes> {
-    Authentication::with_identity(ROUTES)
-}
+//pub fn get_auth_middleware() -> Authentication<Routes> {
+//    Authentication::with_identity(ROUTES)
+//}
 
 impl GetLoginRoute for Routes {
     fn get_login_route(&self, src: Option<&str>) -> String {

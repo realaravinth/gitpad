@@ -14,6 +14,8 @@
 //! - [errors](crate::auth): error data structures used in this crate
 //! - [ops](crate::ops): meta operations like connection pool creation, migrations and getting
 //! connection from pool
+use std::str::FromStr;
+
 use serde::{Deserialize, Serialize};
 
 pub mod errors;
@@ -90,9 +92,13 @@ impl GistVisibility {
             GistVisibility::Public => "public",
         }
     }
+}
+
+impl FromStr for GistVisibility {
+    type Err = DBError;
 
     /// Convert [str] to [GistVisibility]
-    pub fn from_str(s: &str) -> DBResult<Self> {
+    fn from_str(s: &str) -> DBResult<Self> {
         const PRIVATE: &str = GistVisibility::Private.to_str();
         const PUBLIC: &str = GistVisibility::Public.to_str();
         const UNLISTED: &str = GistVisibility::Unlisted.to_str();
@@ -366,7 +372,7 @@ impl GistDatabase for Box<dyn GistDatabase> {
 /// Trait to clone GistDatabase
 pub trait CloneGistDatabase {
     /// clone DB
-    fn clone_db<'a>(&self) -> Box<dyn GistDatabase>;
+    fn clone_db(&self) -> Box<dyn GistDatabase>;
 }
 
 impl<T> CloneGistDatabase for T

@@ -47,7 +47,7 @@ impl Data {
     #[cfg(not(tarpaulin_include))]
     /// create new instance of app data
     pub fn new(settings: Option<Settings>) -> Arc<Self> {
-        let settings = settings.unwrap_or(Settings::new().unwrap());
+        let settings = settings.unwrap_or_else(|| Settings::new().unwrap());
         let creds = Self::get_creds();
         let c = creds.clone();
 

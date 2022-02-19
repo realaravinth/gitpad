@@ -38,7 +38,7 @@ impl CreateGistRequest {
     pub fn to_create_gist<'a>(&'a self, owner: &'a str) -> CreateGist<'a> {
         CreateGist {
             owner,
-            description: self.description.as_ref().map(|s| s.as_str()),
+            description: self.description.as_deref(),
             visibility: &self.visibility,
         }
     }
@@ -48,6 +48,12 @@ pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(new);
     cfg.service(get_file);
     cfg.service(post_comment);
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateGistResp {
+    /// public ID
+    pub id: String,
 }
 
 #[my_codegen::post(
@@ -70,9 +76,8 @@ async fn new(
         &payload.files,
     )
     .await?;
-    Ok(HttpResponse::TemporaryRedirect()
-        .insert_header((http::header::LOCATION, gist.id))
-        .finish())
+    let resp = CreateGistResp { id: gist.id };
+    Ok(HttpResponse::Ok().json(&resp))
 }
 
 #[my_codegen::get(path = "crate::V1_API_ROUTES.gist.get_file")]
@@ -212,22 +217,18 @@ mod tests {
                 .to_request(),
         )
         .await;
-        assert_eq!(create_gist_resp.status(), StatusCode::TEMPORARY_REDIRECT);
+        assert_eq!(create_gist_resp.status(), StatusCode::OK);
+        let gist_id: CreateGistResp = test::read_body_json(create_gist_resp).await;
+        let gist_id = gist_id.id;
 
-        let gist_id = create_gist_resp
-            .headers()
-            .get(http::header::LOCATION)
-            .unwrap()
-            .to_str()
-            .unwrap();
-        data.gist_created_test_helper(db, gist_id, NAME).await;
-        data.gist_files_written_helper(db, gist_id, &files).await;
+        data.gist_created_test_helper(db, &gist_id, NAME).await;
+        data.gist_files_written_helper(db, &gist_id, &files).await;
 
         // get gists
         // 1. Public gists
         let mut get_file_path = GetFilePath {
             username: NAME.into(),
-            gist: gist_id.into(),
+            gist: gist_id.clone(),
             file: "".into(),
         };
         for file in files.iter() {
@@ -280,16 +281,11 @@ mod tests {
                 .to_request(),
         )
         .await;
-        assert_eq!(create_gist_resp.status(), StatusCode::TEMPORARY_REDIRECT);
+        assert_eq!(create_gist_resp.status(), StatusCode::OK);
+        let unlisted: CreateGistResp = test::read_body_json(create_gist_resp).await;
+        let unlisted = unlisted.id;
 
-        let unlisted = create_gist_resp
-            .headers()
-            .get(http::header::LOCATION)
-            .unwrap()
-            .to_str()
-            .unwrap();
-
-        get_file_path.gist = unlisted.into();
+        get_file_path.gist = unlisted.clone();
         for file in one_file.iter() {
             // requesting user is owner
             get_file_path.file = file.filename.clone();
@@ -335,16 +331,11 @@ mod tests {
                 .to_request(),
         )
         .await;
-        assert_eq!(create_gist_resp.status(), StatusCode::TEMPORARY_REDIRECT);
+        assert_eq!(create_gist_resp.status(), StatusCode::OK);
+        let private: CreateGistResp = test::read_body_json(create_gist_resp).await;
+        let private = private.id;
 
-        let private = create_gist_resp
-            .headers()
-            .get(http::header::LOCATION)
-            .unwrap()
-            .to_str()
-            .unwrap();
-
-        get_file_path.gist = private.into();
+        get_file_path.gist = private.clone();
         for file in one_file.iter() {
             get_file_path.file = file.filename.clone();
             let path = V1_API_ROUTES.gist.get_file_route(&get_file_path);
@@ -376,14 +367,14 @@ mod tests {
         println!("testing comments");
         let mut create_comment = PostCommentPath {
             username: NAME2.into(),
-            gist: gist_id.into(),
+            gist: gist_id.clone(),
         };
 
         let mut comment = PostCommentRequest { comment: "".into() };
         println!("empty comment");
         // empty comment
         data.bad_post_req_test(
-            &db,
+            db,
             NAME,
             PASSWORD,
             V1_API_ROUTES.gist.post_comment,
@@ -398,17 +389,17 @@ mod tests {
         let post_comment_path = V1_API_ROUTES.gist.get_post_comment_route(&create_comment);
         println!("gist not found");
         data.bad_post_req_test(
-            &db,
+            db,
             NAME,
             PASSWORD,
-            V1_API_ROUTES.gist.post_comment,
+            &post_comment_path,
             &comment,
             ServiceError::GistNotFound,
         )
         .await;
 
         println!("comment OK");
-        create_comment.gist = gist_id.into();
+        create_comment.gist = gist_id;
         let post_comment_path = V1_API_ROUTES.gist.get_post_comment_route(&create_comment);
         let resp = test::call_service(
             &app,
@@ -420,7 +411,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
 
         println!("comment OK");
-        create_comment.gist = unlisted.into();
+        create_comment.gist = unlisted;
         let post_comment_path = V1_API_ROUTES.gist.get_post_comment_route(&create_comment);
         let resp = test::call_service(
             &app,
@@ -432,7 +423,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
 
         println!("comment OK");
-        create_comment.gist = private.into();
+        create_comment.gist = private.clone();
         let post_comment_path = V1_API_ROUTES.gist.get_post_comment_route(&create_comment);
         let resp = test::call_service(
             &app,
@@ -445,10 +436,10 @@ mod tests {
 
         // commenting on private gist
         println!("private gist, not OK");
-        create_comment.gist = private.into();
+        create_comment.gist = private.clone();
         let post_comment_path = V1_API_ROUTES.gist.get_post_comment_route(&create_comment);
         data.bad_post_req_test(
-            &db,
+            db,
             NAME2,
             PASSWORD,
             &post_comment_path,

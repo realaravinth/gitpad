@@ -73,6 +73,12 @@ impl From<&'_ TreeEntry<'_>> for GitFileMode {
     }
 }
 
+impl From<TreeEntry<'_>> for GitFileMode {
+    fn from(t: TreeEntry) -> Self {
+        GitFileMode::from(t.filemode() as isize)
+    }
+}
+
 pub struct Gist {
     pub id: String,
     pub repository: git2::Repository,
@@ -194,7 +200,7 @@ impl Data {
                 let escaped_filename = escape_spaces(&file.filename);
 
                 match &file.content {
-                    FileType::Dir(dir_contents) => unimplemented!(),
+                    FileType::Dir(_dir_contents) => unimplemented!(),
                     FileType::File(f) => {
                         let obj = odb.write(ObjectType::Blob, f.as_bytes()).unwrap();
                         tree_builder
@@ -260,8 +266,6 @@ impl Data {
             let head = repo.head().unwrap();
             let tree = head.peel_to_tree().unwrap();
             let entry = tree.get_path(Path::new(path)).unwrap();
-            GitFileMode::Regular as i32;
-
             fn read_file(id: Oid, repo: &git2::Repository) -> FileType {
                 let blob = repo.find_blob(id).unwrap();
                 FileType::File(ContentType::from_blob(&blob))
@@ -271,8 +275,9 @@ impl Data {
                 let tree = repo.find_tree(id).unwrap();
                 let mut items = Vec::with_capacity(tree.len());
                 for item in tree.iter() {
-                    println!("{:?}", &item.name());
+                    println!("{:?}", item.name());
                     if let Some(name) = item.name() {
+                        #[allow(clippy::needless_borrow)]
                         let mode: GitFileMode = (&item).into();
                         let file = match mode {
                             GitFileMode::Dir => read_dir(item.id(), repo),
@@ -292,7 +297,7 @@ impl Data {
                 }
                 FileType::Dir(items)
             }
-            let mode: GitFileMode = (&entry).into();
+            let mode: GitFileMode = entry.clone().into();
             if let Some(name) = entry.name() {
                 let file = match mode {
                     GitFileMode::Dir => read_dir(entry.id(), repo),
@@ -337,7 +342,7 @@ pub mod tests {
         ) {
             let path = self.get_repository_path(gist_id);
             assert!(path.exists());
-            assert!(db.gist_exists(&gist_id).await.unwrap());
+            assert!(db.gist_exists(gist_id).await.unwrap());
             let repo = Repository::open(&path).unwrap();
             assert!(repo.is_bare());
             assert_eq!(db.get_gist(gist_id).await.unwrap().owner, owner);
@@ -351,7 +356,7 @@ pub mod tests {
         ) {
             for file in files.iter() {
                 let content = self
-                    .read_file(db, GistID::ID(&gist_id), &escape_spaces(&file.filename))
+                    .read_file(db, GistID::ID(gist_id), &escape_spaces(&file.filename))
                     .await
                     .unwrap();
                 let req_escaped_file = FileInfo {

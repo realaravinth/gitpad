@@ -88,13 +88,13 @@ pub async fn gists_work<T: GistDatabase>(
     db.username_register(&register_payload).await.unwrap();
 
     let create_gist = CreateGist {
-        owner: username.into(),
+        owner: username,
         description: Some("foo"),
         public_id,
         visibility: &GistVisibility::Public,
     };
 
-    assert!(!db.gist_exists(&create_gist.public_id).await.unwrap());
+    assert!(!db.gist_exists(create_gist.public_id).await.unwrap());
     // create gist
     assert!(db.get_user_gists(username).await.unwrap().is_empty());
 
@@ -104,9 +104,9 @@ pub async fn gists_work<T: GistDatabase>(
         Some(DBError::GistIDTaken)
     ));
 
-    assert!(db.gist_exists(&create_gist.public_id).await.unwrap());
+    assert!(db.gist_exists(create_gist.public_id).await.unwrap());
     // get gist
-    let db_gist = db.get_gist(&create_gist.public_id).await.unwrap();
+    let db_gist = db.get_gist(create_gist.public_id).await.unwrap();
     assert_gists(&create_gist, &db_gist);
 
     let mut gists = db.get_user_gists(username).await.unwrap();
@@ -116,14 +116,14 @@ pub async fn gists_work<T: GistDatabase>(
 
     // comment on gist
     let create_comment = CreateGistComment {
-        owner: username.into(),
+        owner: username,
         gist_public_id: create_gist.public_id,
-        comment: "foo".into(),
+        comment: "foo",
     };
     db.new_comment(&create_comment).await.unwrap();
     // get all comments on gist
     let mut comments = db
-        .get_comments_on_gist(&create_gist.public_id)
+        .get_comments_on_gist(create_gist.public_id)
         .await
         .unwrap();
     assert!(comments.len() == 1);
@@ -144,14 +144,14 @@ pub async fn gists_work<T: GistDatabase>(
 
     // visibility filters
     let create_unlisted_gist = CreateGist {
-        owner: username.into(),
+        owner: username,
         description: Some("foo"),
         public_id: &format!("{}unlisted", public_id),
         visibility: &GistVisibility::Unlisted,
     };
     db.new_gist(&create_unlisted_gist).await.unwrap();
     let create_private_gist = CreateGist {
-        owner: username.into(),
+        owner: username,
         description: Some("foo"),
         public_id: &format!("{}private", public_id),
         visibility: &GistVisibility::Private,
@@ -186,15 +186,15 @@ pub async fn gists_work<T: GistDatabase>(
     }
 
     //  delete gist
-    db.delete_gist(username, &create_gist.public_id)
+    db.delete_gist(username, create_gist.public_id)
         .await
         .unwrap();
     assert!(matches!(
-        db.get_gist(&create_gist.public_id).await.err().unwrap(),
+        db.get_gist(create_gist.public_id).await.err().unwrap(),
         DBError::GistNotFound
     ));
     assert!(db
-        .get_comments_on_gist(&create_gist.public_id)
+        .get_comments_on_gist(create_gist.public_id)
         .await
         .unwrap()
         .is_empty());
@@ -269,7 +269,7 @@ pub async fn duplicate_secret_guard_works<T: GistDatabase>(
 }
 
 /// check if duplicate username and duplicate email guards are working on update workflows
-
+#[allow(clippy::too_many_arguments)]
 pub async fn duplicate_username_and_email<T: GistDatabase>(
     db: &T,
     username: &str,
