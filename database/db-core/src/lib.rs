@@ -268,8 +268,8 @@ pub trait GistDatabase: std::marker::Send + std::marker::Sync + CloneGistDatabas
     /// Delete gist
     async fn delete_gist(&self, owner: &str, public_id: &str) -> DBResult<()>;
 
-    /// Create new comment
-    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<()>;
+    /// Create new comment, returns database ID of the newly created comment
+    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<i64>;
     /// Get comments on a gist
     async fn get_comments_on_gist(&self, public_id: &str) -> DBResult<Vec<GistComment>>;
     /// Get a specific comment using its database assigned ID
@@ -364,7 +364,7 @@ impl GistDatabase for Box<dyn GistDatabase> {
         (**self).delete_gist(owner, public_id).await
     }
 
-    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<()> {
+    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<i64> {
         (**self).new_comment(comment).await
     }
 

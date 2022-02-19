@@ -468,7 +468,7 @@ impl GistDatabase for Database {
     }
 
     /// Create new comment
-    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<()> {
+    async fn new_comment(&self, comment: &CreateGistComment) -> DBResult<i64> {
         let now = now_unix_time_stamp();
         sqlx::query!(
             "INSERT INTO gists_comments (owner_id, gist_id, comment, created)
@@ -486,7 +486,40 @@ impl GistDatabase for Database {
         .execute(&self.pool)
         .await
         .map_err(map_register_err)?;
-        Ok(())
+        #[allow(non_snake_case)]
+        struct ID {
+            ID: i64,
+        }
+
+        let res = sqlx::query_as!(
+            ID,
+            "
+            SELECT
+                ID
+            FROM
+                gists_comments_view
+            WHERE
+                owner = $1
+            AND
+                gist_public_id = $2
+            AND
+                created = $3
+            AND
+                comment = $4
+            ",
+            comment.owner,
+            comment.gist_public_id,
+            now,
+            comment.comment,
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| match e {
+            Error::RowNotFound => DBError::CommentNotFound,
+            e => DBError::DBError(Box::new(e)),
+        })?;
+
+        Ok(res.ID)
     }
     /// Get comments on a gist
     async fn get_comments_on_gist(&self, public_id: &str) -> DBResult<Vec<GistComment>> {

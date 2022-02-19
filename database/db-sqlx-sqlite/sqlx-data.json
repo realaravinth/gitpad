@@ -186,6 +186,24 @@
       ]
     }
   },
+  "39fd5eb5cc62c26e62a2c6673ea70319cb0c8c31d1022a0cada3cdd5ad8438be": {
+    "query": "\n            SELECT\n                ID\n            FROM\n                gists_comments_view\n            WHERE\n                owner = $1\n            AND\n                gist_public_id = $2\n            AND\n                created = $3\n            AND\n                comment = $4\n            ",
+    "describe": {
+      "columns": [
+        {
+          "name": "ID",
+          "ordinal": 0,
+          "type_info": "Int64"
+        }
+      ],
+      "parameters": {
+        "Right": 4
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "405772009a7aee0194b6b25c42955c2674c3ff92b812d7f15c4075d243879c60": {
     "query": "SELECT password  FROM gists_users WHERE username = ($1)",
     "describe": {

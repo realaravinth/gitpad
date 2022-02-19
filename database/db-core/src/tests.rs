@@ -136,7 +136,7 @@ pub async fn gists_work<T: GistDatabase>(
         gist_public_id: create_gist.public_id,
         comment: "foo",
     };
-    db.new_comment(&create_comment).await.unwrap();
+    let comment_id = db.new_comment(&create_comment).await.unwrap();
     // get all comments on gist
     let mut comments = db
         .get_comments_on_gist(create_gist.public_id)
@@ -149,6 +149,8 @@ pub async fn gists_work<T: GistDatabase>(
     // get all comments by ID
     let comment = db.get_comment_by_id(comment.id).await.unwrap();
     assert_comments(&create_comment, &comment);
+    let comment_from_id = db.get_comment_by_id(comment_id).await.unwrap();
+    assert_comments(&create_comment, &comment_from_id);
 
     // delete comment
     db.delete_comment(username, comment.id).await.unwrap();

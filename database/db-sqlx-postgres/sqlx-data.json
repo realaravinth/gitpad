@@ -206,6 +206,29 @@
       "nullable": []
     }
   },
+  "564376f79920fa30c6acb660b30fa3e45e1502c91ad4dafbb46709087550f296": {
+    "query": "\n            SELECT\n                ID\n            FROM\n                gists_comments_view\n            WHERE\n                owner = $1\n            AND\n                gist_public_id = $2\n            AND\n                created = $3\n            AND\n                comment = $4;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Timestamptz",
+          "Text"
+        ]
+      },
+      "nullable": [
+        true
+      ]
+    }
+  },
   "7cc18cdd39aa42dcbb75b0b0d06b6df05ac654654b86db71be07344e3f09510d": {
     "query": "UPDATE gists_users set username = $1 WHERE username = $2",
     "describe": {
