@@ -58,16 +58,23 @@ pub struct PostCommentPath {
     pub gist: String,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct GetCommentPath {
+    pub username: String,
+    pub gist: String,
+    pub comment_id: i64,
+}
+
 /// Authentication routes
 pub struct Gist {
     /// logout route
     pub new: &'static str,
-
     /// get flie route
     pub get_file: &'static str,
-
     /// post comment on gist
     pub post_comment: &'static str,
+    /// get comment
+    pub get_comment: &'static str,
 }
 
 impl Gist {
@@ -76,10 +83,12 @@ impl Gist {
         let new = "/api/v1/gist/new";
         let get_file = "/api/v1/gist/profile/{username}/{gist}/contents/{file}";
         let post_comment = "/api/v1/gist/profile/{username}/{gist}/comments";
+        let get_comment = "/api/v1/gist/profile/{username}/{gist}/comment/{comment_id}";
         Gist {
             new,
             get_file,
             post_comment,
+            get_comment,
         }
     }
 
@@ -97,6 +106,14 @@ impl Gist {
         self.post_comment
             .replace("{username}", &components.username)
             .replace("{gist}", &components.gist)
+    }
+
+    /// get post_comment route with placeholders replaced with values provided.
+    pub fn get_get_comment_route(&self, components: &GetCommentPath) -> String {
+        self.get_comment
+            .replace("{username}", &components.username)
+            .replace("{gist}", &components.gist)
+            .replace("{comment_id}", &components.comment_id.to_string())
     }
 }
 
@@ -183,5 +200,46 @@ impl GetLoginRoute for Routes {
         } else {
             self.auth.register.to_string()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn gist_route_substitution_works() {
+        const NAME: &str = "bob";
+        const GIST: &str = "gistpublicid";
+        const FILE: &str = "README.md";
+        const COMMENT_ID: i64 = 5;
+        let get_file = format!("/api/v1/gist/profile/{NAME}/{GIST}/contents/{FILE}");
+        let post_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comments");
+        let get_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comment/{COMMENT_ID}");
+
+        let get_file_component = GetFilePath {
+            file: FILE.into(),
+            gist: GIST.into(),
+            username: NAME.into(),
+        };
+        assert_eq!(get_file, ROUTES.gist.get_file_route(&get_file_component));
+
+        let post_comment_path = PostCommentPath {
+            gist: GIST.into(),
+            username: NAME.into(),
+        };
+        assert_eq!(
+            post_comment,
+            ROUTES.gist.get_post_comment_route(&post_comment_path)
+        );
+
+        let get_comment_path = GetCommentPath {
+            gist: GIST.into(),
+            username: NAME.into(),
+            comment_id: COMMENT_ID,
+        };
+        assert_eq!(
+            get_comment,
+            ROUTES.gist.get_get_comment_route(&get_comment_path)
+        );
     }
 }
