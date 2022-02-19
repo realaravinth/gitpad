@@ -660,7 +660,6 @@
 <span id="659">659</span>
 <span id="660">660</span>
 <span id="661">661</span>
-<span id="662">662</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -1181,7 +1180,6 @@
             <span class="ident">Error::RowNotFound</span> =&gt; <span class="ident">DBError::CommentNotFound</span>,
             <span class="ident">e</span> =&gt; <span class="ident">DBError::DBError</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)),
         })<span class="question-mark">?</span>;
-
 
         <span class="prelude-val">Ok</span>(<span class="ident">res</span>.<span class="ident">ID</span>)
     }
