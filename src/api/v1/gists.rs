@@ -20,7 +20,7 @@ use actix_web::*;
 use db_core::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use super::routes::{GetFilePath, PostCommentPath};
+use super::routes::{GetCommentPath, GetFilePath, PostCommentPath};
 use crate::data::api::v1::gists::{CreateGist, FileInfo, GistID};
 use crate::errors::*;
 use crate::utils::escape_spaces;
@@ -48,6 +48,7 @@ pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(new);
     cfg.service(get_file);
     cfg.service(post_comment);
+    cfg.service(get_comment);
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -160,11 +161,37 @@ async fn post_comment(
     Ok(HttpResponse::Ok().json(resp))
 }
 
+#[my_codegen::get(path = "crate::V1_API_ROUTES.gist.get_comment")]
+async fn get_comment(
+    path: web::Path<GetCommentPath>,
+    id: Identity,
+    db: crate::DB,
+) -> ServiceResult<impl Responder> {
+    let gist = db.get_gist(&path.gist).await?;
+
+    match gist.visibility {
+        GistVisibility::Public | GistVisibility::Unlisted => {
+            let comment = db.get_comment_by_id(path.comment_id).await?;
+            Ok(HttpResponse::Ok().json(comment))
+        }
+        GistVisibility::Private => {
+            if let Some(username) = id.identity() {
+                if gist.owner == username {
+                    let comment = db.get_comment_by_id(path.comment_id).await?;
+                    return Ok(HttpResponse::Ok().json(comment));
+                }
+            };
+            Err(ServiceError::GistNotFound)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::data::api::v1::gists::{ContentType, FileType};
     use crate::tests::*;
+    use actix_web::ResponseError;
 
     use crate::utils::escape_spaces;
     #[actix_rt::test]
@@ -410,10 +437,10 @@ mod tests {
         )
         .await;
 
-        let mut comment_ids = Vec::with_capacity(2);
+        let mut comment_ids = Vec::with_capacity(3);
 
         println!("comment OK");
-        create_comment.gist = gist_id;
+        create_comment.gist = gist_id.clone();
         let post_comment_path = V1_API_ROUTES.gist.get_post_comment_route(&create_comment);
         let resp = test::call_service(
             &app,
@@ -424,10 +451,15 @@ mod tests {
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
         let comment_resp: PostCommentResp = test::read_body_json(resp).await;
-        comment_ids.push(comment_resp);
+        comment_ids.push((
+            comment_resp,
+            comment.clone(),
+            gist_id.clone(),
+            GistVisibility::Public,
+        ));
 
         println!("comment OK");
-        create_comment.gist = unlisted;
+        create_comment.gist = unlisted.clone();
         let post_comment_path = V1_API_ROUTES.gist.get_post_comment_route(&create_comment);
         let resp = test::call_service(
             &app,
@@ -438,7 +470,12 @@ mod tests {
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
         let comment_resp: PostCommentResp = test::read_body_json(resp).await;
-        comment_ids.push(comment_resp);
+        comment_ids.push((
+            comment_resp,
+            comment.clone(),
+            unlisted.clone(),
+            GistVisibility::Unlisted,
+        ));
 
         println!("comment OK");
         create_comment.gist = private.clone();
@@ -451,7 +488,13 @@ mod tests {
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
-        let _comment_resp: PostCommentResp = test::read_body_json(resp).await;
+        let comment_resp: PostCommentResp = test::read_body_json(resp).await;
+        comment_ids.push((
+            comment_resp,
+            comment.clone(),
+            private.clone(),
+            GistVisibility::Private,
+        ));
 
         // commenting on private gist
         println!("private gist, not OK");
@@ -466,5 +509,83 @@ mod tests {
             ServiceError::GistNotFound,
         )
         .await;
+
+        /*
+         * +++++++++++++++++++++++++++++++++++
+         *          GET COMMENT
+         * +++++++++++++++++++++++++++++++++++
+         */
+
+        // gist not found
+        let mut get_comment_path_component = GetCommentPath {
+            gist: "gistdoesntexist".into(),
+            username: NAME.into(),
+            comment_id: 466767,
+        };
+        let get_comment_path = V1_API_ROUTES
+            .gist
+            .get_get_comment_route(&get_comment_path_component);
+        println!("getting comment; gist doesn't exist");
+        let resp = get_request!(&app, &get_comment_path);
+        assert_eq!(resp.status(), ServiceError::GistNotFound.status_code());
+        let resp_err: ErrorToResponse = test::read_body_json(resp).await;
+        assert_eq!(resp_err.error, format!("{}", ServiceError::GistNotFound));
+
+        // private gist
+        get_comment_path_component.gist = private.clone();
+        let get_comment_path = V1_API_ROUTES
+            .gist
+            .get_get_comment_route(&get_comment_path_component);
+        println!("getting comment; private gist");
+        let resp = get_request!(&app, &get_comment_path);
+        assert_eq!(resp.status(), ServiceError::GistNotFound.status_code());
+        let resp_err: ErrorToResponse = test::read_body_json(resp).await;
+        assert_eq!(resp_err.error, format!("{}", ServiceError::GistNotFound));
+
+        // comment not found
+        get_comment_path_component.gist = gist_id.clone();
+        let get_comment_path = V1_API_ROUTES
+            .gist
+            .get_get_comment_route(&get_comment_path_component);
+        println!("getting comment; comment doesn't exist");
+        let resp = get_request!(&app, &get_comment_path);
+        assert_eq!(resp.status(), ServiceError::CommentNotFound.status_code());
+        let resp_err: ErrorToResponse = test::read_body_json(resp).await;
+        assert_eq!(resp_err.error, format!("{}", ServiceError::CommentNotFound));
+
+        for (comment_id, comment_payload, gist, visibility) in comment_ids.iter() {
+            let component = GetCommentPath {
+                gist: gist.into(),
+                username: NAME.into(),
+                comment_id: comment_id.id,
+            };
+
+            if visibility == &GistVisibility::Private {
+                println!("getting comment; private gist but user==owner");
+                let path = V1_API_ROUTES.gist.get_get_comment_route(&component);
+                let resp = get_request!(&app, &path, cookies.clone());
+                assert_eq!(resp.status(), StatusCode::OK);
+                let comment: GistComment = test::read_body_json(resp).await;
+                assert_eq!(comment.comment, comment_payload.comment);
+
+                println!("getting comment; private gist but user is unauthenticated");
+                let resp = get_request!(&app, &path);
+                assert_eq!(resp.status(), ServiceError::GistNotFound.status_code());
+                let resp_err: ErrorToResponse = test::read_body_json(resp).await;
+                assert_eq!(resp_err.error, format!("{}", ServiceError::GistNotFound));
+
+                println!("getting comment; private gist but user != owner");
+                let resp = get_request!(&app, &path, cookies2.clone());
+                assert_eq!(resp.status(), ServiceError::GistNotFound.status_code());
+                let err: ErrorToResponse = test::read_body_json(resp).await;
+                assert_eq!(err.error, format!("{}", ServiceError::GistNotFound));
+            } else {
+                let path = V1_API_ROUTES.gist.get_get_comment_route(&component);
+                let resp = get_request!(&app, &path, cookies.clone());
+                assert_eq!(resp.status(), StatusCode::OK);
+                let comment: GistComment = test::read_body_json(resp).await;
+                assert_eq!(comment.comment, comment_payload.comment);
+            }
+        }
     }
 }
