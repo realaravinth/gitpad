@@ -110,6 +110,24 @@ macro_rules! get_request {
 }
 
 #[macro_export]
+macro_rules! delete_request {
+    ($app:expr,$route:expr ) => {
+        test::call_service(&$app, test::TestRequest::delete().uri($route).to_request()).await
+    };
+
+    ($app:expr, $route:expr, $cookies:expr) => {
+        test::call_service(
+            &$app,
+            test::TestRequest::delete()
+                .uri($route)
+                .cookie($cookies)
+                .to_request(),
+        )
+        .await
+    };
+}
+
+#[macro_export]
 macro_rules! get_app {
     ("APP", $settings:expr) => {
         actix_web::App::new()
