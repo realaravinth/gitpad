@@ -230,6 +230,9 @@
 <span id="229">229</span>
 <span id="230">230</span>
 <span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -350,6 +353,9 @@
 
     <span class="attribute">#[<span class="ident">display</span>(<span class="ident">fmt</span> <span class="op">=</span> <span class="string">&quot;Comment is empty&quot;</span>)]</span>
     <span class="ident">EmptyComment</span>,
+
+    <span class="attribute">#[<span class="ident">display</span>(<span class="ident">fmt</span> <span class="op">=</span> <span class="string">&quot;Unauthorized {}&quot;</span>, <span class="ident">_0</span>)]</span>
+    <span class="ident">UnauthorizedOperation</span>(<span class="attribute">#[<span class="ident">error</span>(<span class="ident">not</span>(<span class="ident">source</span>))]</span> <span class="ident">String</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CredsError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ServiceError</span> {
@@ -431,34 +437,34 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">tarpaulin_include</span>))]</span>
     <span class="kw">fn</span> <span class="ident">status_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">StatusCode</span> {
-        <span class="kw">let</span> <span class="ident">status_code</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">ServiceError::ClosedForRegistration</span> =&gt; <span class="number">403</span>, <span class="comment">//FORBIDDEN,</span>
-            <span class="ident">ServiceError::InternalServerError</span> =&gt; <span class="number">500</span>,   <span class="comment">// INTERNAL SERVER ERROR</span>
-            <span class="ident">ServiceError::NotAnEmail</span> =&gt; <span class="number">400</span>,            <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::NotAUrl</span> =&gt; <span class="number">400</span>,               <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::NotAnId</span> =&gt; <span class="number">400</span>,               <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::URLTooLong</span> =&gt; <span class="number">400</span>,            <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::WrongPassword</span> =&gt; <span class="number">401</span>,         <span class="comment">//UNAUTHORIZED,</span>
-            <span class="ident">ServiceError::AccountNotFound</span> =&gt; <span class="number">404</span>,       <span class="comment">//NOT FOUND,</span>
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">ServiceError::ClosedForRegistration</span> =&gt; <span class="ident">StatusCode::FORBIDDEN</span>, <span class="comment">//FORBIDDEN,</span>
+            <span class="ident">ServiceError::InternalServerError</span> =&gt; <span class="ident">StatusCode::INTERNAL_SERVER_ERROR</span>, <span class="comment">// INTERNAL SERVER ERROR</span>
+            <span class="ident">ServiceError::NotAnEmail</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>,                    <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::NotAUrl</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>,                       <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::NotAnId</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>,                       <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::URLTooLong</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>,                    <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::WrongPassword</span> =&gt; <span class="ident">StatusCode::UNAUTHORIZED</span>,                <span class="comment">//UNAUTHORIZED,</span>
+            <span class="ident">ServiceError::AccountNotFound</span> =&gt; <span class="ident">StatusCode::NOT_FOUND</span>,                 <span class="comment">//NOT FOUND,</span>
 
-            <span class="ident">ServiceError::ProfainityError</span> =&gt; <span class="number">400</span>, <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::BlacklistError</span> =&gt; <span class="number">400</span>,  <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::UsernameCaseMappedError</span> =&gt; <span class="number">400</span>, <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::ProfainityError</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>, <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::BlacklistError</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>,  <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::UsernameCaseMappedError</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>, <span class="comment">//BADREQUEST,</span>
 
-            <span class="ident">ServiceError::PasswordTooShort</span> =&gt; <span class="number">400</span>, <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::PasswordTooLong</span> =&gt; <span class="number">400</span>,  <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::PasswordsDontMatch</span> =&gt; <span class="number">400</span>, <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::PasswordTooShort</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>, <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::PasswordTooLong</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>,  <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::PasswordsDontMatch</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>, <span class="comment">//BADREQUEST,</span>
 
-            <span class="ident">ServiceError::UsernameTaken</span> =&gt; <span class="number">400</span>, <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::EmailTaken</span> =&gt; <span class="number">400</span>,    <span class="comment">//BADREQUEST,</span>
-            <span class="ident">ServiceError::FSError</span>(<span class="kw">_</span>) =&gt; <span class="number">500</span>,
+            <span class="ident">ServiceError::UsernameTaken</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>, <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::EmailTaken</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>,    <span class="comment">//BADREQUEST,</span>
+            <span class="ident">ServiceError::FSError</span>(<span class="kw">_</span>) =&gt; <span class="ident">StatusCode::INTERNAL_SERVER_ERROR</span>,
 
-            <span class="ident">ServiceError::GistNotFound</span> =&gt; <span class="number">404</span>,
-            <span class="ident">ServiceError::CommentNotFound</span> =&gt; <span class="number">404</span>,
-            <span class="ident">ServiceError::EmptyComment</span> =&gt; <span class="number">400</span>,
-        };
+            <span class="ident">ServiceError::GistNotFound</span> =&gt; <span class="ident">StatusCode::NOT_FOUND</span>,
+            <span class="ident">ServiceError::CommentNotFound</span> =&gt; <span class="ident">StatusCode::NOT_FOUND</span>,
+            <span class="ident">ServiceError::EmptyComment</span> =&gt; <span class="ident">StatusCode::BAD_REQUEST</span>,
 
-        <span class="ident">StatusCode::from_u16</span>(<span class="ident">status_code</span>).<span class="ident">unwrap</span>()
+            <span class="ident">ServiceError::UnauthorizedOperation</span>(<span class="kw">_</span>) =&gt; <span class="ident">StatusCode::UNAUTHORIZED</span>,
+        }
     }
 }
 </code></pre></div>

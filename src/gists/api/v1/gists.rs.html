@@ -687,6 +687,101 @@
 <span id="686">686</span>
 <span id="687">687</span>
 <span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -739,6 +834,7 @@
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">post_comment</span>);
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">get_comment</span>);
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">get_gist_comments</span>);
+    <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">delete_comment</span>);
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
@@ -898,6 +994,33 @@
             };
             <span class="prelude-val">Err</span>(<span class="ident">ServiceError::GistNotFound</span>)
         }
+    }
+}
+
+<span class="attribute">#[<span class="ident">my_codegen::delete</span>(
+    <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;crate::V1_API_ROUTES.gist.delete_comment&quot;</span>,
+    <span class="ident">wrap</span> <span class="op">=</span> <span class="string">&quot;super::get_auth_middleware()&quot;</span>
+)]</span>
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">delete_comment</span>(
+    <span class="ident">path</span>: <span class="ident">web::Path</span><span class="op">&lt;</span><span class="ident">GetCommentPath</span><span class="op">&gt;</span>,
+    <span class="ident">id</span>: <span class="ident">Identity</span>,
+    <span class="ident">db</span>: <span class="ident"><span class="kw">crate</span>::DB</span>,
+) -&gt; <span class="ident">ServiceResult</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Responder</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">gist</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_gist</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">gist</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">comment</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_comment_by_id</span>(<span class="ident">path</span>.<span class="ident">comment_id</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">username</span> <span class="op">=</span> <span class="ident">id</span>.<span class="ident">identity</span>().<span class="ident">unwrap</span>();
+    <span class="kw">if</span> <span class="ident">username</span> <span class="op">!</span><span class="op">=</span> <span class="ident">comment</span>.<span class="ident">owner</span> {
+        <span class="kw">match</span> <span class="ident">gist</span>.<span class="ident">visibility</span> {
+            <span class="ident">GistVisibility::Public</span> <span class="op">|</span> <span class="ident">GistVisibility::Unlisted</span> =&gt; {
+                <span class="prelude-val">Err</span>(<span class="ident">ServiceError::UnauthorizedOperation</span>(
+                    <span class="string">&quot;This user is not the owner of the comment to delete it&quot;</span>.<span class="ident">into</span>(),
+                ))
+            }
+            <span class="ident">GistVisibility::Private</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ServiceError::GistNotFound</span>),
+        }
+    } <span class="kw">else</span> {
+        <span class="ident">db</span>.<span class="ident">delete_comment</span>(<span class="kw-2">&amp;</span><span class="ident">username</span>, <span class="ident">comment</span>.<span class="ident">id</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>())
     }
 }
 
@@ -1373,6 +1496,73 @@
                 );
             }
         }
+
+        <span class="comment">/*
+         * +++++++++++++++++++++++++++++++++++
+         *          DELETE COMMENT
+         * +++++++++++++++++++++++++++++++++++
+         */</span>
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">delete_comment_component</span> <span class="op">=</span> <span class="ident">GetCommentPath</span> {
+            <span class="ident">gist</span>: <span class="string">&quot;gistdoesntexist&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">username</span>: <span class="ident">NAME</span>.<span class="ident">into</span>(),
+            <span class="ident">comment_id</span>: <span class="number">34234234</span>,
+        };
+
+        <span class="macro">println!</span>(<span class="string">&quot;delete comments; unauthenticated, gist does&#39;t exist&quot;</span>);
+        <span class="kw">let</span> <span class="ident">del_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>
+            .<span class="ident">gist</span>
+            .<span class="ident">get_delete_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">delete_comment_component</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">delete_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">del_comment_path</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::FOUND</span>);
+
+        <span class="macro">println!</span>(<span class="string">&quot;delete comments; authenticated, gist does&#39;t exist&quot;</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">delete_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">del_comment_path</span>, <span class="ident">cookies</span>.<span class="ident">clone</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">ServiceError::GistNotFound</span>.<span class="ident">status_code</span>());
+        <span class="kw">let</span> <span class="ident">err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::GistNotFound</span>));
+
+        <span class="macro">println!</span>(<span class="string">&quot;delete comments; authenticated, comment doesn&#39;t exist&quot;</span>);
+        <span class="ident">delete_comment_component</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">gist_id</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">del_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>
+            .<span class="ident">gist</span>
+            .<span class="ident">get_delete_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">delete_comment_component</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">delete_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">del_comment_path</span>, <span class="ident">cookies</span>.<span class="ident">clone</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">ServiceError::CommentNotFound</span>.<span class="ident">status_code</span>());
+        <span class="kw">let</span> <span class="ident">err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::CommentNotFound</span>));
+
+        <span class="macro">println!</span>(<span class="string">&quot;delete comments; authenticated but comment_owner != user and gist is public&quot;</span>);
+        <span class="ident">delete_comment_component</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">gist_id</span>.<span class="ident">clone</span>();
+        <span class="ident">delete_comment_component</span>.<span class="ident">comment_id</span> <span class="op">=</span> <span class="ident">comment_ids</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="number">0</span>.<span class="ident">id</span>;
+        <span class="kw">let</span> <span class="ident">del_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>
+            .<span class="ident">gist</span>
+            .<span class="ident">get_delete_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">delete_comment_component</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">delete_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">del_comment_path</span>, <span class="ident">cookies2</span>.<span class="ident">clone</span>());
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">resp</span>.<span class="ident">status</span>(),
+            <span class="ident">ServiceError::UnauthorizedOperation</span>(<span class="string">&quot;&quot;</span>.<span class="ident">into</span>()).<span class="ident">status_code</span>()
+        );
+        <span class="kw">let</span> <span class="ident">err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(<span class="ident">err</span>.<span class="ident">error</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">&quot;{}&quot;</span>,
+            <span class="ident">ServiceError::UnauthorizedOperation</span>(<span class="string">&quot;&quot;</span>.<span class="ident">into</span>())
+        )));
+
+        <span class="macro">println!</span>(<span class="string">&quot;delete comments; authenticated but comment_owner != user and gist is private&quot;</span>);
+        <span class="ident">delete_comment_component</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">clone</span>();
+        <span class="ident">delete_comment_component</span>.<span class="ident">comment_id</span> <span class="op">=</span> <span class="ident">comment_ids</span>.<span class="ident">last</span>().<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="number">0</span>.<span class="ident">id</span>;
+        <span class="kw">let</span> <span class="ident">del_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>
+            .<span class="ident">gist</span>
+            .<span class="ident">get_delete_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">delete_comment_component</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">delete_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">del_comment_path</span>, <span class="ident">cookies2</span>.<span class="ident">clone</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">ServiceError::GistNotFound</span>.<span class="ident">status_code</span>());
+        <span class="kw">let</span> <span class="ident">err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::GistNotFound</span>));
+
+        <span class="macro">println!</span>(<span class="string">&quot;delete comments; authenticated  comment_owner == owner&quot;</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">delete_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">del_comment_path</span>, <span class="ident">cookies</span>.<span class="ident">clone</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
     }
 }
 </code></pre></div>
