@@ -203,7 +203,7 @@
 * along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
 */</span>
 <span class="doccomment">//! V1 API Routes</span>
-<span class="kw">use</span> <span class="ident">actix_auth_middleware</span>::{<span class="ident">Authentication</span>, <span class="ident">GetLoginRoute</span>};
+<span class="kw">use</span> <span class="ident">actix_auth_middleware::GetLoginRoute</span>;
 <span class="kw">use</span> <span class="ident">serde</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::meta::routes::Meta</span>;
@@ -356,9 +356,9 @@
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_auth_middleware</span>() -&gt; <span class="ident">Authentication</span><span class="op">&lt;</span><span class="ident">Routes</span><span class="op">&gt;</span> {
-    <span class="ident">Authentication::with_identity</span>(<span class="ident">ROUTES</span>)
-}
+<span class="comment">//pub fn get_auth_middleware() -&gt; Authentication&lt;Routes&gt; {</span>
+<span class="comment">//    Authentication::with_identity(ROUTES)</span>
+<span class="comment">//}</span>
 
 <span class="kw">impl</span> <span class="ident">GetLoginRoute</span> <span class="kw">for</span> <span class="ident">Routes</span> {
     <span class="kw">fn</span> <span class="ident">get_login_route</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">src</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>) -&gt; <span class="ident">String</span> {

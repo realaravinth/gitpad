@@ -450,15 +450,6 @@
 <span id="449">449</span>
 <span id="450">450</span>
 <span id="451">451</span>
-<span id="452">452</span>
-<span id="453">453</span>
-<span id="454">454</span>
-<span id="455">455</span>
-<span id="456">456</span>
-<span id="457">457</span>
-<span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -499,7 +490,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_create_gist</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">owner</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="ident">CreateGist</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">CreateGist</span> {
             <span class="ident">owner</span>,
-            <span class="ident">description</span>: <span class="self">self</span>.<span class="ident">description</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">as_str</span>()),
+            <span class="ident">description</span>: <span class="self">self</span>.<span class="ident">description</span>.<span class="ident">as_deref</span>(),
             <span class="ident">visibility</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">visibility</span>,
         }
     }
@@ -509,6 +500,12 @@
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">new</span>);
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">get_file</span>);
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">post_comment</span>);
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CreateGistResp</span> {
+    <span class="doccomment">/// public ID</span>
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">String</span>,
 }
 
 <span class="attribute">#[<span class="ident">my_codegen::post</span>(
@@ -531,9 +528,8 @@
         <span class="kw-2">&amp;</span><span class="ident">payload</span>.<span class="ident">files</span>,
     )
     .<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::TemporaryRedirect</span>()
-        .<span class="ident">insert_header</span>((<span class="ident">http::header::LOCATION</span>, <span class="ident">gist</span>.<span class="ident">id</span>))
-        .<span class="ident">finish</span>())
+    <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">CreateGistResp</span> { <span class="ident">id</span>: <span class="ident">gist</span>.<span class="ident">id</span> };
+    <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>().<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">resp</span>))
 }
 
 <span class="attribute">#[<span class="ident">my_codegen::get</span>(<span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;crate::V1_API_ROUTES.gist.get_file&quot;</span>)]</span>
@@ -673,22 +669,18 @@
                 .<span class="ident">to_request</span>(),
         )
         .<span class="kw">await</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">create_gist_resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::TEMPORARY_REDIRECT</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">create_gist_resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
+        <span class="kw">let</span> <span class="ident">gist_id</span>: <span class="ident">CreateGistResp</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">create_gist_resp</span>).<span class="kw">await</span>;
+        <span class="kw">let</span> <span class="ident">gist_id</span> <span class="op">=</span> <span class="ident">gist_id</span>.<span class="ident">id</span>;
 
-        <span class="kw">let</span> <span class="ident">gist_id</span> <span class="op">=</span> <span class="ident">create_gist_resp</span>
-            .<span class="ident">headers</span>()
-            .<span class="ident">get</span>(<span class="ident">http::header::LOCATION</span>)
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">to_str</span>()
-            .<span class="ident">unwrap</span>();
-        <span class="ident">data</span>.<span class="ident">gist_created_test_helper</span>(<span class="ident">db</span>, <span class="ident">gist_id</span>, <span class="ident">NAME</span>).<span class="kw">await</span>;
-        <span class="ident">data</span>.<span class="ident">gist_files_written_helper</span>(<span class="ident">db</span>, <span class="ident">gist_id</span>, <span class="kw-2">&amp;</span><span class="ident">files</span>).<span class="kw">await</span>;
+        <span class="ident">data</span>.<span class="ident">gist_created_test_helper</span>(<span class="ident">db</span>, <span class="kw-2">&amp;</span><span class="ident">gist_id</span>, <span class="ident">NAME</span>).<span class="kw">await</span>;
+        <span class="ident">data</span>.<span class="ident">gist_files_written_helper</span>(<span class="ident">db</span>, <span class="kw-2">&amp;</span><span class="ident">gist_id</span>, <span class="kw-2">&amp;</span><span class="ident">files</span>).<span class="kw">await</span>;
 
         <span class="comment">// get gists</span>
         <span class="comment">// 1. Public gists</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">get_file_path</span> <span class="op">=</span> <span class="ident">GetFilePath</span> {
             <span class="ident">username</span>: <span class="ident">NAME</span>.<span class="ident">into</span>(),
-            <span class="ident">gist</span>: <span class="ident">gist_id</span>.<span class="ident">into</span>(),
+            <span class="ident">gist</span>: <span class="ident">gist_id</span>.<span class="ident">clone</span>(),
             <span class="ident">file</span>: <span class="string">&quot;&quot;</span>.<span class="ident">into</span>(),
         };
         <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">files</span>.<span class="ident">iter</span>() {
@@ -741,16 +733,11 @@
                 .<span class="ident">to_request</span>(),
         )
         .<span class="kw">await</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">create_gist_resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::TEMPORARY_REDIRECT</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">create_gist_resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
+        <span class="kw">let</span> <span class="ident">unlisted</span>: <span class="ident">CreateGistResp</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">create_gist_resp</span>).<span class="kw">await</span>;
+        <span class="kw">let</span> <span class="ident">unlisted</span> <span class="op">=</span> <span class="ident">unlisted</span>.<span class="ident">id</span>;
 
-        <span class="kw">let</span> <span class="ident">unlisted</span> <span class="op">=</span> <span class="ident">create_gist_resp</span>
-            .<span class="ident">headers</span>()
-            .<span class="ident">get</span>(<span class="ident">http::header::LOCATION</span>)
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">to_str</span>()
-            .<span class="ident">unwrap</span>();
-
-        <span class="ident">get_file_path</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">unlisted</span>.<span class="ident">into</span>();
+        <span class="ident">get_file_path</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">unlisted</span>.<span class="ident">clone</span>();
         <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">one_file</span>.<span class="ident">iter</span>() {
             <span class="comment">// requesting user is owner</span>
             <span class="ident">get_file_path</span>.<span class="ident">file</span> <span class="op">=</span> <span class="ident">file</span>.<span class="ident">filename</span>.<span class="ident">clone</span>();
@@ -796,16 +783,11 @@
                 .<span class="ident">to_request</span>(),
         )
         .<span class="kw">await</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">create_gist_resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::TEMPORARY_REDIRECT</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">create_gist_resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
+        <span class="kw">let</span> <span class="ident">private</span>: <span class="ident">CreateGistResp</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">create_gist_resp</span>).<span class="kw">await</span>;
+        <span class="kw">let</span> <span class="ident">private</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">id</span>;
 
-        <span class="kw">let</span> <span class="ident">private</span> <span class="op">=</span> <span class="ident">create_gist_resp</span>
-            .<span class="ident">headers</span>()
-            .<span class="ident">get</span>(<span class="ident">http::header::LOCATION</span>)
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">to_str</span>()
-            .<span class="ident">unwrap</span>();
-
-        <span class="ident">get_file_path</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">into</span>();
+        <span class="ident">get_file_path</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">clone</span>();
         <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">one_file</span>.<span class="ident">iter</span>() {
             <span class="ident">get_file_path</span>.<span class="ident">file</span> <span class="op">=</span> <span class="ident">file</span>.<span class="ident">filename</span>.<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_file_route</span>(<span class="kw-2">&amp;</span><span class="ident">get_file_path</span>);
@@ -837,14 +819,14 @@
         <span class="macro">println!</span>(<span class="string">&quot;testing comments&quot;</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">create_comment</span> <span class="op">=</span> <span class="ident">PostCommentPath</span> {
             <span class="ident">username</span>: <span class="ident">NAME2</span>.<span class="ident">into</span>(),
-            <span class="ident">gist</span>: <span class="ident">gist_id</span>.<span class="ident">into</span>(),
+            <span class="ident">gist</span>: <span class="ident">gist_id</span>.<span class="ident">clone</span>(),
         };
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comment</span> <span class="op">=</span> <span class="ident">PostCommentRequest</span> { <span class="ident">comment</span>: <span class="string">&quot;&quot;</span>.<span class="ident">into</span>() };
         <span class="macro">println!</span>(<span class="string">&quot;empty comment&quot;</span>);
         <span class="comment">// empty comment</span>
         <span class="ident">data</span>.<span class="ident">bad_post_req_test</span>(
-            <span class="kw-2">&amp;</span><span class="ident">db</span>,
+            <span class="ident">db</span>,
             <span class="ident">NAME</span>,
             <span class="ident">PASSWORD</span>,
             <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">post_comment</span>,
@@ -859,17 +841,17 @@
         <span class="kw">let</span> <span class="ident">post_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_post_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">create_comment</span>);
         <span class="macro">println!</span>(<span class="string">&quot;gist not found&quot;</span>);
         <span class="ident">data</span>.<span class="ident">bad_post_req_test</span>(
-            <span class="kw-2">&amp;</span><span class="ident">db</span>,
+            <span class="ident">db</span>,
             <span class="ident">NAME</span>,
             <span class="ident">PASSWORD</span>,
-            <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">post_comment</span>,
+            <span class="kw-2">&amp;</span><span class="ident">post_comment_path</span>,
             <span class="kw-2">&amp;</span><span class="ident">comment</span>,
             <span class="ident">ServiceError::GistNotFound</span>,
         )
         .<span class="kw">await</span>;
 
         <span class="macro">println!</span>(<span class="string">&quot;comment OK&quot;</span>);
-        <span class="ident">create_comment</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">gist_id</span>.<span class="ident">into</span>();
+        <span class="ident">create_comment</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">gist_id</span>;
         <span class="kw">let</span> <span class="ident">post_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_post_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">create_comment</span>);
         <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">test::call_service</span>(
             <span class="kw-2">&amp;</span><span class="ident">app</span>,
@@ -881,7 +863,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
 
         <span class="macro">println!</span>(<span class="string">&quot;comment OK&quot;</span>);
-        <span class="ident">create_comment</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">unlisted</span>.<span class="ident">into</span>();
+        <span class="ident">create_comment</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">unlisted</span>;
         <span class="kw">let</span> <span class="ident">post_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_post_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">create_comment</span>);
         <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">test::call_service</span>(
             <span class="kw-2">&amp;</span><span class="ident">app</span>,
@@ -893,7 +875,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
 
         <span class="macro">println!</span>(<span class="string">&quot;comment OK&quot;</span>);
-        <span class="ident">create_comment</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">into</span>();
+        <span class="ident">create_comment</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">clone</span>();
         <span class="kw">let</span> <span class="ident">post_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_post_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">create_comment</span>);
         <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">test::call_service</span>(
             <span class="kw-2">&amp;</span><span class="ident">app</span>,
@@ -906,10 +888,10 @@
 
         <span class="comment">// commenting on private gist</span>
         <span class="macro">println!</span>(<span class="string">&quot;private gist, not OK&quot;</span>);
-        <span class="ident">create_comment</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">into</span>();
+        <span class="ident">create_comment</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">clone</span>();
         <span class="kw">let</span> <span class="ident">post_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_post_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">create_comment</span>);
         <span class="ident">data</span>.<span class="ident">bad_post_req_test</span>(
-            <span class="kw-2">&amp;</span><span class="ident">db</span>,
+            <span class="ident">db</span>,
             <span class="ident">NAME2</span>,
             <span class="ident">PASSWORD</span>,
             <span class="kw-2">&amp;</span><span class="ident">post_comment_path</span>,

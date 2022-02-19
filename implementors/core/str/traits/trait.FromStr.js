@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["db_core"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.58.1/core/str/traits/trait.FromStr.html\" title=\"trait core::str::traits::FromStr\">FromStr</a> for <a class=\"enum\" href=\"db_core/enum.GistVisibility.html\" title=\"enum db_core::GistVisibility\">GistVisibility</a>","synthetic":false,"types":["db_core::GistVisibility"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -116,7 +116,7 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">tarpaulin_include</span>))]</span>
     <span class="doccomment">/// create new instance of app data</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">settings</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Settings</span><span class="op">&gt;</span>) -&gt; <span class="ident">Arc</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">settings</span> <span class="op">=</span> <span class="ident">settings</span>.<span class="ident">unwrap_or</span>(<span class="ident">Settings::new</span>().<span class="ident">unwrap</span>());
+        <span class="kw">let</span> <span class="ident">settings</span> <span class="op">=</span> <span class="ident">settings</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Settings::new</span>().<span class="ident">unwrap</span>());
         <span class="kw">let</span> <span class="ident">creds</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_creds</span>();
         <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">creds</span>.<span class="ident">clone</span>();
 

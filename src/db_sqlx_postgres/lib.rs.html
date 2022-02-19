@@ -643,10 +643,44 @@
 <span id="642">642</span>
 <span id="643">643</span>
 <span id="644">644</span>
-</pre><pre class="rust"><code><span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+</pre><pre class="rust"><code><span class="comment">/*
+ * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
+ */</span>
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
 <span class="doccomment">//! # `libadmin` database operations implemented using sqlx postgres</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`GistDatabase`](GistDatabase) is implemented on [Database].</span>
+<span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
 
 <span class="kw">use</span> <span class="ident">db_core::dev</span>::<span class="kw-2">*</span>;
 
@@ -1009,7 +1043,7 @@
             <span class="ident">Error::RowNotFound</span> =&gt; <span class="ident">DBError::GistNotFound</span>,
             <span class="ident">e</span> =&gt; <span class="ident">DBError::DBError</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)),
         })<span class="question-mark">?</span>;
-        <span class="ident">res</span>.<span class="ident">to_gist</span>()
+        <span class="ident">res</span>.<span class="ident">into_gist</span>()
     }
 
     <span class="doccomment">/// Retrieve gists belonging to user from database</span>
@@ -1038,7 +1072,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gists</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">res</span>.<span class="ident">len</span>());
         <span class="kw">for</span> <span class="ident">r</span> <span class="kw">in</span> <span class="ident">res</span>.<span class="ident">drain</span>(..) {
-            <span class="ident">gists</span>.<span class="ident">push</span>(<span class="ident">r</span>.<span class="ident">to_gist</span>()<span class="question-mark">?</span>);
+            <span class="ident">gists</span>.<span class="ident">push</span>(<span class="ident">r</span>.<span class="ident">into_gist</span>()<span class="question-mark">?</span>);
         }
         <span class="prelude-val">Ok</span>(<span class="ident">gists</span>)
     }
@@ -1074,7 +1108,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gists</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">res</span>.<span class="ident">len</span>());
         <span class="kw">for</span> <span class="ident">r</span> <span class="kw">in</span> <span class="ident">res</span>.<span class="ident">drain</span>(..) {
-            <span class="ident">gists</span>.<span class="ident">push</span>(<span class="ident">r</span>.<span class="ident">to_gist</span>()<span class="question-mark">?</span>);
+            <span class="ident">gists</span>.<span class="ident">push</span>(<span class="ident">r</span>.<span class="ident">into_gist</span>()<span class="question-mark">?</span>);
         }
         <span class="prelude-val">Ok</span>(<span class="ident">gists</span>)
     }
@@ -1110,7 +1144,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gists</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">res</span>.<span class="ident">len</span>());
         <span class="kw">for</span> <span class="ident">r</span> <span class="kw">in</span> <span class="ident">res</span>.<span class="ident">drain</span>(..) {
-            <span class="ident">gists</span>.<span class="ident">push</span>(<span class="ident">r</span>.<span class="ident">to_gist</span>()<span class="question-mark">?</span>);
+            <span class="ident">gists</span>.<span class="ident">push</span>(<span class="ident">r</span>.<span class="ident">into_gist</span>()<span class="question-mark">?</span>);
         }
         <span class="prelude-val">Ok</span>(<span class="ident">gists</span>)
     }
@@ -1256,7 +1290,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">InnerGist</span> {
-    <span class="kw">fn</span> <span class="ident">to_gist</span>(<span class="self">self</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">Gist</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into_gist</span>(<span class="self">self</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">Gist</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">Gist</span> {
             <span class="ident">owner</span>: <span class="self">self</span>.<span class="ident">owner</span>.<span class="ident">unwrap</span>(),
             <span class="ident">description</span>: <span class="self">self</span>.<span class="ident">description</span>,
