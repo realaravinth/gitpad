@@ -71,8 +71,8 @@ async fn main() -> std::io::Result<()> {
 
     log::info!("DB type: {}", settings.database.database_type);
     let db = match settings.database.database_type {
-        settings::DBType::Sqlite => db::sqlite::get_data(None).await,
-        settings::DBType::Postgres => db::pg::get_data(None).await,
+        settings::DBType::Sqlite => db::sqlite::get_data(Some(settings.clone())).await,
+        settings::DBType::Postgres => db::pg::get_data(Some(settings.clone())).await,
     };
     let db = WebData::new(db);
 

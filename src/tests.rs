@@ -32,45 +32,33 @@ use crate::api::v1::ROUTES;
 use crate::data::api::v1::auth::{Login, Register};
 use crate::data::Data;
 pub use crate::db::BoxDB;
+use crate::db::{pg, sqlite};
 use crate::errors::*;
 use crate::settings::DBType;
 use crate::*;
-use db_core::prelude::*;
 
 pub mod sqlx_postgres {
     use super::*;
-    use db_sqlx_postgres::{ConnectionOptions, Fresh};
-    use sqlx::postgres::PgPoolOptions;
 
     pub async fn get_data() -> (BoxDB, Arc<Data>) {
         let url = env::var("POSTGRES_DATABASE_URL").unwrap();
         let mut settings = Settings::new().unwrap();
         settings.database.url = url.clone();
         settings.database.database_type = DBType::Postgres;
-        let pool_options = PgPoolOptions::new().max_connections(2);
-        let connection_options = ConnectionOptions::Fresh(Fresh { pool_options, url });
-
-        let db = Box::new(connection_options.connect().await.unwrap());
-
+        let db = pg::get_data(Some(settings.clone())).await;
         (db, Data::new(Some(settings)))
     }
 }
 
 pub mod sqlx_sqlite {
     use super::*;
-    use db_sqlx_sqlite::{ConnectionOptions, Fresh};
-    use sqlx::sqlite::SqlitePoolOptions;
 
     pub async fn get_data() -> (BoxDB, Arc<Data>) {
         let url = env::var("SQLITE_DATABASE_URL").unwrap();
         let mut settings = Settings::new().unwrap();
         settings.database.url = url.clone();
         settings.database.database_type = DBType::Sqlite;
-
-        let pool_options = SqlitePoolOptions::new().max_connections(2);
-        let connection_options = ConnectionOptions::Fresh(Fresh { pool_options, url });
-
-        let db = Box::new(connection_options.connect().await.unwrap());
+        let db = sqlite::get_data(Some(settings.clone())).await;
         (db, Data::new(Some(settings)))
     }
 }
@@ -155,7 +143,7 @@ impl Data {
         password: &str,
     ) -> (Login, ServiceResponse<EitherBody<BoxBody>>) {
         self.register_test(db, name, email, password).await;
-        self.signin_test(&db, name, password).await
+        self.signin_test(db, name, password).await
     }
 
     pub fn to_arc(&self) -> Arc<Self> {

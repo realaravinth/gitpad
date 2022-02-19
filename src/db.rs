@@ -25,9 +25,9 @@ pub mod pg {
     use db_sqlx_postgres::{ConnectionOptions, Fresh};
     use sqlx::postgres::PgPoolOptions;
 
-    pub async fn get_data(pool: Option<u32>) -> BoxDB {
-        let settings = Settings::new().unwrap();
-        let pool = pool.unwrap_or(settings.database.pool);
+    pub async fn get_data(settings: Option<Settings>) -> BoxDB {
+        let settings = settings.unwrap_or_else(|| Settings::new().unwrap());
+        let pool = settings.database.pool;
         let pool_options = PgPoolOptions::new().max_connections(pool);
         let connection_options = ConnectionOptions::Fresh(Fresh {
             pool_options,
@@ -35,9 +35,7 @@ pub mod pg {
         });
         let db = connection_options.connect().await.unwrap();
         db.migrate().await.unwrap();
-        let db = Box::new(db);
-
-        db
+        Box::new(db)
     }
 }
 
@@ -46,10 +44,10 @@ pub mod sqlite {
     use db_sqlx_sqlite::{ConnectionOptions, Fresh};
     use sqlx::sqlite::SqlitePoolOptions;
 
-    pub async fn get_data(pool: Option<u32>) -> BoxDB {
-        let settings = Settings::new().unwrap();
+    pub async fn get_data(settings: Option<Settings>) -> BoxDB {
+        let settings = settings.unwrap_or_else(|| Settings::new().unwrap());
 
-        let pool = pool.unwrap_or(settings.database.pool);
+        let pool = settings.database.pool;
         let pool_options = SqlitePoolOptions::new().max_connections(pool);
         let connection_options = ConnectionOptions::Fresh(Fresh {
             pool_options,
@@ -58,7 +56,6 @@ pub mod sqlite {
 
         let db = connection_options.connect().await.unwrap();
         db.migrate().await.unwrap();
-        let db = Box::new(db);
-        db
+        Box::new(db)
     }
 }
