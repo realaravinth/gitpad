@@ -118,6 +118,9 @@ pub enum ServiceError {
 
     #[display(fmt = "Comment is empty")]
     EmptyComment,
+
+    #[display(fmt = "Unauthorized {}", _0)]
+    UnauthorizedOperation(#[error(not(source))] String),
 }
 
 impl From<CredsError> for ServiceError {
@@ -199,33 +202,33 @@ impl ResponseError for ServiceError {
 
     #[cfg(not(tarpaulin_include))]
     fn status_code(&self) -> StatusCode {
-        let status_code = match self {
-            ServiceError::ClosedForRegistration => 403, //FORBIDDEN,
-            ServiceError::InternalServerError => 500,   // INTERNAL SERVER ERROR
-            ServiceError::NotAnEmail => 400,            //BADREQUEST,
-            ServiceError::NotAUrl => 400,               //BADREQUEST,
-            ServiceError::NotAnId => 400,               //BADREQUEST,
-            ServiceError::URLTooLong => 400,            //BADREQUEST,
-            ServiceError::WrongPassword => 401,         //UNAUTHORIZED,
-            ServiceError::AccountNotFound => 404,       //NOT FOUND,
+        match self {
+            ServiceError::ClosedForRegistration => StatusCode::FORBIDDEN, //FORBIDDEN,
+            ServiceError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR, // INTERNAL SERVER ERROR
+            ServiceError::NotAnEmail => StatusCode::BAD_REQUEST,                    //BADREQUEST,
+            ServiceError::NotAUrl => StatusCode::BAD_REQUEST,                       //BADREQUEST,
+            ServiceError::NotAnId => StatusCode::BAD_REQUEST,                       //BADREQUEST,
+            ServiceError::URLTooLong => StatusCode::BAD_REQUEST,                    //BADREQUEST,
+            ServiceError::WrongPassword => StatusCode::UNAUTHORIZED,                //UNAUTHORIZED,
+            ServiceError::AccountNotFound => StatusCode::NOT_FOUND,                 //NOT FOUND,
 
-            ServiceError::ProfainityError => 400, //BADREQUEST,
-            ServiceError::BlacklistError => 400,  //BADREQUEST,
-            ServiceError::UsernameCaseMappedError => 400, //BADREQUEST,
+            ServiceError::ProfainityError => StatusCode::BAD_REQUEST, //BADREQUEST,
+            ServiceError::BlacklistError => StatusCode::BAD_REQUEST,  //BADREQUEST,
+            ServiceError::UsernameCaseMappedError => StatusCode::BAD_REQUEST, //BADREQUEST,
 
-            ServiceError::PasswordTooShort => 400, //BADREQUEST,
-            ServiceError::PasswordTooLong => 400,  //BADREQUEST,
-            ServiceError::PasswordsDontMatch => 400, //BADREQUEST,
+            ServiceError::PasswordTooShort => StatusCode::BAD_REQUEST, //BADREQUEST,
+            ServiceError::PasswordTooLong => StatusCode::BAD_REQUEST,  //BADREQUEST,
+            ServiceError::PasswordsDontMatch => StatusCode::BAD_REQUEST, //BADREQUEST,
 
-            ServiceError::UsernameTaken => 400, //BADREQUEST,
-            ServiceError::EmailTaken => 400,    //BADREQUEST,
-            ServiceError::FSError(_) => 500,
+            ServiceError::UsernameTaken => StatusCode::BAD_REQUEST, //BADREQUEST,
+            ServiceError::EmailTaken => StatusCode::BAD_REQUEST,    //BADREQUEST,
+            ServiceError::FSError(_) => StatusCode::INTERNAL_SERVER_ERROR,
 
-            ServiceError::GistNotFound => 404,
-            ServiceError::CommentNotFound => 404,
-            ServiceError::EmptyComment => 400,
-        };
+            ServiceError::GistNotFound => StatusCode::NOT_FOUND,
+            ServiceError::CommentNotFound => StatusCode::NOT_FOUND,
+            ServiceError::EmptyComment => StatusCode::BAD_REQUEST,
 
-        StatusCode::from_u16(status_code).unwrap()
+            ServiceError::UnauthorizedOperation(_) => StatusCode::UNAUTHORIZED,
+        }
     }
 }
