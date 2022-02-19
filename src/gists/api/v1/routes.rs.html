@@ -244,6 +244,25 @@
 <span id="243">243</span>
 <span id="244">244</span>
 <span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
 </pre><pre class="rust"><code><span class="comment">/*
 * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
 *
@@ -321,6 +340,8 @@
     <span class="kw">pub</span> <span class="ident">post_comment</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
     <span class="doccomment">/// get comment</span>
     <span class="kw">pub</span> <span class="ident">get_comment</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+    <span class="doccomment">/// get gist comments</span>
+    <span class="kw">pub</span> <span class="ident">get_gist_comments</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Gist</span> {
@@ -330,11 +351,13 @@
         <span class="kw">let</span> <span class="ident">get_file</span> <span class="op">=</span> <span class="string">&quot;/api/v1/gist/profile/{username}/{gist}/contents/{file}&quot;</span>;
         <span class="kw">let</span> <span class="ident">post_comment</span> <span class="op">=</span> <span class="string">&quot;/api/v1/gist/profile/{username}/{gist}/comments&quot;</span>;
         <span class="kw">let</span> <span class="ident">get_comment</span> <span class="op">=</span> <span class="string">&quot;/api/v1/gist/profile/{username}/{gist}/comment/{comment_id}&quot;</span>;
+        <span class="kw">let</span> <span class="ident">get_gist_comments</span> <span class="op">=</span> <span class="ident">post_comment</span>;
         <span class="ident">Gist</span> {
             <span class="ident">new</span>,
             <span class="ident">get_file</span>,
             <span class="ident">post_comment</span>,
             <span class="ident">get_comment</span>,
+            <span class="ident">get_gist_comments</span>,
         }
     }
 
@@ -352,6 +375,11 @@
         <span class="self">self</span>.<span class="ident">post_comment</span>
             .<span class="ident">replace</span>(<span class="string">&quot;{username}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">username</span>)
             .<span class="ident">replace</span>(<span class="string">&quot;{gist}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">gist</span>)
+    }
+
+    <span class="doccomment">/// get post_comment route with placeholders replaced with values provided.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_gist_comments</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">components</span>: <span class="kw-2">&amp;</span><span class="ident">PostCommentPath</span>) -&gt; <span class="ident">String</span> {
+        <span class="self">self</span>.<span class="ident">get_post_comment_route</span>(<span class="ident">components</span>)
     }
 
     <span class="doccomment">/// get post_comment route with placeholders replaced with values provided.</span>
@@ -460,6 +488,7 @@
         <span class="kw">const</span> <span class="ident">COMMENT_ID</span>: <span class="ident">i64</span> <span class="op">=</span> <span class="number">5</span>;
         <span class="kw">let</span> <span class="ident">get_file</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/api/v1/gist/profile/{NAME}/{GIST}/contents/{FILE}&quot;</span>);
         <span class="kw">let</span> <span class="ident">post_comment</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/api/v1/gist/profile/{NAME}/{GIST}/comments&quot;</span>);
+        <span class="kw">let</span> <span class="ident">get_gist_comments</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/api/v1/gist/profile/{NAME}/{GIST}/comments&quot;</span>);
         <span class="kw">let</span> <span class="ident">get_comment</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/api/v1/gist/profile/{NAME}/{GIST}/comment/{COMMENT_ID}&quot;</span>);
 
         <span class="kw">let</span> <span class="ident">get_file_component</span> <span class="op">=</span> <span class="ident">GetFilePath</span> {
@@ -486,6 +515,15 @@
         <span class="macro">assert_eq!</span>(
             <span class="ident">get_comment</span>,
             <span class="ident">ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_get_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">get_comment_path</span>)
+        );
+
+        <span class="kw">let</span> <span class="ident">get_gist_comments_path</span> <span class="op">=</span> <span class="ident">PostCommentPath</span> {
+            <span class="ident">gist</span>: <span class="ident">GIST</span>.<span class="ident">into</span>(),
+            <span class="ident">username</span>: <span class="ident">NAME</span>.<span class="ident">into</span>(),
+        };
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">get_gist_comments</span>,
+            <span class="ident">ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_post_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">get_gist_comments_path</span>)
         );
     }
 }

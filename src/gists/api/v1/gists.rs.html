@@ -590,6 +590,103 @@
 <span id="589">589</span>
 <span id="590">590</span>
 <span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -641,6 +738,7 @@
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">get_file</span>);
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">post_comment</span>);
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">get_comment</span>);
+    <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">get_gist_comments</span>);
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
@@ -771,6 +869,31 @@
                 <span class="kw">if</span> <span class="ident">gist</span>.<span class="ident">owner</span> <span class="op">==</span> <span class="ident">username</span> {
                     <span class="kw">let</span> <span class="ident">comment</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_comment_by_id</span>(<span class="ident">path</span>.<span class="ident">comment_id</span>).<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>().<span class="ident">json</span>(<span class="ident">comment</span>));
+                }
+            };
+            <span class="prelude-val">Err</span>(<span class="ident">ServiceError::GistNotFound</span>)
+        }
+    }
+}
+
+<span class="attribute">#[<span class="ident">my_codegen::get</span>(<span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;crate::V1_API_ROUTES.gist.get_gist_comments&quot;</span>)]</span>
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_gist_comments</span>(
+    <span class="ident">path</span>: <span class="ident">web::Path</span><span class="op">&lt;</span><span class="ident">PostCommentPath</span><span class="op">&gt;</span>,
+    <span class="ident">id</span>: <span class="ident">Identity</span>,
+    <span class="ident">db</span>: <span class="ident"><span class="kw">crate</span>::DB</span>,
+) -&gt; <span class="ident">ServiceResult</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Responder</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">gist</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_gist</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">gist</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+    <span class="kw">match</span> <span class="ident">gist</span>.<span class="ident">visibility</span> {
+        <span class="ident">GistVisibility::Public</span> <span class="op">|</span> <span class="ident">GistVisibility::Unlisted</span> =&gt; {
+            <span class="kw">let</span> <span class="ident">comments</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_comments_on_gist</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">gist</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>().<span class="ident">json</span>(<span class="ident">comments</span>))
+        }
+        <span class="ident">GistVisibility::Private</span> =&gt; {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">username</span>) <span class="op">=</span> <span class="ident">id</span>.<span class="ident">identity</span>() {
+                <span class="kw">if</span> <span class="ident">gist</span>.<span class="ident">owner</span> <span class="op">==</span> <span class="ident">username</span> {
+                    <span class="kw">let</span> <span class="ident">comments</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_comments_on_gist</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">gist</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>().<span class="ident">json</span>(<span class="ident">comments</span>));
                 }
             };
             <span class="prelude-val">Err</span>(<span class="ident">ServiceError::GistNotFound</span>)
@@ -1177,6 +1300,77 @@
                 <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
                 <span class="kw">let</span> <span class="ident">comment</span>: <span class="ident">GistComment</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
                 <span class="macro">assert_eq!</span>(<span class="ident">comment</span>.<span class="ident">comment</span>, <span class="ident">comment_payload</span>.<span class="ident">comment</span>);
+            }
+        }
+
+        <span class="comment">/*
+         * +++++++++++++++++++++++++++++++++++
+         *          GET GIST COMMENT
+         * +++++++++++++++++++++++++++++++++++
+         */</span>
+
+        <span class="comment">// gist not found</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">get_gist_comments_component</span> <span class="op">=</span> <span class="ident">PostCommentPath</span> {
+            <span class="ident">gist</span>: <span class="string">&quot;gistdoesntexist&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">username</span>: <span class="ident">NAME</span>.<span class="ident">into</span>(),
+        };
+        <span class="kw">let</span> <span class="ident">get_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>
+            .<span class="ident">gist</span>
+            .<span class="ident">get_gist_comments</span>(<span class="kw-2">&amp;</span><span class="ident">get_gist_comments_component</span>);
+        <span class="macro">println!</span>(<span class="string">&quot;getting comments; gist doesn&#39;t exist&quot;</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">get_comment_path</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">ServiceError::GistNotFound</span>.<span class="ident">status_code</span>());
+        <span class="kw">let</span> <span class="ident">resp_err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">resp_err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::GistNotFound</span>));
+
+        <span class="comment">// private gist</span>
+        <span class="ident">get_gist_comments_component</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">get_comment_path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>
+            .<span class="ident">gist</span>
+            .<span class="ident">get_gist_comments</span>(<span class="kw-2">&amp;</span><span class="ident">get_gist_comments_component</span>);
+        <span class="macro">println!</span>(<span class="string">&quot;getting comments; private gist&quot;</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">get_comment_path</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">ServiceError::GistNotFound</span>.<span class="ident">status_code</span>());
+        <span class="kw">let</span> <span class="ident">resp_err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">resp_err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::GistNotFound</span>));
+
+        <span class="kw">for</span> (<span class="ident">_comment_id</span>, <span class="ident">comment_payload</span>, <span class="ident">gist</span>, <span class="ident">visibility</span>) <span class="kw">in</span> <span class="ident">comment_ids</span>.<span class="ident">iter</span>() {
+            <span class="kw">let</span> <span class="ident">component</span> <span class="op">=</span> <span class="ident">PostCommentPath</span> {
+                <span class="ident">gist</span>: <span class="ident">gist</span>.<span class="ident">into</span>(),
+                <span class="ident">username</span>: <span class="ident">NAME</span>.<span class="ident">into</span>(),
+            };
+
+            <span class="kw">if</span> <span class="ident">visibility</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">GistVisibility::Private</span> {
+                <span class="macro">println!</span>(<span class="string">&quot;getting comments; private gist but user==owner&quot;</span>);
+                <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_gist_comments</span>(<span class="kw-2">&amp;</span><span class="ident">component</span>);
+                <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">cookies</span>.<span class="ident">clone</span>());
+                <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comment</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GistComment</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">comment</span>.<span class="ident">pop</span>().<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">comment</span>,
+                    <span class="ident">comment_payload</span>.<span class="ident">comment</span>
+                );
+
+                <span class="macro">println!</span>(<span class="string">&quot;getting comments; private gist but user is unauthenticated&quot;</span>);
+                <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">ServiceError::GistNotFound</span>.<span class="ident">status_code</span>());
+                <span class="kw">let</span> <span class="ident">resp_err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+                <span class="macro">assert_eq!</span>(<span class="ident">resp_err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::GistNotFound</span>));
+
+                <span class="macro">println!</span>(<span class="string">&quot;getting comments; private gist but user != owner&quot;</span>);
+                <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">cookies2</span>.<span class="ident">clone</span>());
+                <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">ServiceError::GistNotFound</span>.<span class="ident">status_code</span>());
+                <span class="kw">let</span> <span class="ident">err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+                <span class="macro">assert_eq!</span>(<span class="ident">err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::GistNotFound</span>));
+            } <span class="kw">else</span> {
+                <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_gist_comments</span>(<span class="kw-2">&amp;</span><span class="ident">component</span>);
+                <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">cookies</span>.<span class="ident">clone</span>());
+                <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comment</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GistComment</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">comment</span>.<span class="ident">pop</span>().<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">comment</span>,
+                    <span class="ident">comment_payload</span>.<span class="ident">comment</span>
+                );
             }
         }
     }

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["services",""]],"struct":[["CreateGistRequest",""],["CreateGistResp",""],["PostCommentRequest",""],["PostCommentResp",""],["get_comment",""],["get_file",""],["new",""],["post_comment",""]]});
+initSidebarItems({"fn":[["services",""]],"struct":[["CreateGistRequest",""],["CreateGistResp",""],["PostCommentRequest",""],["PostCommentResp",""],["get_comment",""],["get_file",""],["get_gist_comments",""],["new",""],["post_comment",""]]});
