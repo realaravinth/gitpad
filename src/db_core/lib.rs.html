@@ -676,8 +676,8 @@
     <span class="doccomment">/// Delete gist</span>
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">delete_gist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">owner</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">public_id</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
-    <span class="doccomment">/// Create new comment</span>
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">new_comment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">comment</span>: <span class="kw-2">&amp;</span><span class="ident">CreateGistComment</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="doccomment">/// Create new comment, returns database ID of the newly created comment</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">new_comment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">comment</span>: <span class="kw-2">&amp;</span><span class="ident">CreateGistComment</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>;
     <span class="doccomment">/// Get comments on a gist</span>
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_comments_on_gist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">public_id</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GistComment</span><span class="op">&gt;</span><span class="op">&gt;</span>;
     <span class="doccomment">/// Get a specific comment using its database assigned ID</span>
@@ -772,7 +772,7 @@
         (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">delete_gist</span>(<span class="ident">owner</span>, <span class="ident">public_id</span>).<span class="kw">await</span>
     }
 
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">new_comment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">comment</span>: <span class="kw-2">&amp;</span><span class="ident">CreateGistComment</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">new_comment</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">comment</span>: <span class="kw-2">&amp;</span><span class="ident">CreateGistComment</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> {
         (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">new_comment</span>(<span class="ident">comment</span>).<span class="kw">await</span>
     }
 
