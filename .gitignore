@@ -2,3 +2,5 @@
 .env
 tarpaulin-report.html
 **/tmp/
+assets
+src/cache_buster_data.json

@@ -22,7 +22,9 @@ use actix_web::{
     error::InternalError, http::StatusCode, middleware as actix_middleware, web::Data as WebData,
     web::JsonConfig, App, HttpServer,
 };
+use lazy_static::lazy_static;
 use log::info;
+use static_assets::FileMap;
 
 mod api;
 pub mod data;
@@ -49,6 +51,10 @@ pub const PKG_HOMEPAGE: &str = env!("CARGO_PKG_HOMEPAGE");
 
 pub type AppData = WebData<Arc<data::Data>>;
 pub type DB = WebData<Box<dyn db_core::GPDatabse>>;
+
+lazy_static! {
+    pub static ref FILES: FileMap = FileMap::new();
+}
 
 #[cfg(not(tarpaulin_include))]
 #[actix_web::main]

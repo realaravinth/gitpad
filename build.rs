@@ -16,6 +16,8 @@
  */
 use std::process::Command;
 
+use cache_buster::{BusterBuilder, NoHashCategory};
+
 fn main() {
     let output = Command::new("git")
         .args(&["rev-parse", "HEAD"])
@@ -23,4 +25,32 @@ fn main() {
         .expect("error in git command, is git installed?");
     let git_hash = String::from_utf8(output.stdout).unwrap();
     println!("cargo:rustc-env=GIT_HASH={}", git_hash);
+
+    cache_bust();
+}
+
+fn cache_bust() {
+    //    until APPLICATION_WASM gets added to mime crate
+    //    PR: https://github.com/hyperium/mime/pull/138
+    //    let types = vec![
+    //        mime::IMAGE_PNG,
+    //        mime::IMAGE_SVG,
+    //        mime::IMAGE_JPEG,
+    //        mime::IMAGE_GIF,
+    //        mime::APPLICATION_JAVASCRIPT,
+    //        mime::TEXT_CSS,
+    //    ];
+
+    println!("cargo:rerun-if-changed=static/cache");
+    let no_hash = vec![NoHashCategory::FileExtentions(vec!["wasm"])];
+
+    let config = BusterBuilder::default()
+        .source("./static/cache/")
+        .result("./assets")
+        .no_hash(no_hash)
+        .follow_links(true)
+        .build()
+        .unwrap();
+
+    config.process().unwrap();
 }
