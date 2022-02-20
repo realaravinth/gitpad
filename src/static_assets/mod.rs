@@ -14,11 +14,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use actix_web::web;
+use actix_web::*;
 
-use crate::api::v1;
+pub mod filemap;
+pub mod static_files;
+
+pub use filemap::FileMap;
+pub use routes::{Assets, ASSETS};
 
 pub fn services(cfg: &mut web::ServiceConfig) {
-    v1::services(cfg);
-    crate::static_assets::services(cfg);
+    cfg.service(static_files::static_files);
+}
+
+pub mod routes {
+    use lazy_static::lazy_static;
+    use serde::*;
+
+    use super::*;
+
+    lazy_static! {
+        pub static ref ASSETS: Assets = Assets::new();
+    }
+
+    #[derive(Serialize)]
+    /// Top-level routes data structure for V1 AP1
+    pub struct Assets {
+        /// Authentication routes
+        pub css: &'static str,
+    }
+
+    impl Assets {
+        /// create new instance of Routes
+        pub fn new() -> Assets {
+            Assets {
+                css: &static_files::assets::CSS,
+            }
+        }
+    }
 }

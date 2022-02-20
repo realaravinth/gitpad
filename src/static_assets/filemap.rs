@@ -14,11 +14,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use actix_web::web;
+use cache_buster::Files;
 
-use crate::api::v1;
+pub struct FileMap {
+    pub files: Files,
+}
 
-pub fn services(cfg: &mut web::ServiceConfig) {
-    v1::services(cfg);
-    crate::static_assets::services(cfg);
+impl FileMap {
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> Self {
+        let map = include_str!("../cache_buster_data.json");
+        let files = Files::new(map);
+        Self { files }
+    }
+    pub fn get(&self, path: impl AsRef<str>) -> Option<&str> {
+        let file_path = self.files.get_full_path(path);
+        file_path.map(|file_path| &file_path[1..])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn filemap_works() {
+        let files = super::FileMap::new();
+        let css = files.get("./static/cache/css/main.css").unwrap();
+        println!("{}", css);
+        assert!(css.contains("/assets/css/main"));
+    }
 }

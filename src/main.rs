@@ -33,6 +33,7 @@ pub mod demo;
 pub mod errors;
 mod routes;
 mod settings;
+mod static_assets;
 #[cfg(test)]
 mod tests;
 mod utils;
