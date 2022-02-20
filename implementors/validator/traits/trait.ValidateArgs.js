@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["gitpad"] = [{"text":"impl&lt;'v_a&gt; ValidateArgs&lt;'v_a&gt; for <a class=\"struct\" href=\"gitpad/settings/struct.Settings.html\" title=\"struct gitpad::settings::Settings\">Settings</a>","synthetic":false,"types":["gitpad::settings::Settings"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

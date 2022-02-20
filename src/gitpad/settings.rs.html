@@ -314,6 +314,23 @@
 <span id="313">313</span>
 <span id="314">314</span>
 <span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -338,6 +355,7 @@
 <span class="kw">use</span> <span class="ident">log::warn</span>;
 <span class="kw">use</span> <span class="ident">serde::Deserialize</span>;
 <span class="kw">use</span> <span class="ident">url::Url</span>;
+<span class="kw">use</span> <span class="ident">validator::Validate</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Server</span> {
@@ -453,19 +471,32 @@
     <span class="kw">pub</span> <span class="ident">database_type</span>: <span class="ident">DBType</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Validate</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Settings</span> {
     <span class="kw">pub</span> <span class="ident">log</span>: <span class="ident">LogLevel</span>,
     <span class="kw">pub</span> <span class="ident">database</span>: <span class="ident">Database</span>,
     <span class="kw">pub</span> <span class="ident">allow_registration</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">allow_demo</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">server</span>: <span class="ident">Server</span>,
+    <span class="attribute">#[<span class="ident">validate</span>(<span class="ident">url</span>)]</span>
     <span class="kw">pub</span> <span class="ident">source_code</span>: <span class="ident">String</span>,
     <span class="kw">pub</span> <span class="ident">repository</span>: <span class="ident">Repository</span>,
+    <span class="attribute">#[<span class="ident">validate</span>(<span class="ident">email</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">admin_email</span>: <span class="ident">String</span>,
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">tarpaulin_include</span>))]</span>
 <span class="kw">impl</span> <span class="ident">Settings</span> {
+    <span class="kw">fn</span> <span class="ident">set_source_code</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">source_code</span>.<span class="ident">ends_with</span>(<span class="string">&#39;/&#39;</span>) {
+            <span class="self">self</span>.<span class="ident">source_code</span>.<span class="ident">push</span>(<span class="string">&#39;/&#39;</span>);
+        }
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">url::Url::parse</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">source_code</span>).<span class="ident">unwrap</span>();
+        <span class="ident">base</span> <span class="op">=</span> <span class="ident">base</span>.<span class="ident">join</span>(<span class="string">&quot;tree/&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="ident">base</span> <span class="op">=</span> <span class="ident">base</span>.<span class="ident">join</span>(<span class="ident"><span class="kw">crate</span>::GIT_COMMIT_HASH</span>).<span class="ident">unwrap</span>();
+        <span class="self">self</span>.<span class="ident">source_code</span> <span class="op">=</span> <span class="ident">base</span>.<span class="ident">into</span>();
+    }
+
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ConfigError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">Config::new</span>();
 
@@ -510,10 +541,13 @@
 
         <span class="ident">set_database_url</span>(<span class="kw-2">&amp;mut</span> <span class="ident">s</span>);
 
-        <span class="kw">let</span> <span class="ident">settings</span>: <span class="ident">Settings</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">settings</span>: <span class="ident">Settings</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>;
 
         <span class="ident">settings</span>.<span class="ident">log</span>.<span class="ident">set_log_level</span>();
         <span class="ident">settings</span>.<span class="ident">repository</span>.<span class="ident">create_root_dir</span>();
+        <span class="ident">settings</span>.<span class="ident">validate</span>().<span class="ident">unwrap</span>();
+        <span class="ident">settings</span>.<span class="ident">set_source_code</span>();
+        <span class="ident">settings</span>.<span class="ident">validate</span>().<span class="ident">unwrap</span>();
 
         <span class="prelude-val">Ok</span>(<span class="ident">settings</span>)
     }
