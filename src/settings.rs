@@ -22,6 +22,7 @@ use derive_more::Display;
 use log::warn;
 use serde::Deserialize;
 use url::Url;
+use validator::Validate;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Server {
@@ -137,19 +138,32 @@ pub struct Database {
     pub database_type: DBType,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Validate, Clone, Deserialize)]
 pub struct Settings {
     pub log: LogLevel,
     pub database: Database,
     pub allow_registration: bool,
     pub allow_demo: bool,
     pub server: Server,
+    #[validate(url)]
     pub source_code: String,
     pub repository: Repository,
+    #[validate(email)]
+    pub admin_email: String,
 }
 
 #[cfg(not(tarpaulin_include))]
 impl Settings {
+    fn set_source_code(&mut self) {
+        if !self.source_code.ends_with('/') {
+            self.source_code.push('/');
+        }
+        let mut base = url::Url::parse(&self.source_code).unwrap();
+        base = base.join("tree/").unwrap();
+        base = base.join(crate::GIT_COMMIT_HASH).unwrap();
+        self.source_code = base.into();
+    }
+
     pub fn new() -> Result<Self, ConfigError> {
         let mut s = Config::new();
 
@@ -194,10 +208,13 @@ impl Settings {
 
         set_database_url(&mut s);
 
-        let settings: Settings = s.try_into()?;
+        let mut settings: Settings = s.try_into()?;
 
         settings.log.set_log_level();
         settings.repository.create_root_dir();
+        settings.validate().unwrap();
+        settings.set_source_code();
+        settings.validate().unwrap();
 
         Ok(settings)
     }

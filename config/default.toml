@@ -2,6 +2,7 @@ log = "info" # possible values: "info", "warn", "trace", "error", "debug"
 source_code = "https://github.com/realaravinth/gitpad"
 allow_registration = true # allow registration on server
 allow_demo = true # allow demo on server
+admin_email = "admin@gitpad.example.com"
 
 [server]
 # The port at which you want authentication to listen to
