@@ -18,7 +18,7 @@
 use crate::prelude::*;
 
 /// test email registration implementation
-pub async fn email_register_works<T: GistDatabase>(
+pub async fn email_register_works<T: GPDatabse>(
     db: &T,
     email: &str,
     username: &str,
@@ -56,7 +56,7 @@ pub async fn email_register_works<T: GistDatabase>(
 }
 
 /// test if all visibility modes are available on database
-pub async fn visibility_works<T: GistDatabase>(db: &T) {
+pub async fn visibility_works<T: GPDatabse>(db: &T) {
     for p in [
         GistVisibility::Public,
         GistVisibility::Unlisted,
@@ -70,7 +70,7 @@ pub async fn visibility_works<T: GistDatabase>(db: &T) {
 }
 
 /// test all gist methods
-pub async fn gists_work<T: GistDatabase>(
+pub async fn gists_work<T: GPDatabse>(
     db: &T,
     username: &str,
     password: &str,
@@ -219,7 +219,7 @@ pub async fn gists_work<T: GistDatabase>(
 }
 
 /// test username registration implementation
-pub async fn username_register_works<T: GistDatabase>(
+pub async fn username_register_works<T: GPDatabse>(
     db: &T,
     username: &str,
     password: &str,
@@ -251,7 +251,7 @@ pub async fn username_register_works<T: GistDatabase>(
 }
 
 /// test duplicate secret errors
-pub async fn duplicate_secret_guard_works<T: GistDatabase>(
+pub async fn duplicate_secret_guard_works<T: GPDatabse>(
     db: &T,
     username: &str,
     password: &str,
@@ -288,7 +288,7 @@ pub async fn duplicate_secret_guard_works<T: GistDatabase>(
 
 /// check if duplicate username and duplicate email guards are working on update workflows
 #[allow(clippy::too_many_arguments)]
-pub async fn duplicate_username_and_email<T: GistDatabase>(
+pub async fn duplicate_username_and_email<T: GPDatabse>(
     db: &T,
     username: &str,
     fresh_username: &str,

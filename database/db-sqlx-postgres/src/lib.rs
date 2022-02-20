@@ -17,7 +17,7 @@
 #![deny(missing_docs)]
 //! # `libadmin` database operations implemented using sqlx postgres
 //!
-//! [`GistDatabase`](GistDatabase) is implemented on [Database].
+//! [`GPDatabse`](GPDatabse) is implemented on [Database].
 use std::str::FromStr;
 
 use db_core::dev::*;
@@ -102,7 +102,7 @@ impl Migrate for Database {
 }
 
 #[async_trait]
-impl GistDatabase for Database {
+impl GPDatabse for Database {
     async fn email_login(&self, email: &str) -> DBResult<Creds> {
         sqlx::query_as!(
             Creds,

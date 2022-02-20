@@ -16,7 +16,7 @@
  */
 use std::sync::Arc;
 
-use db_core::GistDatabase;
+use db_core::GPDatabse;
 
 use crate::api::v1::auth::{Login, Register};
 use crate::errors::*;
@@ -35,7 +35,7 @@ async fn sqlite_auth_works() {
     auth_works(data, &db).await;
 }
 
-async fn auth_works(data: Arc<Data>, db: &Box<dyn GistDatabase>) {
+async fn auth_works(data: Arc<Data>, db: &Box<dyn GPDatabse>) {
     const NAME: &str = "testuser";
     const PASSWORD: &str = "longpassword";
     const EMAIL: &str = "testuser1@a.com";

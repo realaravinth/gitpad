@@ -89,7 +89,7 @@ impl Migrate for Database {
 }
 
 #[async_trait]
-impl GistDatabase for Database {
+impl GPDatabse for Database {
     async fn email_login(&self, email: &str) -> DBResult<Creds> {
         sqlx::query_as!(
             Creds,

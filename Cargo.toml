@@ -1,12 +1,12 @@
 [package]
-name = "gists"
+name = "gitpad"
 description = "Self-Hosted GitHub Gists"
 version = "0.1.0"
 edition = "2021"
-homepage = "https://github.com/realaravinth/gists"
-repository = "https://github.com/realaravinth/gists"
-documentation = "https://github.con/realaravinth/gists"
-readme = "https://github.com/realaravinth/gists/blob/master/README.md"
+homepage = "https://github.com/realaravinth/gitpad"
+repository = "https://github.com/realaravinth/gitpad"
+documentation = "https://github.con/realaravinth/gitpad"
+readme = "https://github.com/realaravinth/gitpad/blob/master/README.md"
 license = "AGPLv3 or later version"
 authors = ["realaravinth <realaravinth@batsense.net>"]
 build = "build.rs"
@@ -48,6 +48,7 @@ url = "2.2"
 urlencoding = "2.1.0"
 validator = { version = "0.14.0", features = ["derive"] }
 num_enum = "0.5.6"
+tera = { version = "1.15.0", default-features = false}
 
 [dev-dependencies]
 actix-rt = "2"

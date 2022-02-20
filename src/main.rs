@@ -48,7 +48,7 @@ pub const PKG_DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 pub const PKG_HOMEPAGE: &str = env!("CARGO_PKG_HOMEPAGE");
 
 pub type AppData = WebData<Arc<data::Data>>;
-pub type DB = WebData<Box<dyn db_core::GistDatabase>>;
+pub type DB = WebData<Box<dyn db_core::GPDatabse>>;
 
 #[cfg(not(tarpaulin_include))]
 #[actix_web::main]

@@ -159,9 +159,9 @@ impl Settings {
             .expect("Couldn't get the number of CPUs");
 
         const CURRENT_DIR: &str = "./config/default.toml";
-        const ETC: &str = "/etc/gists/config.toml";
+        const ETC: &str = "/etc/gitpad/config.toml";
 
-        if let Ok(path) = env::var("GIST_CONFIG") {
+        if let Ok(path) = env::var("GITPAD_CONFIG") {
             s.merge(File::with_name(&path))?;
         } else if Path::new(CURRENT_DIR).exists() {
             // merging default config from file
@@ -172,7 +172,7 @@ impl Settings {
             log::warn!("configuration file not found");
         }
 
-        s.merge(Environment::with_prefix("GISTS").separator("__"))?;
+        s.merge(Environment::with_prefix("GITPAD").separator("__"))?;
 
         check_url(&s);
 

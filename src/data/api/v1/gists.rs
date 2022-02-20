@@ -50,7 +50,7 @@ pub enum GitFileMode {
     Dir = 0o40000,
     /// Deprecated represent non-executable files with the group writable bit set.  This mode was
     /// supported by the first versions of git, but it has been deprecated nowadays.  This
-    /// library(github.com/go-git/go-git uses it, not realaravinth/gists at the moment) uses them
+    /// library(github.com/go-git/go-git uses it, not realaravinth/gitpad at the moment) uses them
     /// internally, so you can read old packfiles, but will treat them as Regulars when interfacing
     /// with the outside world.  This is the standard git behaviour.
     Deprecated = 0o100664,
@@ -143,7 +143,7 @@ pub enum FileType {
 }
 
 impl Data {
-    pub async fn new_gist<T: GistDatabase>(
+    pub async fn new_gist<T: GPDatabse>(
         &self,
         db: &T,
         msg: &CreateGist<'_>,
@@ -185,7 +185,7 @@ impl Data {
         Path::new(&self.settings.repository.root).join(gist_id)
     }
 
-    pub async fn write_file<T: GistDatabase>(
+    pub async fn write_file<T: GPDatabse>(
         &self,
         _db: &T,
         gist_id: GistID<'_>,
@@ -256,7 +256,7 @@ impl Data {
     /// For example, a read request for "foo bar.md" will fail even if that file is present
     /// in the repository. However, it will succeed if the output of [escape_spaces] is
     /// used in the request.
-    pub async fn read_file<T: GistDatabase>(
+    pub async fn read_file<T: GPDatabse>(
         &self,
         _db: &T,
         gist_id: GistID<'_>,
@@ -334,7 +334,7 @@ pub mod tests {
     use crate::tests::*;
 
     impl Data {
-        pub async fn gist_created_test_helper<T: GistDatabase>(
+        pub async fn gist_created_test_helper<T: GPDatabse>(
             &self,
             db: &T,
             gist_id: &str,
@@ -348,7 +348,7 @@ pub mod tests {
             assert_eq!(db.get_gist(gist_id).await.unwrap().owner, owner);
         }
 
-        pub async fn gist_files_written_helper<T: GistDatabase>(
+        pub async fn gist_files_written_helper<T: GPDatabse>(
             &self,
             db: &T,
             gist_id: &str,

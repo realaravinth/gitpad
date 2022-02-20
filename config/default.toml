@@ -1,5 +1,5 @@
 log = "info" # possible values: "info", "warn", "trace", "error", "debug"
-source_code = "https://github.com/realaravinth/gists"
+source_code = "https://github.com/realaravinth/gitpad"
 allow_registration = true # allow registration on server
 allow_demo = true # allow demo on server
 
@@ -33,4 +33,4 @@ database_type = "postgres"
 
 
 [repository]
-root = "/tmp/gists.batsense.net"
+root = "/tmp/gitpad.batsense.net"

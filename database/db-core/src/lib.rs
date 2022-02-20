@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #![warn(missing_docs)]
-//! # `gists` database operations
+//! # `gitpad` database operations
 //!
-//! Traits and datastructures used in gists to interact with database.
+//! Traits and datastructures used in gitpad to interact with database.
 //!
-//! To use an unsupported database with gists, traits present within this crate should be
+//! To use an unsupported database with gitpad, traits present within this crate should be
 //! implemented.
 //!
 //!
@@ -220,7 +220,7 @@ pub struct UpdateUsernamePayload<'a> {
 use dev::*;
 /// foo
 #[async_trait]
-pub trait GistDatabase: std::marker::Send + std::marker::Sync + CloneGistDatabase {
+pub trait GPDatabse: std::marker::Send + std::marker::Sync + CloneGPDatabse {
     /// Update email of specified user in database
     async fn update_email(&self, payload: &UpdateEmailPayload) -> DBResult<()>;
     /// Update password of specified user in database
@@ -282,7 +282,7 @@ pub trait GistDatabase: std::marker::Send + std::marker::Sync + CloneGistDatabas
 }
 
 #[async_trait]
-impl GistDatabase for Box<dyn GistDatabase> {
+impl GPDatabse for Box<dyn GPDatabse> {
     async fn update_email(&self, payload: &UpdateEmailPayload) -> DBResult<()> {
         (**self).update_email(payload).await
     }
@@ -385,22 +385,22 @@ impl GistDatabase for Box<dyn GistDatabase> {
     }
 }
 
-/// Trait to clone GistDatabase
-pub trait CloneGistDatabase {
+/// Trait to clone GPDatabse
+pub trait CloneGPDatabse {
     /// clone DB
-    fn clone_db(&self) -> Box<dyn GistDatabase>;
+    fn clone_db(&self) -> Box<dyn GPDatabse>;
 }
 
-impl<T> CloneGistDatabase for T
+impl<T> CloneGPDatabse for T
 where
-    T: GistDatabase + Clone + 'static,
+    T: GPDatabse + Clone + 'static,
 {
-    fn clone_db(&self) -> Box<dyn GistDatabase> {
+    fn clone_db(&self) -> Box<dyn GPDatabse> {
         Box::new(self.clone())
     }
 }
 
-impl Clone for Box<dyn GistDatabase> {
+impl Clone for Box<dyn GPDatabse> {
     fn clone(&self) -> Self {
         (**self).clone_db()
     }

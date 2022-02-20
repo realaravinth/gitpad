@@ -18,11 +18,11 @@ doc: ## Prepare documentation
 	cargo doc --no-deps --workspace --all-features
 
 #docker: ## Build docker images
-#	docker build -t realaravinth/gists:master -t realaravinth/gists:latest .
+#	docker build -t realaravinth/gitpad:master -t realaravinth/gitpad:latest .
 #
 #docker-publish: docker ## Build and publish docker images
-#	docker push realaravinth/gists:master 
-#	docker push realaravinth/gists:latest
+#	docker push realaravinth/gitpad:master 
+#	docker push realaravinth/gitpad:latest
 
 lint: ## Lint codebase
 	cargo fmt -v --all -- --emit files
@@ -39,7 +39,7 @@ migrate: ## run migrations
 	cd database/migrator && cargo run
 
 sqlx-offline-data: ## prepare sqlx offline data
-	cargo sqlx prepare  --database-url=${POSTGRES_DATABASE_URL} -- --bin gists \
+	cargo sqlx prepare  --database-url=${POSTGRES_DATABASE_URL} -- --bin gitpad \
 		--all-features
 
 test: migrate ## Run tests

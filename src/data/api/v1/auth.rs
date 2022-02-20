@@ -57,7 +57,7 @@ pub struct Password {
 impl Data {
     /// Log in method. Returns `Ok(())` when user is authenticated and errors when authentication
     /// fails
-    pub async fn login<T: GistDatabase>(&self, db: &T, payload: &Login) -> ServiceResult<String> {
+    pub async fn login<T: GPDatabse>(&self, db: &T, payload: &Login) -> ServiceResult<String> {
         use argon2_creds::Config;
 
         let verify = |stored: &str, received: &str| {
@@ -80,7 +80,7 @@ impl Data {
     }
 
     /// register new user
-    pub async fn register<T: GistDatabase>(&self, db: &T, payload: &Register) -> ServiceResult<()> {
+    pub async fn register<T: GPDatabse>(&self, db: &T, payload: &Register) -> ServiceResult<()> {
         if !self.settings.allow_registration {
             return Err(ServiceError::ClosedForRegistration);
         }

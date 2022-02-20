@@ -17,7 +17,7 @@
 use crate::settings::Settings;
 use db_core::prelude::*;
 
-pub type BoxDB = Box<dyn GistDatabase>;
+pub type BoxDB = Box<dyn GPDatabse>;
 
 pub mod pg {
 

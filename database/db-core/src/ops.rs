@@ -34,7 +34,7 @@ pub trait GetConnection {
 #[async_trait]
 pub trait Connect {
     /// database specific pool-type
-    type Pool: GistDatabase;
+    type Pool: GPDatabse;
     /// database specific error-type
     /// create connection pool
     async fn connect(self) -> DBResult<Self::Pool>;
@@ -42,7 +42,7 @@ pub trait Connect {
 
 /// database migrations
 #[async_trait]
-pub trait Migrate: GistDatabase {
+pub trait Migrate: GPDatabse {
     /// database specific error-type
     /// run migrations
     async fn migrate(&self) -> DBResult<()>;

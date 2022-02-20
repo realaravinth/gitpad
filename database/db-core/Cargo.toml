@@ -2,10 +2,10 @@
 name = "db-core"
 version = "0.1.0"
 edition = "2021"
-homepage = "https://github.com/realaravinth/gists"
-repository = "https://github.com/realaravinth/gists"
-documentation = "https://github.con/realaravinth/gists"
-readme = "https://github.com/realaravinth/gists/blob/master/README.md"
+homepage = "https://github.com/realaravinth/gitpad"
+repository = "https://github.com/realaravinth/gitpad"
+documentation = "https://github.con/realaravinth/gitpad"
+readme = "https://github.com/realaravinth/gitpad/blob/master/README.md"
 license = "AGPLv3 or later version"
 authors = ["realaravinth <realaravinth@batsense.net>"]
 

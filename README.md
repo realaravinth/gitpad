@@ -1,14 +1,14 @@
 <div align="center">
-<h1> Gists </h1>
+<h1> GitPad </h1>
 <p>
 
 **Self-Hosted GitHub Gists**
 
 </p>
 
-[![Build](https://github.com/realaravinth/gists/actions/workflows/linux.yml/badge.svg)](https://github.com/realaravinth/gists/actions/workflows/linux.yml)
-[![dependency status](https://deps.rs/repo/github/realaravinth/gists/status.svg)](https://deps.rs/repo/github/realaravinth/gists)
-[![codecov](https://codecov.io/gh/realaravinth/gists/branch/master/graph/badge.svg)](https://codecov.io/gh/realaravinth/gists)
+[![Build](https://github.com/realaravinth/gitpad/actions/workflows/linux.yml/badge.svg)](https://github.com/realaravinth/gitpad/actions/workflows/linux.yml)
+[![dependency status](https://deps.rs/repo/github/realaravinth/gitpad/status.svg)](https://deps.rs/repo/github/realaravinth/gitpad)
+[![codecov](https://codecov.io/gh/realaravinth/gitpad/branch/master/graph/badge.svg)](https://codecov.io/gh/realaravinth/gitpad)
 
 </div>
 
@@ -34,4 +34,4 @@ can rival GitHub Gists.
 
 1. All configuration is done through
    [./config/default.toml](./config/default.toml)(can be moved to
-   `/etc/gists/config.toml`).
+   `/etc/gitpad/config.toml`).

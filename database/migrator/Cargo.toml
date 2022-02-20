@@ -2,6 +2,12 @@
 name = "migrator"
 version = "0.1.0"
 edition = "2021"
+homepage = "https://github.com/realaravinth/gitpad"
+repository = "https://github.com/realaravinth/gitpad"
+documentation = "https://github.con/realaravinth/gitpad"
+readme = "https://github.com/realaravinth/gitpad/blob/master/README.md"
+license = "AGPLv3 or later version"
+authors = ["realaravinth <realaravinth@batsense.net>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
