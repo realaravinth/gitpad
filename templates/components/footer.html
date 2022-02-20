@@ -1,0 +1,46 @@
+<footer>
+  <div class="footer__container">
+    <div class="footer__column">
+      <span class="license__conatiner">
+        <a class="license__link" rel="noreferrer" href="/docs" target="_blank"
+          >Docs</a
+        >
+        <span class="footer__column-divider--mobile-visible">|</span>
+        <a
+          class="license__link"
+          rel="noreferrer"
+          href="https://www.eff.org/issues/do-not-track/amp/"
+          target="_blank"
+          >No AMP</a
+        >
+      </span>
+    </div>
+    <div class="footer__column">
+      <a
+        href="/"
+        class="footer__link"
+        target="_blank"
+        rel="noopener"
+        title="RSS"
+      >
+        Home
+      </a>
+
+      <div class="footer__column-divider">|</div>
+      <a href="mailto:{{ footer.admin_email }}" class="footer__link"
+        >Contact Instance Maintainer</a
+      >
+
+      <div class="footer__column-divider">|</div>
+      <a
+        class="footer__link"
+        href="{{ footer.source_code }}"
+        target="_blank"
+        rel="noopener"
+        title="Source Code"
+      >
+        v{{ footer.version }}-{{ footer.git_hash }}
+      </a>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,23 @@
+{% extends 'base' %} 
+{% block title %}{% block title_name %} {% endblock %} | GitPad{% endblock %}
+
+{% block main %}
+<main>
+  <section class="main">
+    <div class="title">
+      <h1>GitPad</h1>
+          <p class="welcome">
+            Welcome to GitPad - A libre pastebin service! Currently implemented
+            features include:
+          <ul class="features">
+            <li>Git-powered version history</li>
+            <li>Comments on gists</li>
+          </ul>
+          </p>
+    </div>
+  </section>
+  <section class="login">
+    {% block login %} {% endblock %}
+  </section>
+</main>
+{% endblock %}

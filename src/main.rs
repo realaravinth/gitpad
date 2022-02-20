@@ -31,6 +31,7 @@ pub mod data;
 mod db;
 pub mod demo;
 pub mod errors;
+mod pages;
 mod routes;
 mod settings;
 mod static_assets;
@@ -62,6 +63,7 @@ lazy_static! {
 async fn main() -> std::io::Result<()> {
     let settings = Settings::new().unwrap();
     pretty_env_logger::init();
+    pages::init(&settings);
 
     info!(
         "{}: {}.\nFor more information, see: {}\nBuild info:\nVersion: {} commit: {}",

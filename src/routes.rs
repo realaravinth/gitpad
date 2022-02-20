@@ -20,5 +20,6 @@ use crate::api::v1;
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     v1::services(cfg);
+    crate::pages::services(cfg);
     crate::static_assets::services(cfg);
 }

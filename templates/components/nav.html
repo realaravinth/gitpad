@@ -1,0 +1,26 @@
+<nav class="nav__container">
+  <input type="checkbox" class="nav__toggle" id="nav__toggle" />
+
+  <div class="nav__header">
+    <a class="nav__logo-container" href="/">
+      <p class="nav__home-btn">GitPad</p>
+    </a>
+    <label class="nav__hamburger-menu" for="nav__toggle">
+      <span class="nav__hamburger-inner"></span>
+    </label>
+  </div>
+
+  <div class="nav__spacer"></div>
+
+  <div class="nav__link-group">
+    <div class="nav__link-container">
+      <a class="nav__link" rel="noreferrer" href="/explore">Explore</a>
+    </div>
+    <div class="nav__link-container">
+      <a class="nav__link" rel="noreferrer" href="{{ page.auth.login }}">Login</a>
+    </div>
+    <div class="nav__link-container">
+      <a class="nav__link" rel="noreferrer" href="{{ page.auth.register }}">Register</a>
+    </div>
+  </div>
+</nav>

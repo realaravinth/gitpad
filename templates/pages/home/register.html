@@ -1,0 +1,54 @@
+{% extends 'homebase' %} 
+{% block title_name %}Sign Up {% endblock %}
+{% block login %}
+<h2>Sign Up</h2>
+<form action="{{ page.auth.register }}" method="POST" class="form" accept-charset="utf-8">
+  <label class="form__label" for="username">
+    Username
+    <input
+      class="form__input"
+      name="username"
+      required
+      id="username"
+      type="text"
+    />
+  </label>
+
+  <label class="form__label" for="email">
+    Email(optional)
+    <input class="form__input" name="email" id="email" type="email" />
+  </label>
+
+  <label class="form__label" for="password">
+    password
+    <input
+      class="form__input"
+      name="password"
+      required
+      id="password"
+      type="password"
+    />
+  </label>
+
+  <label class="form__label" for="confirm_password">
+    Re-enter Password
+    <input
+      class="form__input"
+      name="confirm_password"
+      required
+      id="confirm_password"
+      type="password"
+    />
+  </label>
+
+  <div class="form__action-container">
+    <a href="/forgot-password">Forgot password?</a>
+    <button class="form__submit" type="submit">Sign Up</button>
+  </div>
+</form>
+
+<p class="form__alt-action">
+  Already have an account?
+  <a href="{{ page.auth.login }}"> Login </a>
+</p>
+{% endblock %}
