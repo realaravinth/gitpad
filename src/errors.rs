@@ -28,12 +28,14 @@ use validator::ValidationErrors;
 #[derive(Debug, Display, Error)]
 pub struct FSError(#[display(fmt = "File System Error {}", _0)] pub FSErrorInner);
 
+#[cfg(not(tarpaulin_include))]
 impl PartialEq for FSError {
     fn eq(&self, other: &Self) -> bool {
         self.0.kind() == other.0.kind()
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 impl From<FSErrorInner> for ServiceError {
     fn from(e: FSErrorInner) -> Self {
         Self::FSError(FSError(e))
@@ -153,6 +155,7 @@ impl From<ParseError> for ServiceError {
 }
 
 impl From<DBError> for ServiceError {
+    #[cfg(not(tarpaulin_include))]
     fn from(e: DBError) -> Self {
         log::error!("{:?}", e);
         println!("{:?}", e);

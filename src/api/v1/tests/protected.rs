@@ -56,17 +56,19 @@ async fn protected_routes_work(data: Arc<Data>, db: BoxDB) {
     let app = get_app!(data, db).await;
 
     for url in get_protected_urls.iter() {
-        let resp = test::call_service(&app, test::TestRequest::get().uri(url).to_request()).await;
+        //let resp = test::call_service(&app, test::TestRequest::get().uri(url).to_request()).await;
+        let resp = get_request!(&app, url);
         assert_eq!(resp.status(), StatusCode::FOUND);
 
-        let authenticated_resp = test::call_service(
-            &app,
-            test::TestRequest::get()
-                .uri(url)
-                .cookie(cookies.clone())
-                .to_request(),
-        )
-        .await;
+        //        let authenticated_resp = test::call_service(
+        //            &app,
+        //            test::TestRequest::get()
+        //                .uri(url)
+        //                .cookie(cookies.clone())
+        //                .to_request(),
+        //        )
+        //        .await;
+        let authenticated_resp = get_request!(&app, url, cookies.clone());
 
         if url == &V1_API_ROUTES.auth.logout {
             assert_eq!(authenticated_resp.status(), StatusCode::FOUND);
