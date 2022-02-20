@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["context",""],["init",""],["services",""]],"mod":[["auth",""],["routes",""]],"struct":[["Footer",""],["TEMPLATES",""]]});

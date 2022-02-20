@@ -22,6 +22,8 @@
 <span id="21">21</span>
 <span id="22">22</span>
 <span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -44,6 +46,8 @@
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">services</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;mut</span> <span class="ident">web::ServiceConfig</span>) {
     <span class="ident">v1::services</span>(<span class="ident">cfg</span>);
+    <span class="ident"><span class="kw">crate</span>::pages::services</span>(<span class="ident">cfg</span>);
+    <span class="ident"><span class="kw">crate</span>::static_assets::services</span>(<span class="ident">cfg</span>);
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="gitpad" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
