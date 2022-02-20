@@ -423,11 +423,11 @@
  * along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
  */</span>
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
-<span class="doccomment">//! # `gists` database operations</span>
+<span class="doccomment">//! # `gitpad` database operations</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Traits and datastructures used in gists to interact with database.</span>
+<span class="doccomment">//! Traits and datastructures used in gitpad to interact with database.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! To use an unsupported database with gists, traits present within this crate should be</span>
+<span class="doccomment">//! To use an unsupported database with gitpad, traits present within this crate should be</span>
 <span class="doccomment">//! implemented.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!</span>
@@ -628,7 +628,7 @@
 <span class="kw">use</span> <span class="ident">dev</span>::<span class="kw-2">*</span>;
 <span class="doccomment">/// foo</span>
 <span class="attribute">#[<span class="ident">async_trait</span>]</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">GistDatabase</span>: <span class="ident">std::marker::Send</span> <span class="op">+</span> <span class="ident">std::marker::Sync</span> <span class="op">+</span> <span class="ident">CloneGistDatabase</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">GPDatabse</span>: <span class="ident">std::marker::Send</span> <span class="op">+</span> <span class="ident">std::marker::Sync</span> <span class="op">+</span> <span class="ident">CloneGPDatabse</span> {
     <span class="doccomment">/// Update email of specified user in database</span>
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">update_email</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">UpdateEmailPayload</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
     <span class="doccomment">/// Update password of specified user in database</span>
@@ -690,7 +690,7 @@
 }
 
 <span class="attribute">#[<span class="ident">async_trait</span>]</span>
-<span class="kw">impl</span> <span class="ident">GistDatabase</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GistDatabase</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">GPDatabse</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GPDatabse</span><span class="op">&gt;</span> {
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">update_email</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">UpdateEmailPayload</span>) -&gt; <span class="ident">DBResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">update_email</span>(<span class="ident">payload</span>).<span class="kw">await</span>
     }
@@ -793,22 +793,22 @@
     }
 }
 
-<span class="doccomment">/// Trait to clone GistDatabase</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CloneGistDatabase</span> {
+<span class="doccomment">/// Trait to clone GPDatabse</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CloneGPDatabse</span> {
     <span class="doccomment">/// clone DB</span>
-    <span class="kw">fn</span> <span class="ident">clone_db</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GistDatabase</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">clone_db</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GPDatabse</span><span class="op">&gt;</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">CloneGistDatabase</span> <span class="kw">for</span> <span class="ident">T</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">CloneGPDatabse</span> <span class="kw">for</span> <span class="ident">T</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">GistDatabase</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">T</span>: <span class="ident">GPDatabse</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">fn</span> <span class="ident">clone_db</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GistDatabase</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">clone_db</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GPDatabse</span><span class="op">&gt;</span> {
         <span class="ident">Box::new</span>(<span class="self">self</span>.<span class="ident">clone</span>())
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GistDatabase</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GPDatabse</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
         (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">clone_db</span>()
     }

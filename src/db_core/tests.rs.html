@@ -349,7 +349,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// test email registration implementation</span>
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">email_register_works</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GistDatabase</span><span class="op">&gt;</span>(
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">email_register_works</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GPDatabse</span><span class="op">&gt;</span>(
     <span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
     <span class="ident">email</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
@@ -387,7 +387,7 @@
 }
 
 <span class="doccomment">/// test if all visibility modes are available on database</span>
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">visibility_works</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GistDatabase</span><span class="op">&gt;</span>(<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) {
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">visibility_works</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GPDatabse</span><span class="op">&gt;</span>(<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) {
     <span class="kw">for</span> <span class="ident">p</span> <span class="kw">in</span> [
         <span class="ident">GistVisibility::Public</span>,
         <span class="ident">GistVisibility::Unlisted</span>,
@@ -401,7 +401,7 @@
 }
 
 <span class="doccomment">/// test all gist methods</span>
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">gists_work</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GistDatabase</span><span class="op">&gt;</span>(
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">gists_work</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GPDatabse</span><span class="op">&gt;</span>(
     <span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
     <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">password</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
@@ -550,7 +550,7 @@
 }
 
 <span class="doccomment">/// test username registration implementation</span>
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">username_register_works</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GistDatabase</span><span class="op">&gt;</span>(
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">username_register_works</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GPDatabse</span><span class="op">&gt;</span>(
     <span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
     <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">password</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
@@ -582,7 +582,7 @@
 }
 
 <span class="doccomment">/// test duplicate secret errors</span>
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">duplicate_secret_guard_works</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GistDatabase</span><span class="op">&gt;</span>(
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">duplicate_secret_guard_works</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GPDatabse</span><span class="op">&gt;</span>(
     <span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
     <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">password</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
@@ -619,7 +619,7 @@
 
 <span class="doccomment">/// check if duplicate username and duplicate email guards are working on update workflows</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::too_many_arguments</span>)]</span>
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">duplicate_username_and_email</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GistDatabase</span><span class="op">&gt;</span>(
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">duplicate_username_and_email</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GPDatabse</span><span class="op">&gt;</span>(
     <span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
     <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">fresh_username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,

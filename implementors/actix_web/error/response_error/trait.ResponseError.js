@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["gists"] = [{"text":"impl ResponseError for <a class=\"enum\" href=\"gists/errors/enum.ServiceError.html\" title=\"enum gists::errors::ServiceError\">ServiceError</a>","synthetic":false,"types":["gists::errors::ServiceError"]}];
+implementors["gitpad"] = [{"text":"impl ResponseError for <a class=\"enum\" href=\"gitpad/errors/enum.ServiceError.html\" title=\"enum gitpad::errors::ServiceError\">ServiceError</a>","synthetic":false,"types":["gitpad::errors::ServiceError"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
