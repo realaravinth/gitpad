@@ -36,7 +36,7 @@ impl Auth {
     /// create new instance of Authentication route
     pub const fn new() -> Auth {
         let login = "/api/v1/signin";
-        let logout = "/logout";
+        let logout = "/api/v1/logout";
         let register = "/api/v1/signup";
         Auth {
             logout,
@@ -202,10 +202,6 @@ impl Routes {
         }
     }
 }
-
-//pub fn get_auth_middleware() -> Authentication<Routes> {
-//    Authentication::with_identity(ROUTES)
-//}
 
 impl GetLoginRoute for Routes {
     fn get_login_route(&self, src: Option<&str>) -> String {
