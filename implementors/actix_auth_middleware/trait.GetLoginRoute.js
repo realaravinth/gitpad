@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["gitpad"] = [{"text":"impl GetLoginRoute for <a class=\"struct\" href=\"gitpad/api/v1/routes/struct.Routes.html\" title=\"struct gitpad::api::v1::routes::Routes\">Routes</a>","synthetic":false,"types":["gitpad::api::v1::routes::Routes"]}];
+implementors["gitpad"] = [{"text":"impl GetLoginRoute for <a class=\"struct\" href=\"gitpad/api/v1/routes/struct.Routes.html\" title=\"struct gitpad::api::v1::routes::Routes\">Routes</a>","synthetic":false,"types":["gitpad::api::v1::routes::Routes"]},{"text":"impl GetLoginRoute for <a class=\"struct\" href=\"gitpad/pages/routes/struct.Pages.html\" title=\"struct gitpad::pages::routes::Pages\">Pages</a>","synthetic":false,"types":["gitpad::pages::routes::Pages"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

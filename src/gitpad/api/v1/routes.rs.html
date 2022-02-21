@@ -279,10 +279,6 @@
 <span id="278">278</span>
 <span id="279">279</span>
 <span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
 </pre><pre class="rust"><code><span class="comment">/*
 * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
 *
@@ -321,7 +317,7 @@
     <span class="doccomment">/// create new instance of Authentication route</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">Auth</span> {
         <span class="kw">let</span> <span class="ident">login</span> <span class="op">=</span> <span class="string">&quot;/api/v1/signin&quot;</span>;
-        <span class="kw">let</span> <span class="ident">logout</span> <span class="op">=</span> <span class="string">&quot;/logout&quot;</span>;
+        <span class="kw">let</span> <span class="ident">logout</span> <span class="op">=</span> <span class="string">&quot;/api/v1/logout&quot;</span>;
         <span class="kw">let</span> <span class="ident">register</span> <span class="op">=</span> <span class="string">&quot;/api/v1/signup&quot;</span>;
         <span class="ident">Auth</span> {
             <span class="ident">logout</span>,
@@ -487,10 +483,6 @@
         }
     }
 }
-
-<span class="comment">//pub fn get_auth_middleware() -&gt; Authentication&lt;Routes&gt; {</span>
-<span class="comment">//    Authentication::with_identity(ROUTES)</span>
-<span class="comment">//}</span>
 
 <span class="kw">impl</span> <span class="ident">GetLoginRoute</span> <span class="kw">for</span> <span class="ident">Routes</span> {
     <span class="kw">fn</span> <span class="ident">get_login_route</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">src</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>) -&gt; <span class="ident">String</span> {

@@ -149,6 +149,20 @@
 <span id="148">148</span>
 <span id="149">149</span>
 <span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -165,6 +179,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
  */</span>
+<span class="kw">use</span> <span class="ident">actix_identity::Identity</span>;
 <span class="kw">use</span> <span class="ident">actix_web</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">context</span>, <span class="ident">Footer</span>, <span class="ident">PAGES</span>, <span class="ident">TEMPLATES</span>};
@@ -189,8 +204,21 @@
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">services</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;mut</span> <span class="ident">web::ServiceConfig</span>) {
+    <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">signout</span>);
     <span class="ident">register::services</span>(<span class="ident">cfg</span>);
     <span class="ident">login::services</span>(<span class="ident">cfg</span>);
+}
+
+<span class="attribute">#[<span class="ident">my_codegen::get</span>(<span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;PAGES.auth.logout&quot;</span>, <span class="ident">wrap</span> <span class="op">=</span> <span class="string">&quot;super::get_auth_middleware()&quot;</span>)]</span>
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">signout</span>(<span class="ident">id</span>: <span class="ident">Identity</span>) -&gt; <span class="kw">impl</span> <span class="ident">Responder</span> {
+    <span class="kw">use</span> <span class="ident">actix_auth_middleware::GetLoginRoute</span>;
+
+    <span class="kw">if</span> <span class="ident">id</span>.<span class="ident">identity</span>().<span class="ident">is_some</span>() {
+        <span class="ident">id</span>.<span class="ident">forget</span>();
+    }
+    <span class="ident">HttpResponse::Found</span>()
+        .<span class="ident">append_header</span>((<span class="ident">http::header::LOCATION</span>, <span class="ident">PAGES</span>.<span class="ident">get_login_route</span>(<span class="prelude-val">None</span>)))
+        .<span class="ident">finish</span>()
 }
 
 <span class="comment">//#[post(path = &quot;PAGES.auth.login&quot;)]</span>
