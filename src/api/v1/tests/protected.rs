@@ -19,6 +19,7 @@ use actix_web::http::StatusCode;
 use actix_web::test;
 
 use crate::data::Data;
+use crate::pages::PAGES;
 use crate::*;
 
 use crate::tests::*;
@@ -47,7 +48,7 @@ async fn protected_routes_work(data: Arc<Data>, db: BoxDB) {
         "/api/v1/account/delete",
     ];
 
-    let get_protected_urls = [V1_API_ROUTES.auth.logout];
+    let get_protected_urls = [V1_API_ROUTES.auth.logout, PAGES.auth.logout];
 
     let _ = data.delete_user(db, NAME, PASSWORD).await;
 
@@ -62,7 +63,7 @@ async fn protected_routes_work(data: Arc<Data>, db: BoxDB) {
         let authenticated_resp = get_request!(&app, url, cookies.clone());
 
         println!("{url}");
-        if url == &V1_API_ROUTES.auth.logout {
+        if url == &V1_API_ROUTES.auth.logout || url == &PAGES.auth.logout {
             assert_eq!(authenticated_resp.status(), StatusCode::FOUND);
         } else {
             assert_eq!(authenticated_resp.status(), StatusCode::OK);

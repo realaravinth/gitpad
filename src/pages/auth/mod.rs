@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+use actix_identity::Identity;
 use actix_web::*;
 
 pub use super::{context, Footer, PAGES, TEMPLATES};
@@ -38,8 +39,21 @@ pub fn register_templates(t: &mut tera::Tera) {
 }
 
 pub fn services(cfg: &mut web::ServiceConfig) {
+    cfg.service(signout);
     register::services(cfg);
     login::services(cfg);
+}
+
+#[my_codegen::get(path = "PAGES.auth.logout", wrap = "super::get_auth_middleware()")]
+async fn signout(id: Identity) -> impl Responder {
+    use actix_auth_middleware::GetLoginRoute;
+
+    if id.identity().is_some() {
+        id.forget();
+    }
+    HttpResponse::Found()
+        .append_header((http::header::LOCATION, PAGES.get_login_route(None)))
+        .finish()
 }
 
 //#[post(path = "PAGES.auth.login")]
