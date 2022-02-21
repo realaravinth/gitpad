@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+use actix_auth_middleware::{Authentication, GetLoginRoute};
 use serde::*;
 
 /// constant [Pages](Pages) instance
@@ -47,13 +48,31 @@ pub struct Auth {
 impl Auth {
     /// create new instance of Authentication route
     pub const fn new() -> Auth {
-        let login = "/";
+        let login = "/login";
         let logout = "/logout";
         let register = "/join";
         Auth {
             logout,
             login,
             register,
+        }
+    }
+}
+
+pub fn get_auth_middleware() -> Authentication<Pages> {
+    Authentication::with_identity(PAGES)
+}
+
+impl GetLoginRoute for Pages {
+    fn get_login_route(&self, src: Option<&str>) -> String {
+        if let Some(redirect_to) = src {
+            format!(
+                "{}?redirect_to={}",
+                self.auth.login,
+                urlencoding::encode(redirect_to)
+            )
+        } else {
+            self.auth.register.to_string()
         }
     }
 }

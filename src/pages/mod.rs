@@ -26,6 +26,7 @@ use crate::{GIT_COMMIT_HASH, VERSION};
 pub mod auth;
 pub mod routes;
 
+pub use routes::get_auth_middleware;
 pub use routes::PAGES;
 
 lazy_static! {
