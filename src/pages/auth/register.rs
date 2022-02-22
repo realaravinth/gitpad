@@ -66,6 +66,21 @@ pub async fn get_register(data: AppData) -> impl Responder {
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(get_register);
+    cfg.service(register_submit);
+}
+
+#[my_codegen::post(path = "PAGES.auth.register")]
+pub async fn register_submit(
+    payload: web::Form<RegisterPayload>,
+    data: AppData,
+    db: crate::DB,
+) -> PageResult<impl Responder, Register> {
+    data.register(&(**db), &payload)
+        .await
+        .map_err(|e| PageError::new(Register::new(&data.settings, Some(&payload)), e))?;
+    Ok(HttpResponse::Found()
+        .insert_header((http::header::LOCATION, PAGES.auth.login))
+        .finish())
 }
 
 #[cfg(test)]

@@ -21,6 +21,8 @@ pub use super::{context, Footer, PAGES, PAYLOAD_KEY, TEMPLATES};
 
 pub mod login;
 pub mod register;
+#[cfg(test)]
+mod test;
 
 pub const HOME_BASE: &str = "homebase";
 
