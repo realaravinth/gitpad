@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["LOGIN",""]],"fn":[["services",""]],"struct":[["Login",""],["get_login",""]]});
+initSidebarItems({"constant":[["LOGIN",""]],"fn":[["services",""]],"struct":[["Login",""],["get_login",""],["login_submit",""]]});
