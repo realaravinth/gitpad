@@ -48,7 +48,7 @@ async fn protected_routes_work(data: Arc<Data>, db: BoxDB) {
         "/api/v1/account/delete",
     ];
 
-    let get_protected_urls = [V1_API_ROUTES.auth.logout, PAGES.auth.logout];
+    let get_protected_urls = [V1_API_ROUTES.auth.logout, PAGES.auth.logout, PAGES.home];
 
     let _ = data.delete_user(db, NAME, PASSWORD).await;
 

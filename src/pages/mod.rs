@@ -24,10 +24,13 @@ use crate::static_assets::ASSETS;
 use crate::{GIT_COMMIT_HASH, VERSION};
 
 pub mod auth;
+pub mod errors;
 pub mod routes;
 
 pub use routes::get_auth_middleware;
 pub use routes::PAGES;
+
+pub const PAYLOAD_KEY: &str = "payload";
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
@@ -40,6 +43,7 @@ lazy_static! {
             println!("Parsing error(s): {}", e);
             ::std::process::exit(1);
         };
+        errors::register_templates(&mut tera);
         tera.autoescape_on(vec![".html", ".sql"]);
         auth::register_templates(&mut tera);
         tera
@@ -81,6 +85,12 @@ impl<'a> Footer<'a> {
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     auth::services(cfg);
+    cfg.service(home);
+}
+
+#[my_codegen::get(path = "PAGES.home", wrap = "get_auth_middleware()")]
+pub async fn home() -> impl Responder {
+    HttpResponse::Ok()
 }
 
 #[cfg(test)]

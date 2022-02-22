@@ -18,6 +18,11 @@
 use std::convert::From;
 use std::io::Error as FSErrorInner;
 
+use actix_web::{
+    error::ResponseError,
+    http::{header, StatusCode},
+    HttpResponse, HttpResponseBuilder,
+};
 use argon2_creds::errors::CredsError;
 use db_core::errors::DBError;
 use derive_more::{Display, Error};
@@ -176,12 +181,6 @@ impl From<DBError> for ServiceError {
 /// Generic result data structure
 #[cfg(not(tarpaulin_include))]
 pub type ServiceResult<V> = std::result::Result<V, ServiceError>;
-
-use actix_web::{
-    error::ResponseError,
-    http::{header, StatusCode},
-    HttpResponse, HttpResponseBuilder,
-};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg(not(tarpaulin_include))]

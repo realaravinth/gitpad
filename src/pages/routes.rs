@@ -25,12 +25,18 @@ pub const PAGES: Pages = Pages::new();
 pub struct Pages {
     /// Authentication routes
     pub auth: Auth,
+    /// home page
+    pub home: &'static str,
 }
 
 impl Pages {
     /// create new instance of Routes
     const fn new() -> Pages {
-        Pages { auth: Auth::new() }
+        let home = "/";
+        Pages {
+            auth: Auth::new(),
+            home,
+        }
     }
 }
 
