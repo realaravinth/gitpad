@@ -14,21 +14,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-use actix_web::http::header::ContentType;
+use std::cell::RefCell;
 
+use actix_web::http::header::ContentType;
+use tera::Context;
+
+use crate::data::api::v1::auth::Login as LoginPayload;
+use crate::pages::errors::*;
 use crate::settings::Settings;
 use crate::AppData;
 
 pub use super::*;
 
-pub struct Login;
+pub struct Login {
+    ctx: RefCell<Context>,
+}
 
 pub const LOGIN: &str = "login";
 
+impl CtxError for Login {
+    fn with_error(&self, e: &ReadableError) -> String {
+        self.ctx.borrow_mut().insert(ERROR_KEY, e);
+        self.render()
+    }
+}
+
 impl Login {
+    fn new(settings: &Settings, payload: Option<LoginPayload>) -> Self {
+        let ctx = RefCell::new(context(settings));
+        if let Some(payload) = &payload {
+            ctx.borrow_mut().insert(PAYLOAD_KEY, payload);
+        }
+        Self { ctx }
+    }
+
+    pub fn render(&self) -> String {
+        TEMPLATES.render(LOGIN, &self.ctx.borrow()).unwrap()
+    }
+
     pub fn page(s: &Settings) -> String {
-        let ctx = context(s);
-        TEMPLATES.render(LOGIN, &ctx).unwrap()
+        let p = Self::new(s, None);
+        p.render()
     }
 }
 

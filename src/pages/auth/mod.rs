@@ -17,7 +17,7 @@
 use actix_identity::Identity;
 use actix_web::*;
 
-pub use super::{context, Footer, PAGES, TEMPLATES};
+pub use super::{context, Footer, PAGES, PAYLOAD_KEY, TEMPLATES};
 
 pub mod login;
 pub mod register;

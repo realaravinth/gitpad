@@ -1,10 +1,21 @@
 {% extends 'homebase' %} 
 {% block login %}
 <h2>Sign In</h2>
+{% include "error_comp" %}
 <form action="{{ page.auth.login }}" method="POST" class="form" accept-charset="utf-8">
   <label class="form__label" for="login">
     Username or Email
-    <input class="form__input" name="login" required id="login" type="text" />
+    <input 
+        class="form__input"
+        name="login"
+        required
+        id="login"
+        type="text"
+      {% if payload.username %}
+          value={{ payload.username }}
+      {% endif %}
+
+    />
   </label>
 
   <label class="form__label" for="password">
@@ -15,6 +26,9 @@
       required
       id="password"
       type="password"
+      {% if payload.password %}
+          value={{ payload.password }}
+      {% endif %}
     />
   </label>
 
