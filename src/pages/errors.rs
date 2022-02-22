@@ -52,7 +52,7 @@ pub struct ReadableError {
 }
 
 impl ReadableError {
-    fn new(e: &ServiceError) -> Self {
+    pub fn new(e: &ServiceError) -> Self {
         let reason = format!("{}", e);
         let title = format!("{}", e.status_code());
 

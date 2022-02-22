@@ -16,9 +16,11 @@
  */
 use std::cell::RefCell;
 
+use actix_identity::Identity;
 use actix_web::http::header::ContentType;
 use tera::Context;
 
+use crate::api::v1::RedirectQuery;
 use crate::data::api::v1::auth::Login as LoginPayload;
 use crate::pages::errors::*;
 use crate::settings::Settings;
@@ -40,9 +42,9 @@ impl CtxError for Login {
 }
 
 impl Login {
-    fn new(settings: &Settings, payload: Option<LoginPayload>) -> Self {
+    pub fn new(settings: &Settings, payload: Option<&LoginPayload>) -> Self {
         let ctx = RefCell::new(context(settings));
-        if let Some(payload) = &payload {
+        if let Some(payload) = payload {
             ctx.borrow_mut().insert(PAYLOAD_KEY, payload);
         }
         Self { ctx }
@@ -69,109 +71,24 @@ pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(get_login);
 }
 
-//#[post(path = "PAGES.auth.login")]
-//pub async fn login_submit(
-//    id: Identity,
-//    payload: web::Form<runners::Login>,
-//    data: AppData,
-//) -> PageResult<impl Responder> {
-//    let payload = payload.into_inner();
-//    match runners::login_runner(&payload, &data).await {
-//        Ok(username) => {
-//            id.remember(username);
-//            Ok(HttpResponse::Found()
-//                .insert_header((header::LOCATION, PAGES.home))
-//                .finish())
-//        }
-//        Err(e) => {
-//            let status = e.status_code();
-//            let heading = status.canonical_reason().unwrap_or("Error");
-//
-//            Ok(HttpResponseBuilder::new(status)
-//                .content_type("text/html; charset=utf-8")
-//                .body(
-//                    IndexPage::new(heading, &format!("{}", e))
-//                        .render_once()
-//                        .unwrap(),
-//                ))
-//        }
-//    }
-//}
-//
-//#[cfg(test)]
-//mod tests {
-//    use actix_web::test;
-//
-//    use super::*;
-//
-//    use crate::api::v1::auth::runners::{Login, Register};
-//    use crate::data::Data;
-//    use crate::tests::*;
-//    use crate::*;
-//    use actix_web::http::StatusCode;
-//
-//    #[actix_rt::test]
-//    async fn auth_form_works() {
-//        let data = Data::new().await;
-//        const NAME: &str = "testuserform";
-//        const PASSWORD: &str = "longpassword";
-//
-//        let app = get_app!(data).await;
-//
-//        delete_user(NAME, &data).await;
-//
-//        // 1. Register with email == None
-//        let msg = Register {
-//            username: NAME.into(),
-//            password: PASSWORD.into(),
-//            confirm_password: PASSWORD.into(),
-//            email: None,
-//        };
-//        let resp = test::call_service(
-//            &app,
-//            post_request!(&msg, V1_API_ROUTES.auth.register).to_request(),
-//        )
-//        .await;
-//        assert_eq!(resp.status(), StatusCode::OK);
-//
-//        // correct form login
-//        let msg = Login {
-//            login: NAME.into(),
-//            password: PASSWORD.into(),
-//        };
-//
-//        let resp = test::call_service(
-//            &app,
-//            post_request!(&msg, PAGES.auth.login, FORM).to_request(),
-//        )
-//        .await;
-//        assert_eq!(resp.status(), StatusCode::FOUND);
-//        let headers = resp.headers();
-//        assert_eq!(headers.get(header::LOCATION).unwrap(), PAGES.home,);
-//
-//        // incorrect form login
-//        let msg = Login {
-//            login: NAME.into(),
-//            password: NAME.into(),
-//        };
-//        let resp = test::call_service(
-//            &app,
-//            post_request!(&msg, PAGES.auth.login, FORM).to_request(),
-//        )
-//        .await;
-//        assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
-//
-//        // non-existent form login
-//        let msg = Login {
-//            login: PASSWORD.into(),
-//            password: PASSWORD.into(),
-//        };
-//        let resp = test::call_service(
-//            &app,
-//            post_request!(&msg, PAGES.auth.login, FORM).to_request(),
-//        )
-//        .await;
-//        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
-//    }
-//}
-//
+#[cfg(test)]
+mod tests {
+    use super::Login;
+    use super::LoginPayload;
+    use crate::errors::*;
+    use crate::pages::errors::*;
+    use crate::settings::Settings;
+
+    #[test]
+    fn register_page_renders() {
+        let settings = Settings::new().unwrap();
+        Login::page(&settings);
+        let payload = LoginPayload {
+            login: "foo".into(),
+            password: "foo".into(),
+        };
+        let page = Login::new(&settings, Some(&payload));
+        page.with_error(&ReadableError::new(&ServiceError::WrongPassword));
+        page.render();
+    }
+}
