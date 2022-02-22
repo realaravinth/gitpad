@@ -2,6 +2,7 @@
 {% block title_name %}Sign Up {% endblock %}
 {% block login %}
 <h2>Sign Up</h2>
+{% include "error_comp" %}
 <form action="{{ page.auth.register }}" method="POST" class="form" accept-charset="utf-8">
   <label class="form__label" for="username">
     Username

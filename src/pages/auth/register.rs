@@ -15,20 +15,45 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 use actix_web::http::header::ContentType;
+use std::cell::RefCell;
+use tera::Context;
 
+use crate::data::api::v1::auth::Register as RegisterPayload;
+use crate::pages::errors::*;
 use crate::settings::Settings;
 use crate::AppData;
 
 pub use super::*;
 
-pub struct Register;
-
 pub const REGISTER: &str = "register";
 
+pub struct Register {
+    ctx: RefCell<Context>,
+}
+
+impl CtxError for Register {
+    fn with_error(&self, e: &ReadableError) -> String {
+        self.ctx.borrow_mut().insert(ERROR_KEY, e);
+        self.render()
+    }
+}
+
 impl Register {
+    fn new(settings: &Settings, payload: Option<&RegisterPayload>) -> Self {
+        let ctx = RefCell::new(context(settings));
+        if let Some(payload) = payload {
+            ctx.borrow_mut().insert(PAYLOAD_KEY, payload);
+        }
+        Self { ctx }
+    }
+
+    pub fn render(&self) -> String {
+        TEMPLATES.render(REGISTER, &self.ctx.borrow()).unwrap()
+    }
+
     pub fn page(s: &Settings) -> String {
-        let ctx = context(s);
-        TEMPLATES.render(REGISTER, &ctx).unwrap()
+        let p = Self::new(s, None);
+        p.render()
     }
 }
 
@@ -43,109 +68,26 @@ pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(get_register);
 }
 
-//#[post(path = "PAGES.auth.login")]
-//pub async fn login_submit(
-//    id: Identity,
-//    payload: web::Form<runners::Login>,
-//    data: AppData,
-//) -> PageResult<impl Responder> {
-//    let payload = payload.into_inner();
-//    match runners::login_runner(&payload, &data).await {
-//        Ok(username) => {
-//            id.remember(username);
-//            Ok(HttpResponse::Found()
-//                .insert_header((header::LOCATION, PAGES.home))
-//                .finish())
-//        }
-//        Err(e) => {
-//            let status = e.status_code();
-//            let heading = status.canonical_reason().unwrap_or("Error");
-//
-//            Ok(HttpResponseBuilder::new(status)
-//                .content_type("text/html; charset=utf-8")
-//                .body(
-//                    IndexPage::new(heading, &format!("{}", e))
-//                        .render_once()
-//                        .unwrap(),
-//                ))
-//        }
-//    }
-//}
-//
-//#[cfg(test)]
-//mod tests {
-//    use actix_web::test;
-//
-//    use super::*;
-//
-//    use crate::api::v1::auth::runners::{Login, Register};
-//    use crate::data::Data;
-//    use crate::tests::*;
-//    use crate::*;
-//    use actix_web::http::StatusCode;
-//
-//    #[actix_rt::test]
-//    async fn auth_form_works() {
-//        let data = Data::new().await;
-//        const NAME: &str = "testuserform";
-//        const PASSWORD: &str = "longpassword";
-//
-//        let app = get_app!(data).await;
-//
-//        delete_user(NAME, &data).await;
-//
-//        // 1. Register with email == None
-//        let msg = Register {
-//            username: NAME.into(),
-//            password: PASSWORD.into(),
-//            confirm_password: PASSWORD.into(),
-//            email: None,
-//        };
-//        let resp = test::call_service(
-//            &app,
-//            post_request!(&msg, V1_API_ROUTES.auth.register).to_request(),
-//        )
-//        .await;
-//        assert_eq!(resp.status(), StatusCode::OK);
-//
-//        // correct form login
-//        let msg = Login {
-//            login: NAME.into(),
-//            password: PASSWORD.into(),
-//        };
-//
-//        let resp = test::call_service(
-//            &app,
-//            post_request!(&msg, PAGES.auth.login, FORM).to_request(),
-//        )
-//        .await;
-//        assert_eq!(resp.status(), StatusCode::FOUND);
-//        let headers = resp.headers();
-//        assert_eq!(headers.get(header::LOCATION).unwrap(), PAGES.home,);
-//
-//        // incorrect form login
-//        let msg = Login {
-//            login: NAME.into(),
-//            password: NAME.into(),
-//        };
-//        let resp = test::call_service(
-//            &app,
-//            post_request!(&msg, PAGES.auth.login, FORM).to_request(),
-//        )
-//        .await;
-//        assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
-//
-//        // non-existent form login
-//        let msg = Login {
-//            login: PASSWORD.into(),
-//            password: PASSWORD.into(),
-//        };
-//        let resp = test::call_service(
-//            &app,
-//            post_request!(&msg, PAGES.auth.login, FORM).to_request(),
-//        )
-//        .await;
-//        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
-//    }
-//}
-//
+#[cfg(test)]
+mod tests {
+    use super::Register;
+    use super::RegisterPayload;
+    use crate::errors::*;
+    use crate::pages::errors::*;
+    use crate::settings::Settings;
+
+    #[test]
+    fn register_page_renders() {
+        let settings = Settings::new().unwrap();
+        Register::page(&settings);
+        let payload = RegisterPayload {
+            username: "foo".into(),
+            password: "foo".into(),
+            confirm_password: "foo".into(),
+            email: Some("foo".into()),
+        };
+        let page = Register::new(&settings, Some(&payload));
+        page.with_error(&ReadableError::new(&ServiceError::WrongPassword));
+        page.render();
+    }
+}
