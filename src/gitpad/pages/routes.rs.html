@@ -77,6 +77,12 @@
 <span id="76">76</span>
 <span id="77">77</span>
 <span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -104,12 +110,18 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pages</span> {
     <span class="doccomment">/// Authentication routes</span>
     <span class="kw">pub</span> <span class="ident">auth</span>: <span class="ident">Auth</span>,
+    <span class="doccomment">/// home page</span>
+    <span class="kw">pub</span> <span class="ident">home</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Pages</span> {
     <span class="doccomment">/// create new instance of Routes</span>
     <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">Pages</span> {
-        <span class="ident">Pages</span> { <span class="ident">auth</span>: <span class="ident">Auth::new</span>() }
+        <span class="kw">let</span> <span class="ident">home</span> <span class="op">=</span> <span class="string">&quot;/&quot;</span>;
+        <span class="ident">Pages</span> {
+            <span class="ident">auth</span>: <span class="ident">Auth::new</span>(),
+            <span class="ident">home</span>,
+        }
     }
 }
 
