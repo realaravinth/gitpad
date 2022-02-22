@@ -69,6 +69,32 @@ pub async fn get_login(data: AppData) -> impl Responder {
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(get_login);
+    cfg.service(login_submit);
+}
+
+#[my_codegen::post(path = "PAGES.auth.login")]
+pub async fn login_submit(
+    id: Identity,
+    payload: web::Form<LoginPayload>,
+    query: web::Query<RedirectQuery>,
+    data: AppData,
+    db: crate::DB,
+) -> PageResult<impl Responder, Login> {
+    let username = data
+        .login(&(**db), &payload)
+        .await
+        .map_err(|e| PageError::new(Login::new(&data.settings, Some(&payload)), e))?;
+    id.remember(username);
+    let query = query.into_inner();
+    if let Some(redirect_to) = query.redirect_to {
+        Ok(HttpResponse::Found()
+            .insert_header((http::header::LOCATION, redirect_to))
+            .finish())
+    } else {
+        Ok(HttpResponse::Found()
+            .insert_header((http::header::LOCATION, PAGES.home))
+            .finish())
+    }
 }
 
 #[cfg(test)]

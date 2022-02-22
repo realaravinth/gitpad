@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+use actix_auth_middleware::GetLoginRoute;
 
 use actix_web::http::header;
 use actix_web::http::StatusCode;
@@ -21,7 +22,7 @@ use actix_web::test;
 
 use super::*;
 
-use crate::data::api::v1::auth::Register;
+use crate::data::api::v1::auth::{Login, Register};
 use crate::data::Data;
 use crate::errors::*;
 use crate::tests::*;
@@ -81,7 +82,40 @@ async fn auth_works(data: Arc<Data>, db: BoxDB) {
     assert_eq!(resp.status(), StatusCode::FOUND);
     let headers = resp.headers();
     assert_eq!(headers.get(header::LOCATION).unwrap(), PAGES.auth.login);
-    let _ = data.delete_user(&db, NAME, PASSWORD).await;
+
+    // sign in
+    let msg = Login {
+        login: NAME.into(),
+        password: PASSWORD.into(),
+    };
+    let resp = test::call_service(
+        &app,
+        post_request!(&msg, PAGES.auth.login, FORM).to_request(),
+    )
+    .await;
+    assert_eq!(resp.status(), StatusCode::FOUND);
+    let headers = resp.headers();
+    assert_eq!(headers.get(header::LOCATION).unwrap(), PAGES.home);
+
+    // redirect after signin
+    let redirect = "/foo/bar/nonexistantuser";
+    let url = PAGES.get_login_route(Some(redirect));
+    let resp = test::call_service(&app, post_request!(&msg, &url, FORM).to_request()).await;
+    assert_eq!(resp.status(), StatusCode::FOUND);
+    let headers = resp.headers();
+    assert_eq!(headers.get(header::LOCATION).unwrap(), &redirect);
+
+    // wrong password signin
+    let msg = Login {
+        login: NAME.into(),
+        password: NAME.into(),
+    };
+    let resp = test::call_service(
+        &app,
+        post_request!(&msg, PAGES.auth.login, FORM).to_request(),
+    )
+    .await;
+    assert_eq!(resp.status(), ServiceError::WrongPassword.status_code());
 }
 
 async fn serverside_password_validation_works(data: Arc<Data>, db: BoxDB) {
