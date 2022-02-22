@@ -162,7 +162,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ReadableError</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">e</span>: <span class="kw-2">&amp;</span><span class="ident">ServiceError</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">e</span>: <span class="kw-2">&amp;</span><span class="ident">ServiceError</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">reason</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>);
         <span class="kw">let</span> <span class="ident">title</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>.<span class="ident">status_code</span>());
 
