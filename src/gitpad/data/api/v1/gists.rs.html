@@ -426,6 +426,9 @@
 <span id="425">425</span>
 <span id="426">426</span>
 <span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -619,6 +622,9 @@
         <span class="ident">gist_id</span>: <span class="ident">GistID</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">files</span>: <span class="kw-2">&amp;</span>[<span class="ident">FileInfo</span>],
     ) -&gt; <span class="ident">ServiceResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">files</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ServiceError::GistEmpty</span>);
+        }
         <span class="comment">// TODO change updated in DB</span>
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="op">|</span><span class="ident">repo</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Repository</span><span class="op">|</span> -&gt; <span class="ident">ServiceResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tree_builder</span> <span class="op">=</span> <span class="ident">repo</span>.<span class="ident">treebuilder</span>(<span class="prelude-val">None</span>).<span class="ident">unwrap</span>();

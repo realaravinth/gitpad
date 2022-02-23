@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CONTENT_FIELD_NAME_PREFIX",""],["FILENAME_FIELD_NAME_PREFIX",""],["NEW_GIST",""]],"fn":[["get_description",""],["get_visibility",""],["register_templates",""],["services",""]],"struct":[["FieldNames",""],["NewGist",""],["new",""]]});
