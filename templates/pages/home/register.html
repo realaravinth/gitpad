@@ -2,22 +2,35 @@
 {% block title_name %}Sign Up {% endblock %}
 {% block login %}
 <h2>Sign Up</h2>
-{% include "error_comp" %}
 <form action="{{ page.auth.register }}" method="POST" class="form" accept-charset="utf-8">
+	{% include "error_comp" %}
   <label class="form__label" for="username">
     Username
     <input
       class="form__input"
+      autofocus
       name="username"
       required
       id="username"
       type="text"
+	  {% if payload.username %}
+          value={{ payload.username }}
+      {% endif %}
     />
   </label>
 
   <label class="form__label" for="email">
     Email(optional)
-    <input class="form__input" name="email" id="email" type="email" />
+    <input
+		class="form__input"
+		name="email"
+		id="email"
+		type="email"
+	  {% if payload.email %}
+          value={{ payload.email }}
+      {% endif %}
+
+	/>
   </label>
 
   <label class="form__label" for="password">
@@ -28,6 +41,9 @@
       required
       id="password"
       type="password"
+	  {% if payload.password %}
+          value={{ payload.password }}
+      {% endif %}
     />
   </label>
 
@@ -39,6 +55,9 @@
       required
       id="confirm_password"
       type="password"
+	  {% if payload.confirm_password %}
+          value={{ payload.confirm_password }}
+      {% endif %}
     />
   </label>
 
