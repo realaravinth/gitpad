@@ -214,3 +214,15 @@ footer {
   width: 100%;
   margin: 10px 0;
 }
+
+.gist__new {
+  width: 80%;
+}
+
+.gist__file-content {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 5px 0;
+  height: 350px;
+}

@@ -26,6 +26,7 @@ use crate::{GIT_COMMIT_HASH, VERSION};
 
 pub mod auth;
 pub mod errors;
+pub mod gists;
 pub mod routes;
 
 pub use routes::get_auth_middleware;
@@ -69,6 +70,7 @@ lazy_static! {
         errors::register_templates(&mut tera);
         tera.autoescape_on(vec![".html", ".sql"]);
         auth::register_templates(&mut tera);
+        gists::register_templates(&mut tera);
         tera
     };
 }
@@ -130,6 +132,7 @@ impl<'a> Footer<'a> {
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     auth::services(cfg);
+    gists::services(cfg);
 }
 
 #[cfg(test)]
@@ -150,7 +153,10 @@ mod tests {
             auth::AUTH_BASE,
             auth::login::LOGIN,
             auth::register::REGISTER,
-            errors::ERROR_TEMPLATE
+            errors::ERROR_TEMPLATE,
+            gists::GIST_BASE,
+            gists::GIST_EXPLORE,
+            gists::new::NEW_GIST,
         ]
         .iter()
         {

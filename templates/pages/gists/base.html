@@ -1,0 +1,7 @@
+{% extends 'base' %} 
+{% block title %}{% block title_name %} {% endblock %} | GitPad{% endblock %}
+
+{% block nav %} {% include "auth_nav" %} {% endblock %}
+{% block main %}
+    {% block gist_main %} {% endblock %}
+{% endblock %}

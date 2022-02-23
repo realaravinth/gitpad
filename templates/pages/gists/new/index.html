@@ -1,0 +1,75 @@
+{% extends 'gistbase' %} 
+{% block gist_main %}
+<form class="gist__new" action="/new" method="POST" accept-charset="utf-8">
+	{% include "error_comp" %}
+  <label class="form__label" for="login">
+    Gist description
+    <input 
+        class="form__input"
+        name="description"
+        autofocus
+        id="description"
+        type="text"
+      {% if payload.description %}
+          value={{ payload.description }}
+      {% endif %}
+    />
+  </label>
+  {% if payload.files %}
+    {% for file in payload.files %}
+      <legend class="gist__file">
+        <label class="form__label" for="login">
+          File name with extension
+          <input 
+			  required
+              class="form__input"
+              name="filename"
+              autofocus
+              id="filename"
+              type="text"
+              value={{ file.filename }}
+          />
+        </label>
+        <label class="form__label" for="login">
+        <textarea 
+			required
+		    class="gist__file-content"
+            name="content"
+            autofocus
+            id="content"
+            type="text"
+            value={{ file.content }}
+        >
+		</textarea>
+
+        </label>
+      </legend>
+    {% endfor %}
+  {% else %}
+    <legend class="gist__file">
+      <label class="form__label" for="login">
+        File name with extension
+        <input 
+            class="form__input"
+            name="filename"
+            autofocus
+            id="filename"
+            type="text"
+        />
+      </label>
+      <label class="form__label" for="login">
+        <textarea 
+			required
+		    class="gist__file-content"
+            name="content"
+            autofocus
+            id="content"
+            type="text"
+        >
+	   </textarea>
+      </label>
+    </legend>
+
+  {% endif %}
+</form>
+{% endblock %}
