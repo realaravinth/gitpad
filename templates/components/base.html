@@ -8,7 +8,7 @@
     <title>{% block title %} {% endblock %}</title>
   </head>
   <body>
-    <header>{% include "nav" %}</header>
+    <header>{% block nav %} {% endblock %}</header>
     <main>{% block main %} {% endblock %}</main>
     {% include "footer" %}
   </body>
