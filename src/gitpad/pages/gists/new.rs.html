@@ -269,6 +269,28 @@
 <span id="268">268</span>
 <span id="269">269</span>
 <span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -463,10 +485,10 @@
         <span class="kw">let</span> <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;some description&quot;</span>;
         <span class="kw">let</span> <span class="ident">ideal</span> <span class="op">=</span> <span class="macro">json!</span>({
             <span class="string">&quot;description&quot;</span>: <span class="ident">description</span>,
-            <span class="ident">f1</span>.<span class="ident">filename</span>: <span class="ident">f1_name</span>,
-            <span class="ident">f1</span>.<span class="ident">content</span>: <span class="ident">f1_content</span>,
-            <span class="ident">f2</span>.<span class="ident">filename</span>: <span class="ident">f2_name</span>,
-            <span class="ident">f2</span>.<span class="ident">content</span>: <span class="ident">f2_content</span>,
+            <span class="ident">f1</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(): <span class="ident">f1_name</span>,
+            <span class="ident">f1</span>.<span class="ident">content</span>.<span class="ident">clone</span>(): <span class="ident">f1_content</span>,
+            <span class="ident">f2</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(): <span class="ident">f2_name</span>,
+            <span class="ident">f2</span>.<span class="ident">content</span>.<span class="ident">clone</span>(): <span class="ident">f2_content</span>,
             <span class="string">&quot;visibility&quot;</span>: <span class="ident">visibility</span>.<span class="ident">to_str</span>(),
         });
 
@@ -500,10 +522,9 @@
         );
 
         <span class="comment">// partially empty fields</span>
-        <span class="kw">let</span> <span class="ident">f1</span>: <span class="ident">FieldNames</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>);
         <span class="kw">let</span> <span class="ident">partially_empty_files</span> <span class="op">=</span> <span class="macro">json!</span>({
             <span class="string">&quot;description&quot;</span>: <span class="string">&quot;&quot;</span>,
-            <span class="ident">f1</span>.<span class="ident">filename</span>: <span class="ident">f1_name</span>,
+            <span class="ident">f1</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(): <span class="ident">f1_name</span>,
         });
         <span class="comment">// description is empty sting</span>
         <span class="macro">assert_eq!</span>(<span class="ident">get_description</span>(<span class="kw-2">&amp;</span><span class="ident">empty</span>), <span class="prelude-val">None</span>);
@@ -517,25 +538,48 @@
             ))
         );
 
+        <span class="kw">let</span> <span class="ident">fields1</span> <span class="op">=</span> <span class="ident">FieldNames</span> {
+            <span class="ident">filename</span>: <span class="ident">f1_name</span>,
+            <span class="ident">content</span>: <span class="ident">f1_content</span>,
+        };
+
         <span class="comment">// some partially empty fields</span>
-        <span class="kw">let</span> <span class="ident">f1</span>: <span class="ident">FieldNames</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>);
-        <span class="kw">let</span> <span class="ident">f2</span>: <span class="ident">FieldNames</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">2</span>);
         <span class="kw">let</span> <span class="ident">some_partially_empty_files</span> <span class="op">=</span> <span class="macro">json!</span>({
-            <span class="ident">f1</span>.<span class="ident">filename</span>: <span class="ident">f1_name</span>,
-            <span class="ident">f1</span>.<span class="ident">content</span>: <span class="ident">f1_content</span>,
-            <span class="ident">f2</span>.<span class="ident">filename</span>: <span class="ident">f2_name</span>,
+            <span class="ident">f1</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(): <span class="ident">f1_name</span>,
+            <span class="ident">f1</span>.<span class="ident">content</span>.<span class="ident">clone</span>(): <span class="ident">f1_content</span>,
+            <span class="ident">f2</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(): <span class="ident">f2_name</span>,
         });
         <span class="kw">let</span> <span class="ident">some_empty_gist_err</span> <span class="op">=</span> <span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::from_serde_json</span>(<span class="kw-2">&amp;</span><span class="ident">some_partially_empty_files</span>);
         <span class="macro">assert!</span>(<span class="ident">some_empty_gist_err</span>.<span class="ident">is_err</span>());
         <span class="macro">assert_eq!</span>(
             <span class="ident">some_empty_gist_err</span>.<span class="ident">err</span>(),
             <span class="prelude-val">Some</span>((
-                <span class="macro">vec!</span>[<span class="ident">FieldNames</span> {
-                    <span class="ident">filename</span>: <span class="ident">f1_name</span>,
-                    <span class="ident">content</span>: <span class="ident">f1_content</span>,
-                }],
+                <span class="macro">vec!</span>[<span class="ident">fields1</span>.<span class="ident">clone</span>()],
                 <span class="ident">ServiceError::BadRequest</span>(<span class="string">&quot;content for 2 file is empty&quot;</span>.<span class="ident">into</span>())
             ))
+        );
+
+        <span class="kw">let</span> <span class="ident">some_partially_empty_files</span> <span class="op">=</span> <span class="macro">json!</span>({
+            <span class="ident">f1</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(): <span class="ident">f1_name</span>,
+            <span class="ident">f1</span>.<span class="ident">content</span>.<span class="ident">clone</span>(): <span class="ident">f1_content</span>,
+            <span class="ident">f2</span>.<span class="ident">content</span>.<span class="ident">clone</span>(): <span class="ident">f2_content</span>,
+        });
+        <span class="kw">let</span> <span class="ident">some_empty_gist_err</span> <span class="op">=</span> <span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::from_serde_json</span>(<span class="kw-2">&amp;</span><span class="ident">some_partially_empty_files</span>);
+        <span class="macro">assert!</span>(<span class="ident">some_empty_gist_err</span>.<span class="ident">is_err</span>());
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">some_empty_gist_err</span>.<span class="ident">err</span>(),
+            <span class="prelude-val">Some</span>((
+                <span class="macro">vec!</span>[<span class="ident">fields1</span>.<span class="ident">clone</span>()],
+                <span class="ident">ServiceError::BadRequest</span>(<span class="string">&quot;filename for 2 field is empty&quot;</span>.<span class="ident">into</span>())
+            ))
+        );
+
+        <span class="comment">// From&lt;FieldNames&gt; for FileInfo</span>
+        <span class="kw">let</span> <span class="ident">f</span>: <span class="ident">FileInfo</span> <span class="op">=</span> <span class="ident">fields1</span>.<span class="ident">clone</span>().<span class="ident">into</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">f</span>.<span class="ident">filename</span>, <span class="ident">fields1</span>.<span class="ident">filename</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">f</span>.<span class="ident">content</span>,
+            <span class="ident">FileType::File</span>(<span class="ident">GistContentType::Text</span>(<span class="ident">fields1</span>.<span class="ident">content</span>.<span class="ident">to_owned</span>()))
         );
     }
 }
