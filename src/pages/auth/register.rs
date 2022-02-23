@@ -25,7 +25,7 @@ use crate::AppData;
 
 pub use super::*;
 
-pub const REGISTER: TemplateFile = TemplateFile::new("login", "pages/auth/register.html");
+pub const REGISTER: TemplateFile = TemplateFile::new("register", "pages/auth/register.html");
 
 pub struct Register {
     ctx: RefCell<Context>,
