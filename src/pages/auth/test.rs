@@ -113,6 +113,7 @@ async fn auth_works(data: Arc<Data>, db: BoxDB) {
     assert_eq!(resp.status(), StatusCode::FOUND);
     let headers = resp.headers();
     assert_eq!(headers.get(header::LOCATION).unwrap(), PAGES.home);
+    let cookies = get_cookie!(resp);
 
     // redirect after signin
     let redirect = "/foo/bar/nonexistantuser";
@@ -133,6 +134,22 @@ async fn auth_works(data: Arc<Data>, db: BoxDB) {
     )
     .await;
     assert_eq!(resp.status(), ServiceError::WrongPassword.status_code());
+
+    // signout
+    let signout_resp = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(PAGES.auth.logout)
+            .cookie(cookies)
+            .to_request(),
+    )
+    .await;
+    assert_eq!(signout_resp.status(), StatusCode::FOUND);
+    let headers = signout_resp.headers();
+    assert_eq!(
+        headers.get(header::LOCATION).unwrap(),
+        &PAGES.get_login_route(None)
+    );
 }
 
 async fn serverside_password_validation_works(data: Arc<Data>, db: BoxDB) {
