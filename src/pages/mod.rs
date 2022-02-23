@@ -95,13 +95,17 @@ pub fn context(s: &Settings) -> Context {
     ctx
 }
 
-pub fn auth_ctx(user: &str, s: &Settings) -> Context {
+pub fn auth_ctx(username: &str, s: &Settings) -> Context {
+    use routes::GistProfilePathComponent;
+    let profile_link = PAGES
+        .gist
+        .get_profile_route(GistProfilePathComponent { username });
     let mut ctx = Context::new();
     let footer = Footer::new(s);
     ctx.insert("footer", &footer);
     ctx.insert("page", &PAGES);
     ctx.insert("assets", &*ASSETS);
-    ctx.insert("loggedin_user", user);
+    ctx.insert("loggedin_user", &profile_link);
     ctx
 }
 
@@ -126,12 +130,6 @@ impl<'a> Footer<'a> {
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     auth::services(cfg);
-    cfg.service(home);
-}
-
-#[my_codegen::get(path = "PAGES.home", wrap = "get_auth_middleware()")]
-pub async fn home() -> impl Responder {
-    HttpResponse::Ok()
 }
 
 #[cfg(test)]
@@ -152,7 +150,7 @@ mod tests {
             auth::AUTH_BASE,
             auth::login::LOGIN,
             auth::register::REGISTER,
-            errors::ERROR_TEMPLATE,
+            errors::ERROR_TEMPLATE
         ]
         .iter()
         {
