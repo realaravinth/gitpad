@@ -17,6 +17,8 @@
 use actix_auth_middleware::{Authentication, GetLoginRoute};
 use serde::*;
 
+pub use crate::api::v1::routes::PostCommentPath;
+
 /// constant [Pages](Pages) instance
 pub const PAGES: Pages = Pages::new();
 
@@ -70,30 +72,44 @@ impl Auth {
 }
 
 #[derive(Deserialize)]
-pub struct GistProfilePath {
-    pub username: String,
+pub struct GistProfilePathComponent<'a> {
+    pub username: &'a str,
 }
 
 #[derive(Serialize)]
 /// Gist routes
 pub struct Gists {
-    /// logout route
+    /// profile route
     pub profile: &'static str,
-    /// login route
+    /// new gist route
     pub new: &'static str,
+    /// view gist
+    pub view_gist: &'static str,
 }
 
 impl Gists {
     /// create new instance of Gists route
     pub const fn new() -> Self {
         let profile = "/{username}";
+        let view_gist = "/{username}/{gist}";
         let new = "/";
-        Self { profile, new }
+        Self {
+            profile,
+            new,
+            view_gist,
+        }
     }
 
     /// get profile route with placeholders replaced with values provided.
-    pub fn get_profile_route(&self, components: &GistProfilePath) -> String {
-        self.profile.replace("{username}", &components.username)
+    pub fn get_profile_route(&self, components: GistProfilePathComponent) -> String {
+        self.profile.replace("{username}", components.username)
+    }
+
+    /// get gist route route with placeholders replaced with values provided.
+    pub fn get_gist_route(&self, components: &PostCommentPath) -> String {
+        self.view_gist
+            .replace("{username}", &components.username)
+            .replace("{gist}", &components.gist)
     }
 }
 
@@ -121,15 +137,19 @@ mod tests {
     #[test]
     fn gist_route_substitution_works() {
         const NAME: &str = "bob";
+        const GIST: &str = "foo";
         let get_profile = format!("/{NAME}");
+        let view_gist = format!("/{NAME}/{GIST}");
 
-        let profile_component = GistProfilePath {
+        let profile_component = GistProfilePathComponent { username: NAME };
+
+        assert_eq!(get_profile, PAGES.gist.get_profile_route(profile_component));
+
+        let profile_component = PostCommentPath {
             username: NAME.into(),
+            gist: GIST.into(),
         };
 
-        assert_eq!(
-            get_profile,
-            PAGES.gist.get_profile_route(&profile_component)
-        );
+        assert_eq!(view_gist, PAGES.gist.get_gist_route(&profile_component));
     }
 }
