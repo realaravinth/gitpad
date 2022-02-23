@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["gitpad"] = [{"text":"impl RustEmbed for <a class=\"struct\" href=\"gitpad/static_assets/static_files/struct.Asset.html\" title=\"struct gitpad::static_assets::static_files::Asset\">Asset</a>","synthetic":false,"types":["gitpad::static_assets::static_files::Asset"]}];
+implementors["gitpad"] = [{"text":"impl RustEmbed for <a class=\"struct\" href=\"gitpad/pages/struct.Templates.html\" title=\"struct gitpad::pages::Templates\">Templates</a>","synthetic":false,"types":["gitpad::pages::Templates"]},{"text":"impl RustEmbed for <a class=\"struct\" href=\"gitpad/static_assets/static_files/struct.Asset.html\" title=\"struct gitpad::static_assets::static_files::Asset\">Asset</a>","synthetic":false,"types":["gitpad::static_assets::static_files::Asset"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

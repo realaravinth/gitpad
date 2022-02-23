@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["HOME_BASE",""]],"fn":[["register_templates",""],["services",""]],"mod":[["login",""],["register",""]],"struct":[["signout",""]]});
+initSidebarItems({"constant":[["AUTH_BASE",""]],"fn":[["register_templates",""],["services",""]],"mod":[["login",""],["register",""]],"struct":[["signout",""]]});

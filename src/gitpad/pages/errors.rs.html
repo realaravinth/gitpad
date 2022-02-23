@@ -104,10 +104,6 @@
 <span id="103">103</span>
 <span id="104">104</span>
 <span id="105">105</span>
-<span id="106">106</span>
-<span id="107">107</span>
-<span id="108">108</span>
-<span id="109">109</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -136,17 +132,13 @@
 <span class="kw">use</span> <span class="ident">serde</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::ServiceError</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::TemplateFile</span>;
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ERROR_KEY</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;error&quot;</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ERROR_PAGE</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;error_comp&quot;</span>;
 
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ERROR_TEMPLATE</span>: <span class="ident">TemplateFile</span> <span class="op">=</span> <span class="ident">TemplateFile::new</span>(<span class="string">&quot;error_comp&quot;</span>, <span class="string">&quot;components/error.html&quot;</span>);
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">register_templates</span>(<span class="ident">t</span>: <span class="kw-2">&amp;mut</span> <span class="ident">tera::Tera</span>) {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span>
-        <span class="ident">t</span>.<span class="ident">add_template_files</span>(<span class="macro">vec!</span>[(<span class="string">&quot;templates/components/error.html&quot;</span>, <span class="prelude-val">Some</span>(<span class="ident">ERROR_PAGE</span>))])
-    {
-        <span class="macro">println!</span>(<span class="string">&quot;Parsing error(s): {}&quot;</span>, <span class="ident">e</span>);
-        <span class="ident">::std::process::exit</span>(<span class="number">1</span>);
-    };
+    <span class="ident">ERROR_TEMPLATE</span>.<span class="ident">register</span>(<span class="ident">t</span>).<span class="ident">expect</span>(<span class="ident">ERROR_TEMPLATE</span>.<span class="ident">name</span>);
 }
 
 <span class="doccomment">/// Render template with error context</span>

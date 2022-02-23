@@ -157,14 +157,6 @@
 <span id="156">156</span>
 <span id="157">157</span>
 <span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -184,27 +176,19 @@
 <span class="kw">use</span> <span class="ident">actix_identity::Identity</span>;
 <span class="kw">use</span> <span class="ident">actix_web</span>::<span class="kw-2">*</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">context</span>, <span class="ident">Footer</span>, <span class="ident">PAGES</span>, <span class="ident">PAYLOAD_KEY</span>, <span class="ident">TEMPLATES</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">context</span>, <span class="ident">Footer</span>, <span class="ident">TemplateFile</span>, <span class="ident">PAGES</span>, <span class="ident">PAYLOAD_KEY</span>, <span class="ident">TEMPLATES</span>};
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">login</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">register</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span>;
 
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HOME_BASE</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;homebase&quot;</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">AUTH_BASE</span>: <span class="ident">TemplateFile</span> <span class="op">=</span> <span class="ident">TemplateFile::new</span>(<span class="string">&quot;authbase&quot;</span>, <span class="string">&quot;pages/auth/base.html&quot;</span>);
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">register_templates</span>(<span class="ident">t</span>: <span class="kw-2">&amp;mut</span> <span class="ident">tera::Tera</span>) {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">t</span>.<span class="ident">add_template_files</span>(<span class="macro">vec!</span>[
-        (<span class="string">&quot;templates/pages/home/login.html&quot;</span>, <span class="prelude-val">Some</span>(<span class="ident">login::LOGIN</span>)),
-        (
-            <span class="string">&quot;templates/pages/home/register.html&quot;</span>,
-            <span class="prelude-val">Some</span>(<span class="ident">register::REGISTER</span>),
-        ),
-        (<span class="string">&quot;templates/pages/home/base.html&quot;</span>, <span class="prelude-val">Some</span>(<span class="ident">HOME_BASE</span>)),
-    ]) {
-        <span class="macro">println!</span>(<span class="string">&quot;Parsing error(s): {}&quot;</span>, <span class="ident">e</span>);
-        <span class="ident">::std::process::exit</span>(<span class="number">1</span>);
-    };
+    <span class="kw">for</span> <span class="ident">template</span> <span class="kw">in</span> [<span class="ident">AUTH_BASE</span>, <span class="ident">login::LOGIN</span>, <span class="ident">register::REGISTER</span>].<span class="ident">iter</span>() {
+        <span class="ident">template</span>.<span class="ident">register</span>(<span class="ident">t</span>).<span class="ident">expect</span>(<span class="ident">template</span>.<span class="ident">name</span>);
+    }
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">services</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;mut</span> <span class="ident">web::ServiceConfig</span>) {

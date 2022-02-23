@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["PAYLOAD_KEY",""]],"fn":[["context",""],["init",""],["services",""]],"mod":[["auth",""],["errors",""],["routes",""]],"struct":[["Footer",""],["TEMPLATES",""],["home",""]]});
+initSidebarItems({"constant":[["BASE",""],["FOOTER",""],["PAYLOAD_KEY",""],["PUB_NAV",""]],"fn":[["context",""],["services",""]],"mod":[["auth",""],["errors",""],["routes",""]],"struct":[["Footer",""],["TEMPLATES",""],["TemplateFile",""],["Templates",""],["home",""]]});
