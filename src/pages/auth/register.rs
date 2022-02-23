@@ -71,10 +71,15 @@ pub fn services(cfg: &mut web::ServiceConfig) {
 
 #[my_codegen::post(path = "PAGES.auth.register")]
 pub async fn register_submit(
-    payload: web::Form<RegisterPayload>,
+    mut payload: web::Form<RegisterPayload>,
     data: AppData,
     db: crate::DB,
 ) -> PageResult<impl Responder, Register> {
+    if let Some(email) = &payload.email {
+        if email.is_empty() {
+            payload.email = None;
+        }
+    }
     data.register(&(**db), &payload)
         .await
         .map_err(|e| PageError::new(Register::new(&data.settings, Some(&payload)), e))?;

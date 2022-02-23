@@ -67,6 +67,23 @@ async fn auth_works(data: Arc<Data>, db: BoxDB) {
     assert_eq!(headers.get(header::LOCATION).unwrap(), PAGES.auth.login);
     let _ = data.delete_user(&db, NAME, PASSWORD).await;
 
+    // 1. Register with email == "" // Form request handler converts empty emails to None
+    let msg = Register {
+        username: NAME.into(),
+        password: PASSWORD.into(),
+        confirm_password: PASSWORD.into(),
+        email: Some("".into()),
+    };
+    let resp = test::call_service(
+        &app,
+        post_request!(&msg, PAGES.auth.register, FORM).to_request(),
+    )
+    .await;
+    assert_eq!(resp.status(), StatusCode::FOUND);
+    let headers = resp.headers();
+    assert_eq!(headers.get(header::LOCATION).unwrap(), PAGES.auth.login);
+    let _ = data.delete_user(&db, NAME, PASSWORD).await;
+
     // 1. Register with email
     let msg = Register {
         username: NAME.into(),
