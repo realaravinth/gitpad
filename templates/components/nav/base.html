@@ -1,0 +1,18 @@
+<nav class="nav__container">
+  <input type="checkbox" class="nav__toggle" id="nav__toggle" />
+
+  <div class="nav__header">
+    <a class="nav__logo-container" href="/">
+      <p class="nav__home-btn">GitPad</p>
+    </a>
+    <label class="nav__hamburger-menu" for="nav__toggle">
+      <span class="nav__hamburger-inner"></span>
+    </label>
+  </div>
+
+  <div class="nav__spacer"></div>
+
+  <div class="nav__link-group">
+    {% block nav_links %} {% endblock %} 
+  </div>
+</nav>

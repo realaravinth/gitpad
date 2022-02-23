@@ -57,12 +57,13 @@ pub const PAYLOAD_KEY: &str = "payload";
 
 pub const BASE: TemplateFile = TemplateFile::new("base", "components/base.html");
 pub const FOOTER: TemplateFile = TemplateFile::new("footer", "components/footer.html");
-pub const PUB_NAV: TemplateFile = TemplateFile::new("pub_nav", "components/pub-nav.html");
+pub const PUB_NAV: TemplateFile = TemplateFile::new("pub_nav", "components/nav/pub.html");
+pub const AUTH_NAV: TemplateFile = TemplateFile::new("auth_nav", "components/nav/auth.html");
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
         let mut tera = Tera::default();
-        for t in [BASE, FOOTER, PUB_NAV].iter() {
+        for t in [BASE, FOOTER, PUB_NAV, AUTH_NAV].iter() {
             t.register(&mut tera).unwrap();
         }
         errors::register_templates(&mut tera);
@@ -91,6 +92,16 @@ pub fn context(s: &Settings) -> Context {
     ctx.insert("footer", &footer);
     ctx.insert("page", &PAGES);
     ctx.insert("assets", &*ASSETS);
+    ctx
+}
+
+pub fn auth_ctx(user: &str, s: &Settings) -> Context {
+    let mut ctx = Context::new();
+    let footer = Footer::new(s);
+    ctx.insert("footer", &footer);
+    ctx.insert("page", &PAGES);
+    ctx.insert("assets", &*ASSETS);
+    ctx.insert("loggedin_user", user);
     ctx
 }
 
@@ -125,17 +136,19 @@ pub async fn home() -> impl Responder {
 
 #[cfg(test)]
 mod tests {
-    use super::{auth, errors, BASE, FOOTER, PUB_NAV};
-    use tera::Tera;
 
     #[test]
-    fn templates_work() {
+    fn templates_work_basic() {
+        use super::*;
+        use tera::Tera;
+
         let mut tera = Tera::default();
         let mut tera2 = Tera::default();
         for t in [
             BASE,
             FOOTER,
             PUB_NAV,
+            AUTH_NAV,
             auth::AUTH_BASE,
             auth::login::LOGIN,
             auth::register::REGISTER,
