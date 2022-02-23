@@ -92,6 +92,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(data.clone())
             .app_data(db.clone())
             .app_data(get_json_err())
+            .wrap(get_identity_service(&data.settings))
             .wrap(
                 actix_middleware::DefaultHeaders::new()
                     .add(("Permissions-Policy", "interest-cohort=()")),
@@ -119,6 +120,7 @@ pub fn get_identity_service(settings: &Settings) -> IdentityService<CookieIdenti
     let cookie_secret = &settings.server.cookie_secret;
     IdentityService::new(
         CookieIdentityPolicy::new(cookie_secret.as_bytes())
+            .path("/")
             .name("Authorization")
             //TODO change cookie age
             .max_age_secs(216000)
