@@ -1,6 +1,6 @@
 {% if error %}
 <div class="error_container">
-  <h1 class="error-title"><.= title .>{{ error.title }}</h1>
-  <p class="error-message"><.= message .>{{ error.reason }}</p>
+  <h3 class="error-title">ERROR: {{ error.title }}</h3>
+  <p class="error-message">{{ error.reason }}</p>
 </div>
 {% endif %}

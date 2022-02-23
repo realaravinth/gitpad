@@ -157,6 +157,11 @@ main {
   color: #fff;
   border: none;
   padding: 5px 0;
+  cursor: pointer;
+}
+
+.form__submit:hover {
+  background-color: #bb486b;
 }
 
 footer {
@@ -201,4 +206,11 @@ footer {
 .footer__icon {
   margin: auto 5px;
   height: 20px;
+}
+
+.error_container {
+  text-align: center;
+  color: #c00;
+  width: 100%;
+  margin: 10px 0;
 }
