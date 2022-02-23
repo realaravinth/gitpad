@@ -63,8 +63,7 @@ lazy_static! {
 async fn main() -> std::io::Result<()> {
     let settings = Settings::new().unwrap();
     pretty_env_logger::init();
-    pages::init(&settings);
-
+    lazy_static::initialize(&pages::TEMPLATES);
     info!(
         "{}: {}.\nFor more information, see: {}\nBuild info:\nVersion: {} commit: {}",
         PKG_NAME,

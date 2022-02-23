@@ -16,6 +16,7 @@
  */
 use actix_web::*;
 use lazy_static::lazy_static;
+use rust_embed::RustEmbed;
 use serde::*;
 use tera::*;
 
@@ -30,24 +31,58 @@ pub mod routes;
 pub use routes::get_auth_middleware;
 pub use routes::PAGES;
 
+pub struct TemplateFile {
+    pub name: &'static str,
+    pub path: &'static str,
+}
+
+impl TemplateFile {
+    pub const fn new(name: &'static str, path: &'static str) -> Self {
+        Self { name, path }
+    }
+
+    pub fn register(&self, t: &mut Tera) -> std::result::Result<(), tera::Error> {
+        t.add_raw_template(self.name, &Templates::get_template(self).expect(self.name))
+    }
+
+    #[cfg(test)]
+    #[allow(dead_code)]
+    pub fn register_from_file(&self, t: &mut Tera) -> std::result::Result<(), tera::Error> {
+        use std::path::Path;
+        t.add_template_file(Path::new("templates/").join(self.path), Some(self.name))
+    }
+}
+
 pub const PAYLOAD_KEY: &str = "payload";
+
+pub const BASE: TemplateFile = TemplateFile::new("base", "components/base.html");
+pub const FOOTER: TemplateFile = TemplateFile::new("footer", "components/footer.html");
+pub const PUB_NAV: TemplateFile = TemplateFile::new("pub_nav", "components/pub-nav.html");
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
         let mut tera = Tera::default();
-        if let Err(e) = tera.add_template_files(vec![
-            ("templates/components/base.html", Some("base")),
-            ("templates/components/footer.html", Some("footer")),
-            ("templates/components/nav.html", Some("nav")),
-        ]) {
-            println!("Parsing error(s): {}", e);
-            ::std::process::exit(1);
-        };
+        for t in [BASE, FOOTER, PUB_NAV].iter() {
+            t.register(&mut tera).unwrap();
+        }
         errors::register_templates(&mut tera);
         tera.autoescape_on(vec![".html", ".sql"]);
         auth::register_templates(&mut tera);
         tera
     };
+}
+
+#[derive(RustEmbed)]
+#[folder = "templates/"]
+pub struct Templates;
+
+impl Templates {
+    pub fn get_template(t: &TemplateFile) -> Option<String> {
+        match Self::get(t.path) {
+            Some(file) => Some(String::from_utf8_lossy(&file.data).into_owned()),
+            None => None,
+        }
+    }
 }
 
 pub fn context(s: &Settings) -> Context {
@@ -57,11 +92,6 @@ pub fn context(s: &Settings) -> Context {
     ctx.insert("page", &PAGES);
     ctx.insert("assets", &*ASSETS);
     ctx
-}
-
-pub fn init(s: &Settings) {
-    auth::login::Login::page(s);
-    auth::register::Register::page(s);
 }
 
 #[derive(Serialize)]
@@ -95,12 +125,23 @@ pub async fn home() -> impl Responder {
 
 #[cfg(test)]
 mod tests {
-    use super::{init, Settings};
+    use super::{auth, errors, BASE, FOOTER, PUB_NAV};
+    use tera::Tera;
 
     #[test]
     fn templates_work() {
-        let settings = Settings::new().unwrap();
-        init(&settings);
+        let mut tera = Tera::default();
+        let mut tera2 = Tera::default();
+        for t in [
+            BASE,
+            FOOTER,
+            PUB_NAV,
+        ]
+        .iter()
+        {
+            t.register_from_file(&mut tera2).unwrap();
+            t.register(&mut tera).unwrap();
+        }
     }
 }
 
