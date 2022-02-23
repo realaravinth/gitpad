@@ -192,10 +192,10 @@ mod tests {
         let description = "some description";
         let ideal = json!({
             "description": description,
-            f1.filename: f1_name,
-            f1.content: f1_content,
-            f2.filename: f2_name,
-            f2.content: f2_content,
+            f1.filename.clone(): f1_name,
+            f1.content.clone(): f1_content,
+            f2.filename.clone(): f2_name,
+            f2.content.clone(): f2_content,
             "visibility": visibility.to_str(),
         });
 
@@ -229,10 +229,9 @@ mod tests {
         );
 
         // partially empty fields
-        let f1: FieldNames<String> = FieldNames::<String>::new(1);
         let partially_empty_files = json!({
             "description": "",
-            f1.filename: f1_name,
+            f1.filename.clone(): f1_name,
         });
         // description is empty sting
         assert_eq!(get_description(&empty), None);
@@ -246,25 +245,48 @@ mod tests {
             ))
         );
 
+        let fields1 = FieldNames {
+            filename: f1_name,
+            content: f1_content,
+        };
+
         // some partially empty fields
-        let f1: FieldNames<String> = FieldNames::<String>::new(1);
-        let f2: FieldNames<String> = FieldNames::<String>::new(2);
         let some_partially_empty_files = json!({
-            f1.filename: f1_name,
-            f1.content: f1_content,
-            f2.filename: f2_name,
+            f1.filename.clone(): f1_name,
+            f1.content.clone(): f1_content,
+            f2.filename.clone(): f2_name,
         });
         let some_empty_gist_err = FieldNames::<&str>::from_serde_json(&some_partially_empty_files);
         assert!(some_empty_gist_err.is_err());
         assert_eq!(
             some_empty_gist_err.err(),
             Some((
-                vec![FieldNames {
-                    filename: f1_name,
-                    content: f1_content,
-                }],
+                vec![fields1.clone()],
                 ServiceError::BadRequest("content for 2 file is empty".into())
             ))
+        );
+
+        let some_partially_empty_files = json!({
+            f1.filename.clone(): f1_name,
+            f1.content.clone(): f1_content,
+            f2.content.clone(): f2_content,
+        });
+        let some_empty_gist_err = FieldNames::<&str>::from_serde_json(&some_partially_empty_files);
+        assert!(some_empty_gist_err.is_err());
+        assert_eq!(
+            some_empty_gist_err.err(),
+            Some((
+                vec![fields1.clone()],
+                ServiceError::BadRequest("filename for 2 field is empty".into())
+            ))
+        );
+
+        // From<FieldNames> for FileInfo
+        let f: FileInfo = fields1.clone().into();
+        assert_eq!(f.filename, fields1.filename);
+        assert_eq!(
+            f.content,
+            FileType::File(GistContentType::Text(fields1.content.to_owned()))
         );
     }
 }
