@@ -128,6 +128,12 @@ pub enum ServiceError {
 
     #[display(fmt = "Unauthorized {}", _0)]
     UnauthorizedOperation(#[error(not(source))] String),
+
+    #[display(fmt = "Bad request: {}", _0)]
+    BadRequest(#[error(not(source))] String),
+
+    #[display(fmt = "Gist is empty, at least one file is required to create gist")]
+    GistEmpty,
 }
 
 impl From<CredsError> for ServiceError {
@@ -231,6 +237,8 @@ impl ResponseError for ServiceError {
             ServiceError::EmptyComment => StatusCode::BAD_REQUEST,
 
             ServiceError::UnauthorizedOperation(_) => StatusCode::UNAUTHORIZED,
+            ServiceError::BadRequest(_) => StatusCode::BAD_REQUEST,
+            ServiceError::GistEmpty => StatusCode::BAD_REQUEST,
         }
     }
 }

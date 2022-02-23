@@ -191,6 +191,9 @@ impl Data {
         gist_id: GistID<'_>,
         files: &[FileInfo],
     ) -> ServiceResult<()> {
+        if files.is_empty() {
+            return Err(ServiceError::GistEmpty);
+        }
         // TODO change updated in DB
         let inner = |repo: &mut Repository| -> ServiceResult<()> {
             let mut tree_builder = repo.treebuilder(None).unwrap();

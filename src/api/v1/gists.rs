@@ -69,6 +69,10 @@ async fn new(
     id: Identity,
     db: crate::DB,
 ) -> ServiceResult<impl Responder> {
+    if payload.files.is_empty() {
+        return Err(ServiceError::GistEmpty);
+    }
+
     let username = id.identity().unwrap();
     let mut gist = data
         .new_gist(db.as_ref(), &payload.to_create_gist(&username))
