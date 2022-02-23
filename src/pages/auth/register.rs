@@ -25,7 +25,7 @@ use crate::AppData;
 
 pub use super::*;
 
-pub const REGISTER: &str = "register";
+pub const REGISTER: TemplateFile = TemplateFile::new("login", "pages/auth/register.html");
 
 pub struct Register {
     ctx: RefCell<Context>,
@@ -48,7 +48,7 @@ impl Register {
     }
 
     pub fn render(&self) -> String {
-        TEMPLATES.render(REGISTER, &self.ctx.borrow()).unwrap()
+        TEMPLATES.render(REGISTER.name, &self.ctx.borrow()).unwrap()
     }
 
     pub fn page(s: &Settings) -> String {

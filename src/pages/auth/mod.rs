@@ -17,27 +17,19 @@
 use actix_identity::Identity;
 use actix_web::*;
 
-pub use super::{context, Footer, PAGES, PAYLOAD_KEY, TEMPLATES};
+pub use super::{context, Footer, TemplateFile, PAGES, PAYLOAD_KEY, TEMPLATES};
 
 pub mod login;
 pub mod register;
 #[cfg(test)]
 mod test;
 
-pub const HOME_BASE: &str = "homebase";
+pub const AUTH_BASE: TemplateFile = TemplateFile::new("authbase", "pages/auth/base.html");
 
 pub fn register_templates(t: &mut tera::Tera) {
-    if let Err(e) = t.add_template_files(vec![
-        ("templates/pages/home/login.html", Some(login::LOGIN)),
-        (
-            "templates/pages/home/register.html",
-            Some(register::REGISTER),
-        ),
-        ("templates/pages/home/base.html", Some(HOME_BASE)),
-    ]) {
-        println!("Parsing error(s): {}", e);
-        ::std::process::exit(1);
-    };
+    for template in [AUTH_BASE, login::LOGIN, register::REGISTER].iter() {
+        template.register(t).expect(template.name);
+    }
 }
 
 pub fn services(cfg: &mut web::ServiceConfig) {

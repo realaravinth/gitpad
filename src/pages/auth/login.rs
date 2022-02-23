@@ -32,7 +32,7 @@ pub struct Login {
     ctx: RefCell<Context>,
 }
 
-pub const LOGIN: &str = "login";
+pub const LOGIN: TemplateFile = TemplateFile::new("login", "pages/auth/login.html");
 
 impl CtxError for Login {
     fn with_error(&self, e: &ReadableError) -> String {
@@ -51,7 +51,7 @@ impl Login {
     }
 
     pub fn render(&self) -> String {
-        TEMPLATES.render(LOGIN, &self.ctx.borrow()).unwrap()
+        TEMPLATES.render(LOGIN.name, &self.ctx.borrow()).unwrap()
     }
 
     pub fn page(s: &Settings) -> String {

@@ -136,6 +136,10 @@ mod tests {
             BASE,
             FOOTER,
             PUB_NAV,
+            auth::AUTH_BASE,
+            auth::login::LOGIN,
+            auth::register::REGISTER,
+            errors::ERROR_TEMPLATE,
         ]
         .iter()
         {

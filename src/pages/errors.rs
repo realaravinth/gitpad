@@ -26,17 +26,13 @@ use derive_more::Error;
 use serde::*;
 
 use crate::errors::ServiceError;
+use super::TemplateFile;
 
 pub const ERROR_KEY: &str = "error";
-pub const ERROR_PAGE: &str = "error_comp";
 
+pub const ERROR_TEMPLATE: TemplateFile = TemplateFile::new("error_comp", "components/error.html");
 pub fn register_templates(t: &mut tera::Tera) {
-    if let Err(e) =
-        t.add_template_files(vec![("templates/components/error.html", Some(ERROR_PAGE))])
-    {
-        println!("Parsing error(s): {}", e);
-        ::std::process::exit(1);
-    };
+    ERROR_TEMPLATE.register(t).expect(ERROR_TEMPLATE.name);
 }
 
 /// Render template with error context
