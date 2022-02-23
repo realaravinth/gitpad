@@ -25,6 +25,8 @@ pub const PAGES: Pages = Pages::new();
 pub struct Pages {
     /// Authentication routes
     pub auth: Auth,
+    /// Gist routes
+    pub gist: Gists,
     /// home page
     pub home: &'static str,
 }
@@ -32,9 +34,11 @@ pub struct Pages {
 impl Pages {
     /// create new instance of Routes
     const fn new() -> Pages {
-        let home = "/";
+        let gist = Gists::new();
+        let home = gist.new;
         Pages {
             auth: Auth::new(),
+            gist,
             home,
         }
     }
@@ -65,6 +69,34 @@ impl Auth {
     }
 }
 
+#[derive(Deserialize)]
+pub struct GistProfilePath {
+    pub username: String,
+}
+
+#[derive(Serialize)]
+/// Gist routes
+pub struct Gists {
+    /// logout route
+    pub profile: &'static str,
+    /// login route
+    pub new: &'static str,
+}
+
+impl Gists {
+    /// create new instance of Gists route
+    pub const fn new() -> Self {
+        let profile = "/{username}";
+        let new = "/";
+        Self { profile, new }
+    }
+
+    /// get profile route with placeholders replaced with values provided.
+    pub fn get_profile_route(&self, components: &GistProfilePath) -> String {
+        self.profile.replace("{username}", &components.username)
+    }
+}
+
 pub fn get_auth_middleware() -> Authentication<Pages> {
     Authentication::with_identity(PAGES)
 }
@@ -80,5 +112,24 @@ impl GetLoginRoute for Pages {
         } else {
             self.auth.register.to_string()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn gist_route_substitution_works() {
+        const NAME: &str = "bob";
+        let get_profile = format!("/{NAME}");
+
+        let profile_component = GistProfilePath {
+            username: NAME.into(),
+        };
+
+        assert_eq!(
+            get_profile,
+            PAGES.gist.get_profile_route(&profile_component)
+        );
     }
 }

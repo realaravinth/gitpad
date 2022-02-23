@@ -25,8 +25,8 @@ use derive_more::Display;
 use derive_more::Error;
 use serde::*;
 
-use crate::errors::ServiceError;
 use super::TemplateFile;
+use crate::errors::ServiceError;
 
 pub const ERROR_KEY: &str = "error";
 
