@@ -89,9 +89,8 @@ mod tests {
     async fn static_assets_work(data: Arc<Data>, db: BoxDB) {
         let app = get_app!(data, db).await;
 
-        for file in [*CSS].iter() {
-            let resp = get_request!(&app, file);
-            assert_eq!(resp.status(), StatusCode::OK);
-        }
+        let file = *CSS;
+        let resp = get_request!(&app, file);
+        assert_eq!(resp.status(), StatusCode::OK);
     }
 }
