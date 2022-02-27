@@ -96,7 +96,6 @@
 <span id="94">94</span>
 <span id="95">95</span>
 <span id="96">96</span>
-<span id="97">97</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -188,10 +187,9 @@
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">static_assets_work</span>(<span class="ident">data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Data</span><span class="op">&gt;</span>, <span class="ident">db</span>: <span class="ident">BoxDB</span>) {
         <span class="kw">let</span> <span class="ident">app</span> <span class="op">=</span> <span class="macro">get_app!</span>(<span class="ident">data</span>, <span class="ident">db</span>).<span class="kw">await</span>;
 
-        <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> [<span class="kw-2">*</span><span class="ident">CSS</span>].<span class="ident">iter</span>() {
-            <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="ident">file</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
-        }
+        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">CSS</span>;
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="ident">file</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
     }
 }
 </code></pre></div>
