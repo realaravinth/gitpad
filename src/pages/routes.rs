@@ -126,7 +126,7 @@ impl GetLoginRoute for Pages {
                 urlencoding::encode(redirect_to)
             )
         } else {
-            self.auth.register.to_string()
+            self.auth.login.to_string()
         }
     }
 }
