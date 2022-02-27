@@ -6,6 +6,7 @@
 
 </p>
 
+[![Docker](https://img.shields.io/docker/pulls/realaravinth/gitpad)](https://hub.docker.com/r/realaravinth/gitpad)
 [![Build](https://github.com/realaravinth/gitpad/actions/workflows/linux.yml/badge.svg)](https://github.com/realaravinth/gitpad/actions/workflows/linux.yml)
 [![dependency status](https://deps.rs/repo/github/realaravinth/gitpad/status.svg)](https://deps.rs/repo/github/realaravinth/gitpad)
 [![codecov](https://codecov.io/gh/realaravinth/gitpad/branch/master/graph/badge.svg)](https://codecov.io/gh/realaravinth/gitpad)
