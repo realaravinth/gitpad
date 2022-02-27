@@ -41,6 +41,7 @@ pub fn register_templates(t: &mut tera::Tera) {
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(new);
+    cfg.service(new_submit);
 }
 
 pub struct NewGist {
@@ -84,7 +85,6 @@ impl NewGist {
             ctx.insert(PAYLOAD_KEY, &[FieldNames::<&'static str>::default()]);
         }
 
-        println!("{:?}", ctx.get(PAYLOAD_KEY));
         let ctx = RefCell::new(ctx);
         Self { ctx }
     }
@@ -198,6 +198,117 @@ fn get_description(payload: &serde_json::Value) -> Option<&str> {
         }
     }
     None
+}
+
+fn is_add_file(payload: &serde_json::Value) -> bool {
+    payload.get("add_file").is_some()
+}
+
+struct FormExtractedData<'a> {
+    description: Option<&'a str>,
+    visibility: GistVisibility,
+    files: Vec<FieldNames<&'a str>>,
+    username: String,
+}
+
+fn extract_form<'a>(
+    id: &Identity,
+    data: &AppData,
+    payload: &'a serde_json::Value,
+) -> PageResult<FormExtractedData<'a>, NewGist> {
+    let username = id.identity().unwrap();
+    let description = get_description(payload);
+    let gist = FieldNames::<&str>::from_serde_json(payload).map_err(|(resp, e)| {
+        PageError::new(
+            NewGist::new(&username, &data.settings, description, Some(&resp)),
+            e,
+        )
+    })?;
+    let visibility = get_visibility(payload)
+        .map_err(|e| map_err(&username, data, description, Some(&gist), e))?;
+    let resp = FormExtractedData {
+        description,
+        visibility,
+        files: gist,
+        username,
+    };
+
+    Ok(resp)
+}
+
+fn map_err(
+    username: &str,
+    data: &AppData,
+    description: Option<&str>,
+    gist: Option<&[FieldNames<&str>]>,
+    e: ServiceError,
+) -> PageError<NewGist> {
+    PageError::new(NewGist::new(username, &data.settings, description, gist), e)
+}
+
+#[my_codegen::post(path = "PAGES.gist.new", wrap = "super::get_auth_middleware()")]
+async fn new_submit(
+    data: AppData,
+    db: crate::DB,
+    payload: web::Form<serde_json::Value>,
+    id: Identity,
+) -> PageResult<impl Responder, NewGist> {
+    let mut form_data = extract_form(&id, &data, &payload)?;
+    let html = ContentType::html();
+
+    if is_add_file(&payload) {
+        form_data.files.push(FieldNames::<&str>::default());
+        let page = NewGist::new(
+            &form_data.username,
+            &data.settings,
+            form_data.description,
+            Some(&form_data.files),
+        )
+        .render();
+        return Ok(HttpResponse::Ok().content_type(html).body(page));
+    };
+
+    let mut files: Vec<FileInfo> = Vec::with_capacity(form_data.files.len());
+    form_data
+        .files
+        .clone()
+        .drain(..)
+        .for_each(|f| files.push(f.into()));
+
+    let map_err = |e: ServiceError| -> PageError<NewGist> {
+        map_err(
+            &form_data.username,
+            &data,
+            form_data.description,
+            Some(&form_data.files),
+            e,
+        )
+    };
+    let msg = CreateGist {
+        owner: &form_data.username,
+        description: form_data.description,
+        visibility: &form_data.visibility,
+    };
+
+    let mut db_gist = data.new_gist(db.as_ref(), &msg).await.map_err(&map_err)?;
+
+    data.write_file(
+        db.as_ref(),
+        GistID::Repository(&mut db_gist.repository),
+        &files,
+    )
+    .await
+    .map_err(&map_err)?;
+
+    Ok(HttpResponse::Found()
+        .insert_header((
+            http::header::LOCATION,
+            PAGES.gist.get_gist_route(&PostCommentPath {
+                username: form_data.username,
+                gist: db_gist.id,
+            }),
+        ))
+        .finish())
 }
 
 #[cfg(test)]
@@ -324,5 +435,8 @@ mod tests {
             f.content,
             FileType::File(GistContentType::Text(fields1.content.to_owned()))
         );
+
+        assert!(!is_add_file(&json!({ "foo": "bar"})));
+        assert!(is_add_file(&json!({ "add_file": "bar"})));
     }
 }
