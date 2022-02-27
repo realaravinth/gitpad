@@ -224,5 +224,28 @@ footer {
   width: 100%;
   margin: 10px 0;
   padding: 5px 0;
-  height: 350px;
+  height: 320px;
+}
+
+
+.gist__button-group {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gist__button-container {
+  flex: 1;
+  max-width: 200px;
+}
+
+.form__submit--secondary {
+  width: 100%;
+  display: block;
+  margin: 10px 0;
+  border: none;
+  padding: 5px 0;
+  cursor: pointer;
+  background-color: #e9e9ed;
 }

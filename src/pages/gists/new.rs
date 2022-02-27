@@ -55,11 +55,37 @@ impl CtxError for NewGist {
 }
 
 impl NewGist {
-    pub fn new(username: &str, settings: &Settings, payload: Option<&[FieldNames<&str>]>) -> Self {
-        let ctx = RefCell::new(auth_ctx(username, settings));
-        if let Some(payload) = payload {
-            ctx.borrow_mut().insert(PAYLOAD_KEY, &payload);
+    pub fn new(
+        username: &str,
+        settings: &Settings,
+        description: Option<&str>,
+        payload: Option<&[FieldNames<&str>]>,
+    ) -> Self {
+        const FIELDNAMES_KEY: &str = "fieldnames";
+        let mut ctx = auth_ctx(username, settings);
+        ctx.insert("visibility_private", GistVisibility::Private.to_str());
+        ctx.insert("visibility_unlisted", GistVisibility::Unlisted.to_str());
+        ctx.insert("visibility_public", GistVisibility::Public.to_str());
+
+        if let Some(description) = description {
+            ctx.insert("description", description);
         }
+
+        if let Some(payload) = payload {
+            ctx.insert(PAYLOAD_KEY, &payload);
+            let fields = payload.len();
+            let mut fieldnames = Vec::with_capacity(fields);
+            for i in 1..=payload.len() {
+                fieldnames.push(FieldNames::<String>::new(i))
+            }
+            ctx.insert(FIELDNAMES_KEY, &fieldnames);
+        } else {
+            ctx.insert(FIELDNAMES_KEY, &[FieldNames::<String>::new(1)]);
+            ctx.insert(PAYLOAD_KEY, &[FieldNames::<&'static str>::default()]);
+        }
+
+        println!("{:?}", ctx.get(PAYLOAD_KEY));
+        let ctx = RefCell::new(ctx);
         Self { ctx }
     }
 
@@ -68,7 +94,7 @@ impl NewGist {
     }
 
     pub fn page(username: &str, s: &Settings) -> String {
-        let p = Self::new(username, s, None);
+        let p = Self::new(username, s, None, None);
         p.render()
     }
 }
@@ -88,6 +114,15 @@ const FILENAME_FIELD_NAME_PREFIX: &str = "filename__";
 pub struct FieldNames<T: Serialize + ToString> {
     pub filename: T,
     pub content: T,
+}
+
+impl Default for FieldNames<&'static str> {
+    fn default() -> Self {
+        Self {
+            content: "",
+            filename: "",
+        }
+    }
 }
 
 impl<T: Serialize + ToString> From<FieldNames<T>> for FileInfo {
@@ -164,6 +199,7 @@ fn get_description(payload: &serde_json::Value) -> Option<&str> {
     }
     None
 }
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;
@@ -267,9 +303,9 @@ mod tests {
         );
 
         let some_partially_empty_files = json!({
-            f1.filename.clone(): f1_name,
-            f1.content.clone(): f1_content,
-            f2.content.clone(): f2_content,
+            f1.filename: f1_name,
+            f1.content: f1_content,
+            f2.content: f2_content,
         });
         let some_empty_gist_err = FieldNames::<&str>::from_serde_json(&some_partially_empty_files);
         assert!(some_empty_gist_err.is_err());

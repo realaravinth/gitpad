@@ -1,8 +1,8 @@
 {% extends 'gistbase' %} 
 {% block gist_main %}
-<form class="gist__new" action="/new" method="POST" accept-charset="utf-8">
+<form class="gist__new" action={{ page.gist.new }} method="POST" accept-charset="utf-8">
 	{% include "error_comp" %}
-  <label class="form__label" for="login">
+  <label class="form__label" for="description">
     Gist description
     <input 
         class="form__input"
@@ -15,61 +15,79 @@
       {% endif %}
     />
   </label>
-  {% if payload.files %}
-    {% for file in payload.files %}
+    {% for fieldname in fieldnames%}
+      {% set content = payload | nth(n=(loop.index - 1)) %}
       <legend class="gist__file">
-        <label class="form__label" for="login">
+        <label class="form__label" for={{ fieldname.filename }}>
           File name with extension
           <input 
 			  required
               class="form__input"
-              name="filename"
+			  name={{ fieldname.filename }}
               autofocus
-              id="filename"
+			  id={{ fieldname.filename }}
               type="text"
-              value={{ file.filename }}
+              value="{{ content.filename }}"
           />
         </label>
-        <label class="form__label" for="login">
+        <label class="form__label" for={{ fieldname.content }}>
         <textarea 
 			required
 		    class="gist__file-content"
-            name="content"
-            autofocus
-            id="content"
+			name={{ fieldname.content }}
+			id={{ fieldname.content }}
             type="text"
-            value={{ file.content }}
-        >
-		</textarea>
-
+        >{{ content.content }}</textarea>
         </label>
       </legend>
     {% endfor %}
-  {% else %}
-    <legend class="gist__file">
-      <label class="form__label" for="login">
-        File name with extension
-        <input 
-            class="form__input"
-            name="filename"
-            autofocus
-            id="filename"
-            type="text"
-        />
-      </label>
-      <label class="form__label" for="login">
-        <textarea 
-			required
-		    class="gist__file-content"
-            name="content"
-            autofocus
-            id="content"
-            type="text"
-        >
-	   </textarea>
-      </label>
-    </legend>
+    <div class="gist__radio-group">
+      <label class="gist__radio-label" for={{ visibility_public }}>
+          <input 
+              required
+              class="gist__radio-btn"
+              name="visibility"
+              id={{ visibility_public }}
+              type="radio"
+              value={{ visibility_public }}
+          />
+          Public
+    </label>
 
-  {% endif %}
+      <label class="gist__radio-label" for={{ visibility_unlisted }}>
+          <input 
+              class="gist__radio-btn"
+              name="visibility"
+              id={{ visibility_unlisted }}
+              type="radio"
+              value={{ visibility_unlisted }}
+          />
+          Unlisted
+    </label>
+
+      <label class="gist__radio-label" for={{ visibility_private }}>
+          <input 
+              class="gist__radio-btn"
+              name="visibility"
+              id={{ visibility_private }}
+              type="radio"
+              value={{ visibility_private }}
+          />
+          Private
+    </label>
+  </div>
+  <div class="gist__button-group">
+    <div class="gist__button-container">
+      <button 
+        class="form__submit--secondary"
+        name="add_file"
+        value="true"
+        type="submit"
+      >Add File</button>
+    </div>
+    <div class="gist__button-container">
+      <button class="form__submit" type="submit">Create Gist</button>
+    </div>
+  </div>
 </form>
 {% endblock %}
