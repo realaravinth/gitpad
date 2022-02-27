@@ -292,6 +292,42 @@
 <span id="290">290</span>
 <span id="291">291</span>
 <span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -349,11 +385,37 @@
 }
 
 <span class="kw">impl</span> <span class="ident">NewGist</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">settings</span>: <span class="kw-2">&amp;</span><span class="ident">Settings</span>, <span class="ident">payload</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">FieldNames</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>]<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">ctx</span> <span class="op">=</span> <span class="ident">RefCell::new</span>(<span class="ident">auth_ctx</span>(<span class="ident">username</span>, <span class="ident">settings</span>));
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">payload</span>) <span class="op">=</span> <span class="ident">payload</span> {
-            <span class="ident">ctx</span>.<span class="ident">borrow_mut</span>().<span class="ident">insert</span>(<span class="ident">PAYLOAD_KEY</span>, <span class="kw-2">&amp;</span><span class="ident">payload</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">settings</span>: <span class="kw-2">&amp;</span><span class="ident">Settings</span>,
+        <span class="ident">description</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">payload</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">FieldNames</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>]<span class="op">&gt;</span>,
+    ) -&gt; <span class="self">Self</span> {
+        <span class="kw">const</span> <span class="ident">FIELDNAMES_KEY</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;fieldnames&quot;</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ctx</span> <span class="op">=</span> <span class="ident">auth_ctx</span>(<span class="ident">username</span>, <span class="ident">settings</span>);
+        <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="string">&quot;visibility_private&quot;</span>, <span class="ident">GistVisibility::Private</span>.<span class="ident">to_str</span>());
+        <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="string">&quot;visibility_unlisted&quot;</span>, <span class="ident">GistVisibility::Unlisted</span>.<span class="ident">to_str</span>());
+        <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="string">&quot;visibility_public&quot;</span>, <span class="ident">GistVisibility::Public</span>.<span class="ident">to_str</span>());
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">description</span>) <span class="op">=</span> <span class="ident">description</span> {
+            <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="string">&quot;description&quot;</span>, <span class="ident">description</span>);
         }
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">payload</span>) <span class="op">=</span> <span class="ident">payload</span> {
+            <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="ident">PAYLOAD_KEY</span>, <span class="kw-2">&amp;</span><span class="ident">payload</span>);
+            <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">len</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fieldnames</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">fields</span>);
+            <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">1</span>..<span class="op">=</span><span class="ident">payload</span>.<span class="ident">len</span>() {
+                <span class="ident">fieldnames</span>.<span class="ident">push</span>(<span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">i</span>))
+            }
+            <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="ident">FIELDNAMES_KEY</span>, <span class="kw-2">&amp;</span><span class="ident">fieldnames</span>);
+        } <span class="kw">else</span> {
+            <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="ident">FIELDNAMES_KEY</span>, <span class="kw-2">&amp;</span>[<span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>)]);
+            <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="ident">PAYLOAD_KEY</span>, <span class="kw-2">&amp;</span>[<span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span><span class="ident">::default</span>()]);
+        }
+
+        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">ctx</span>.<span class="ident">get</span>(<span class="ident">PAYLOAD_KEY</span>));
+        <span class="kw">let</span> <span class="ident">ctx</span> <span class="op">=</span> <span class="ident">RefCell::new</span>(<span class="ident">ctx</span>);
         <span class="self">Self</span> { <span class="ident">ctx</span> }
     }
 
@@ -362,7 +424,7 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">page</span>(<span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">Settings</span>) -&gt; <span class="ident">String</span> {
-        <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">username</span>, <span class="ident">s</span>, <span class="prelude-val">None</span>);
+        <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">username</span>, <span class="ident">s</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
         <span class="ident">p</span>.<span class="ident">render</span>()
     }
 }
@@ -382,6 +444,15 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FieldNames</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Serialize</span> <span class="op">+</span> <span class="ident">ToString</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="ident">filename</span>: <span class="ident">T</span>,
     <span class="kw">pub</span> <span class="ident">content</span>: <span class="ident">T</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">FieldNames</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">content</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">filename</span>: <span class="string">&quot;&quot;</span>,
+        }
+    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Serialize</span> <span class="op">+</span> <span class="ident">ToString</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">FieldNames</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FileInfo</span> {
@@ -458,6 +529,7 @@
     }
     <span class="prelude-val">None</span>
 }
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="ident">serde_json::json</span>;
@@ -561,9 +633,9 @@
         );
 
         <span class="kw">let</span> <span class="ident">some_partially_empty_files</span> <span class="op">=</span> <span class="macro">json!</span>({
-            <span class="ident">f1</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(): <span class="ident">f1_name</span>,
-            <span class="ident">f1</span>.<span class="ident">content</span>.<span class="ident">clone</span>(): <span class="ident">f1_content</span>,
-            <span class="ident">f2</span>.<span class="ident">content</span>.<span class="ident">clone</span>(): <span class="ident">f2_content</span>,
+            <span class="ident">f1</span>.<span class="ident">filename</span>: <span class="ident">f1_name</span>,
+            <span class="ident">f1</span>.<span class="ident">content</span>: <span class="ident">f1_content</span>,
+            <span class="ident">f2</span>.<span class="ident">content</span>: <span class="ident">f2_content</span>,
         });
         <span class="kw">let</span> <span class="ident">some_empty_gist_err</span> <span class="op">=</span> <span class="ident">FieldNames</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::from_serde_json</span>(<span class="kw-2">&amp;</span><span class="ident">some_partially_empty_files</span>);
         <span class="macro">assert!</span>(<span class="ident">some_empty_gist_err</span>.<span class="ident">is_err</span>());
