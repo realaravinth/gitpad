@@ -345,6 +345,58 @@ impl Data {
             GistID::Repository(repository) => inner(repository),
         }
     }
+
+    pub async fn gist_preview<T: GPDatabse>(
+        &self,
+        db: &T,
+        gist_id: &mut GistID<'_>,
+    ) -> ServiceResult<GistInfo> {
+        async fn inner<F: GPDatabse>(
+            gist_id: &mut GistID<'_>,
+            data: &Data,
+            db: &F,
+        ) -> ServiceResult<Vec<FileInfo>> {
+            match &gist_id {
+                GistID::Repository(repo) => {
+                    let head = repo.head().unwrap();
+                    let tree = head.peel_to_tree().unwrap();
+                    let mut files = Vec::with_capacity(5);
+                    for item in tree.iter() {
+                        println!("name from gist_preview: {:?}:", item.name());
+                        if let Some(name) = item.name() {
+                            let file = data.read_file(db, gist_id, name).await?;
+                            files.push(file);
+                        }
+                    }
+                    Ok(files)
+                }
+                _ => unimplemented!(),
+            }
+        }
+
+        let gist_public_id = self.get_gist_id_from_repo_path(gist_id);
+        let gist_info = db.get_gist(&gist_public_id).await?;
+
+        let files = match &gist_id {
+            GistID::ID(path) => {
+                let mut repo = git2::Repository::open(self.get_repository_path(path)).unwrap();
+                let mut gist_id = GistID::Repository(&mut repo);
+                inner(&mut gist_id, self, db).await?
+            }
+            GistID::Repository(_) => inner(gist_id, self, db).await?,
+        };
+
+        let resp = GistInfo {
+            created: gist_info.created,
+            updated: gist_info.updated,
+            files,
+            visibility: gist_info.visibility,
+            description: gist_info.description,
+            owner: gist_info.owner,
+        };
+
+        Ok(resp)
+    }
 }
 
 #[cfg(test)]
@@ -448,6 +500,30 @@ pub mod tests {
                 data.get_gist_id_from_repo_path(&GistID::Repository(&mut repo)),
                 gist.id
             );
+            let preview = data
+                .gist_preview(db, &mut GistID::ID(&gist.id))
+                .await
+                .unwrap();
+            assert_eq!(preview.owner, NAME);
+            println!("preview {:#?}", preview);
+            assert_eq!(preview.files.len(), 4);
+            for file in preview.files.iter() {
+                if file.filename == escape_spaces(&files2[0].filename) {
+                    assert_eq!(file.content, files2[0].content);
+                } else {
+                    let processed: Vec<FileInfo> = files
+                        .iter()
+                        .map(|f| FileInfo {
+                            filename: escape_spaces(&f.filename),
+                            content: f.content.clone(),
+                        })
+                        .collect();
+
+                    assert!(processed
+                        .iter()
+                        .any(|f| f.filename == file.filename && f.content == file.content));
+                }
+            }
         }
     }
 }
