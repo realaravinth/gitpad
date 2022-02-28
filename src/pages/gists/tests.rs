@@ -16,12 +16,14 @@
  */
 use actix_web::http::StatusCode;
 use actix_web::test;
+use actix_web::ResponseError;
 
 use db_core::prelude::*;
 
 use super::new::*;
 
 use crate::data::Data;
+use crate::errors::*;
 use crate::tests::*;
 use crate::*;
 
@@ -81,9 +83,18 @@ async fn gists_new_route_works(data: Arc<Data>, db: BoxDB) {
     let resp = test::call_service(
         &app,
         post_request!(&payload, PAGES.gist.new, FORM)
-            .cookie(cookies)
+            .cookie(cookies.clone())
             .to_request(),
     )
     .await;
     assert_eq!(resp.status(), StatusCode::OK);
+
+    let empty_gist = test::call_service(
+        &app,
+        post_request!(&serde_json::Value::default(), PAGES.gist.new, FORM)
+            .cookie(cookies)
+            .to_request(),
+    )
+    .await;
+    assert_eq!(empty_gist.status(), ServiceError::GistEmpty.status_code());
 }
