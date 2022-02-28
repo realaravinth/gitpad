@@ -868,7 +868,7 @@
         .<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="ident">data</span>.<span class="ident">write_file</span>(
         <span class="ident">db</span>.<span class="ident">as_ref</span>(),
-        <span class="ident">GistID::Repository</span>(<span class="kw-2">&amp;mut</span> <span class="ident">gist</span>.<span class="ident">repository</span>),
+        <span class="kw-2">&amp;mut</span> <span class="ident">GistID::Repository</span>(<span class="kw-2">&amp;mut</span> <span class="ident">gist</span>.<span class="ident">repository</span>),
         <span class="kw-2">&amp;</span><span class="ident">payload</span>.<span class="ident">files</span>,
     )
     .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -889,7 +889,7 @@
             <span class="kw">let</span> <span class="ident">contents</span> <span class="op">=</span> <span class="ident">data</span>
                 .<span class="ident">read_file</span>(
                     <span class="ident">db</span>.<span class="ident">as_ref</span>(),
-                    <span class="ident">GistID::ID</span>(<span class="kw-2">&amp;</span><span class="ident">gist</span>.<span class="ident">public_id</span>),
+                    <span class="kw-2">&amp;</span><span class="ident">GistID::ID</span>(<span class="kw-2">&amp;</span><span class="ident">gist</span>.<span class="ident">public_id</span>),
                     <span class="kw-2">&amp;</span><span class="ident">escape_spaces</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">file</span>),
                 )
                 .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -901,7 +901,7 @@
                     <span class="kw">let</span> <span class="ident">contents</span> <span class="op">=</span> <span class="ident">data</span>
                         .<span class="ident">read_file</span>(
                             <span class="ident">db</span>.<span class="ident">as_ref</span>(),
-                            <span class="ident">GistID::ID</span>(<span class="kw-2">&amp;</span><span class="ident">gist</span>.<span class="ident">public_id</span>),
+                            <span class="kw-2">&amp;</span><span class="ident">GistID::ID</span>(<span class="kw-2">&amp;</span><span class="ident">gist</span>.<span class="ident">public_id</span>),
                             <span class="kw-2">&amp;</span><span class="ident">escape_spaces</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">file</span>),
                         )
                         .<span class="kw">await</span><span class="question-mark">?</span>;

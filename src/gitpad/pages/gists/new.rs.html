@@ -738,7 +738,7 @@
 
     <span class="ident">data</span>.<span class="ident">write_file</span>(
         <span class="ident">db</span>.<span class="ident">as_ref</span>(),
-        <span class="ident">GistID::Repository</span>(<span class="kw-2">&amp;mut</span> <span class="ident">db_gist</span>.<span class="ident">repository</span>),
+        <span class="kw-2">&amp;mut</span> <span class="ident">GistID::Repository</span>(<span class="kw-2">&amp;mut</span> <span class="ident">db_gist</span>.<span class="ident">repository</span>),
         <span class="kw-2">&amp;</span><span class="ident">files</span>,
     )
     .<span class="kw">await</span>
