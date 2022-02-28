@@ -787,6 +787,83 @@
 <span id="785">785</span>
 <span id="786">786</span>
 <span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -840,6 +917,7 @@
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">get_comment</span>);
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">get_gist_comments</span>);
     <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">delete_comment</span>);
+    <span class="ident">cfg</span>.<span class="ident">service</span>(<span class="ident">index</span>);
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
@@ -1033,10 +1111,33 @@
     }
 }
 
+<span class="attribute">#[<span class="ident">my_codegen::get</span>(
+    <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;crate::V1_API_ROUTES.gist.gist_index&quot;</span>,
+    <span class="ident">wrap</span> <span class="op">=</span> <span class="string">&quot;super::get_auth_middleware()&quot;</span>
+)]</span>
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">index</span>(
+    <span class="ident">path</span>: <span class="ident">web::Path</span><span class="op">&lt;</span><span class="ident">PostCommentPath</span><span class="op">&gt;</span>,
+    <span class="ident">id</span>: <span class="ident">Identity</span>,
+    <span class="ident">db</span>: <span class="ident"><span class="kw">crate</span>::DB</span>,
+    <span class="ident">data</span>: <span class="ident">AppData</span>,
+) -&gt; <span class="ident">ServiceResult</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Responder</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">username</span> <span class="op">=</span> <span class="ident">id</span>.<span class="ident">identity</span>().<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="ident">gist</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_gist</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">gist</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">if</span> <span class="ident">gist</span>.<span class="ident">visibility</span> <span class="op">==</span> <span class="ident">GistVisibility::Private</span> <span class="op">&amp;&amp;</span> <span class="ident">username</span> <span class="op">!</span><span class="op">=</span> <span class="ident">gist</span>.<span class="ident">owner</span> {
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ServiceError::GistNotFound</span>);
+    }
+
+    <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">data</span>
+        .<span class="ident">gist_preview</span>(<span class="ident">db</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">GistID::ID</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">gist</span>))
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(<span class="ident">HttpResponse::Ok</span>().<span class="ident">json</span>(<span class="ident">resp</span>))
+}
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data::api::v1::gists</span>::{<span class="ident">ContentType</span>, <span class="ident">FileType</span>};
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data::api::v1::gists</span>::{<span class="ident">ContentType</span>, <span class="ident">FileType</span>, <span class="ident">GistInfo</span>};
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::tests</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">actix_web::ResponseError</span>;
 
@@ -1148,11 +1249,10 @@
             <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">content</span>, <span class="kw-2">&amp;</span><span class="ident">req_escaped_file</span>);
         }
         <span class="comment">// 2. Unlisted gists</span>
-        <span class="kw">let</span> <span class="ident">one_file</span> <span class="op">=</span> [<span class="ident">files</span>[<span class="number">0</span>].<span class="ident">clone</span>()];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">CreateGistRequest</span> {
             <span class="ident">description</span>: <span class="prelude-val">None</span>,
             <span class="ident">visibility</span>: <span class="ident">GistVisibility::Unlisted</span>,
-            <span class="ident">files</span>: <span class="ident">one_file</span>.<span class="ident">to_vec</span>(),
+            <span class="ident">files</span>: <span class="ident">files</span>.<span class="ident">to_vec</span>(),
         };
 
         <span class="kw">let</span> <span class="ident">create_gist_resp</span> <span class="op">=</span> <span class="ident">test::call_service</span>(
@@ -1167,7 +1267,7 @@
         <span class="kw">let</span> <span class="ident">unlisted</span> <span class="op">=</span> <span class="ident">unlisted</span>.<span class="ident">id</span>;
 
         <span class="ident">get_file_path</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">unlisted</span>.<span class="ident">clone</span>();
-        <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">one_file</span>.<span class="ident">iter</span>() {
+        <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">files</span>.<span class="ident">iter</span>() {
             <span class="comment">// requesting user is owner</span>
             <span class="ident">get_file_path</span>.<span class="ident">file</span> <span class="op">=</span> <span class="ident">file</span>.<span class="ident">filename</span>.<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_file_route</span>(<span class="kw-2">&amp;</span><span class="ident">get_file_path</span>);
@@ -1217,7 +1317,7 @@
         <span class="kw">let</span> <span class="ident">private</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">id</span>;
 
         <span class="ident">get_file_path</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">clone</span>();
-        <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">one_file</span>.<span class="ident">iter</span>() {
+        <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">files</span>.<span class="ident">iter</span>() {
             <span class="ident">get_file_path</span>.<span class="ident">file</span> <span class="op">=</span> <span class="ident">file</span>.<span class="ident">filename</span>.<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_file_route</span>(<span class="kw-2">&amp;</span><span class="ident">get_file_path</span>);
             <span class="macro">println!</span>(<span class="string">&quot;Trying to get file {path}&quot;</span>);
@@ -1572,6 +1672,60 @@
         <span class="macro">println!</span>(<span class="string">&quot;delete comments; authenticated  comment_owner == owner&quot;</span>);
         <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">delete_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">del_comment_path</span>, <span class="ident">cookies</span>.<span class="ident">clone</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
+
+        <span class="comment">/*
+         *
+         * ============================================
+         *                  Gist index
+         * ============================================
+         *
+         */</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gist_index</span> <span class="op">=</span> <span class="ident">PostCommentPath</span> {
+            <span class="ident">username</span>: <span class="ident">NAME</span>.<span class="ident">into</span>(),
+            <span class="ident">gist</span>: <span class="string">&quot;non-existant&quot;</span>.<span class="ident">into</span>(),
+        };
+
+        <span class="comment">// unauthenticated request</span>
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_gist_index</span>(<span class="kw-2">&amp;</span><span class="ident">gist_index</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::FOUND</span>);
+
+        <span class="comment">// non-existant gist</span>
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_gist_index</span>(<span class="kw-2">&amp;</span><span class="ident">gist_index</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">cookies</span>.<span class="ident">clone</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::NOT_FOUND</span>);
+        <span class="kw">let</span> <span class="ident">err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::GistNotFound</span>));
+
+        <span class="comment">// get private gist with user that doesn&#39;t have access</span>
+        <span class="ident">gist_index</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_gist_index</span>(<span class="kw-2">&amp;</span><span class="ident">gist_index</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">cookies2</span>.<span class="ident">clone</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::NOT_FOUND</span>);
+        <span class="kw">let</span> <span class="ident">err</span>: <span class="ident">ErrorToResponse</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">err</span>.<span class="ident">error</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">ServiceError::GistNotFound</span>));
+
+        <span class="comment">// get private gist with user=owner</span>
+        <span class="ident">gist_index</span>.<span class="ident">gist</span> <span class="op">=</span> <span class="ident">private</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">V1_API_ROUTES</span>.<span class="ident">gist</span>.<span class="ident">get_gist_index</span>(<span class="kw-2">&amp;</span><span class="ident">gist_index</span>);
+        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="macro">get_request!</span>(<span class="kw-2">&amp;</span><span class="ident">app</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">cookies</span>.<span class="ident">clone</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">resp</span>.<span class="ident">status</span>(), <span class="ident">StatusCode::OK</span>);
+        <span class="kw">let</span> <span class="ident">preview</span>: <span class="ident">GistInfo</span> <span class="op">=</span> <span class="ident">test::read_body_json</span>(<span class="ident">resp</span>).<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">preview</span>.<span class="ident">owner</span>, <span class="ident">NAME</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">preview</span>.<span class="ident">files</span>.<span class="ident">len</span>(), <span class="ident">files</span>.<span class="ident">len</span>());
+        <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">preview</span>.<span class="ident">files</span>.<span class="ident">iter</span>() {
+            <span class="kw">let</span> <span class="ident">processed</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FileInfo</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">files</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">FileInfo</span> {
+                    <span class="ident">filename</span>: <span class="ident">escape_spaces</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">filename</span>),
+                    <span class="ident">content</span>: <span class="ident">f</span>.<span class="ident">content</span>.<span class="ident">clone</span>(),
+                })
+                .<span class="ident">collect</span>();
+
+            <span class="macro">assert!</span>(<span class="ident">processed</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">any</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>.<span class="ident">filename</span> <span class="op">==</span> <span class="ident">file</span>.<span class="ident">filename</span> <span class="op">&amp;&amp;</span> <span class="ident">f</span>.<span class="ident">content</span> <span class="op">==</span> <span class="ident">file</span>.<span class="ident">content</span>));
+        }
     }
 }
 </code></pre></div>
