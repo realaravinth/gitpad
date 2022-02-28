@@ -101,9 +101,10 @@ pub struct FileInfo {
     pub content: FileType,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct GistInfo {
     pub files: Vec<FileInfo>,
-    pub description: String,
+    pub description: Option<String>,
     pub owner: String,
     pub created: i64,
     pub updated: i64,
@@ -183,6 +184,16 @@ impl Data {
 
     pub(crate) fn get_repository_path(&self, gist_id: &str) -> PathBuf {
         Path::new(&self.settings.repository.root).join(gist_id)
+    }
+
+    pub(crate) fn get_gist_id_from_repo_path(&self, gist_id: &GistID<'_>) -> String {
+        match gist_id {
+            GistID::ID(p) => p.to_string(),
+            GistID::Repository(r) => {
+                let path = r.path().to_path_buf(); // /path/to/repository/.git
+                path.file_name().unwrap().to_string_lossy().to_string()
+            }
+        }
     }
 
     pub async fn write_file<T: GPDatabse>(
@@ -431,6 +442,12 @@ pub mod tests {
                 .await
                 .unwrap();
             data.gist_files_written_helper(db, &gist.id, &files2).await;
+
+            let mut repo = Repository::open(data.get_repository_path(&gist.id)).unwrap();
+            assert_eq!(
+                data.get_gist_id_from_repo_path(&GistID::Repository(&mut repo)),
+                gist.id
+            );
         }
     }
 }
