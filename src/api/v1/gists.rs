@@ -51,6 +51,7 @@ pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(get_comment);
     cfg.service(get_gist_comments);
     cfg.service(delete_comment);
+    cfg.service(index);
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -244,10 +245,33 @@ async fn delete_comment(
     }
 }
 
+#[my_codegen::get(
+    path = "crate::V1_API_ROUTES.gist.gist_index",
+    wrap = "super::get_auth_middleware()"
+)]
+async fn index(
+    path: web::Path<PostCommentPath>,
+    id: Identity,
+    db: crate::DB,
+    data: AppData,
+) -> ServiceResult<impl Responder> {
+    let username = id.identity().unwrap();
+    let gist = db.get_gist(&path.gist).await?;
+    if gist.visibility == GistVisibility::Private && username != gist.owner {
+        return Err(ServiceError::GistNotFound);
+    }
+
+    let resp = data
+        .gist_preview(db.as_ref(), &mut GistID::ID(&path.gist))
+        .await?;
+
+    Ok(HttpResponse::Ok().json(resp))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::data::api::v1::gists::{ContentType, FileType};
+    use crate::data::api::v1::gists::{ContentType, FileType, GistInfo};
     use crate::tests::*;
     use actix_web::ResponseError;
 
@@ -359,11 +383,10 @@ mod tests {
             assert_eq!(&content, &req_escaped_file);
         }
         // 2. Unlisted gists
-        let one_file = [files[0].clone()];
         let mut msg = CreateGistRequest {
             description: None,
             visibility: GistVisibility::Unlisted,
-            files: one_file.to_vec(),
+            files: files.to_vec(),
         };
 
         let create_gist_resp = test::call_service(
@@ -378,7 +401,7 @@ mod tests {
         let unlisted = unlisted.id;
 
         get_file_path.gist = unlisted.clone();
-        for file in one_file.iter() {
+        for file in files.iter() {
             // requesting user is owner
             get_file_path.file = file.filename.clone();
             let path = V1_API_ROUTES.gist.get_file_route(&get_file_path);
@@ -428,7 +451,7 @@ mod tests {
         let private = private.id;
 
         get_file_path.gist = private.clone();
-        for file in one_file.iter() {
+        for file in files.iter() {
             get_file_path.file = file.filename.clone();
             let path = V1_API_ROUTES.gist.get_file_route(&get_file_path);
             println!("Trying to get file {path}");
@@ -783,5 +806,59 @@ mod tests {
         println!("delete comments; authenticated  comment_owner == owner");
         let resp = delete_request!(&app, &del_comment_path, cookies.clone());
         assert_eq!(resp.status(), StatusCode::OK);
+
+        /*
+         *
+         * ============================================
+         *                  Gist index
+         * ============================================
+         *
+         */
+        let mut gist_index = PostCommentPath {
+            username: NAME.into(),
+            gist: "non-existant".into(),
+        };
+
+        // unauthenticated request
+        let path = V1_API_ROUTES.gist.get_gist_index(&gist_index);
+        let resp = get_request!(&app, &path);
+        assert_eq!(resp.status(), StatusCode::FOUND);
+
+        // non-existant gist
+        let path = V1_API_ROUTES.gist.get_gist_index(&gist_index);
+        let resp = get_request!(&app, &path, cookies.clone());
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
+        let err: ErrorToResponse = test::read_body_json(resp).await;
+        assert_eq!(err.error, format!("{}", ServiceError::GistNotFound));
+
+        // get private gist with user that doesn't have access
+        gist_index.gist = private.clone();
+        let path = V1_API_ROUTES.gist.get_gist_index(&gist_index);
+        let resp = get_request!(&app, &path, cookies2.clone());
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
+        let err: ErrorToResponse = test::read_body_json(resp).await;
+        assert_eq!(err.error, format!("{}", ServiceError::GistNotFound));
+
+        // get private gist with user=owner
+        gist_index.gist = private.clone();
+        let path = V1_API_ROUTES.gist.get_gist_index(&gist_index);
+        let resp = get_request!(&app, &path, cookies.clone());
+        assert_eq!(resp.status(), StatusCode::OK);
+        let preview: GistInfo = test::read_body_json(resp).await;
+        assert_eq!(preview.owner, NAME);
+        assert_eq!(preview.files.len(), files.len());
+        for file in preview.files.iter() {
+            let processed: Vec<FileInfo> = files
+                .iter()
+                .map(|f| FileInfo {
+                    filename: escape_spaces(&f.filename),
+                    content: f.content.clone(),
+                })
+                .collect();
+
+            assert!(processed
+                .iter()
+                .any(|f| f.filename == file.filename && f.content == file.content));
+        }
     }
 }

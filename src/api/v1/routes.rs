@@ -79,12 +79,15 @@ pub struct Gist {
     pub get_gist_comments: &'static str,
     /// delete comment
     pub delete_comment: &'static str,
+    /// gist index page
+    pub gist_index: &'static str,
 }
 
 impl Gist {
     /// create new instance of Authentication route
     pub const fn new() -> Gist {
         let new = "/api/v1/gist/new";
+        let gist_index = "/api/v1/gist/profile/{username}/{gist}";
         let get_file = "/api/v1/gist/profile/{username}/{gist}/contents/{file}";
         let post_comment = "/api/v1/gist/profile/{username}/{gist}/comments";
         let get_comment = "/api/v1/gist/profile/{username}/{gist}/comment/{comment_id}";
@@ -97,6 +100,7 @@ impl Gist {
             get_comment,
             get_gist_comments,
             delete_comment,
+            gist_index,
         }
     }
 
@@ -112,6 +116,13 @@ impl Gist {
     /// get post_comment route with placeholders replaced with values provided.
     pub fn get_post_comment_route(&self, components: &PostCommentPath) -> String {
         self.post_comment
+            .replace("{username}", &components.username)
+            .replace("{gist}", &components.gist)
+    }
+
+    /// get gist index route with placeholders replaced with values provided.
+    pub fn get_gist_index(&self, components: &PostCommentPath) -> String {
+        self.gist_index
             .replace("{username}", &components.username)
             .replace("{gist}", &components.gist)
     }
@@ -228,6 +239,7 @@ mod tests {
         const COMMENT_ID: i64 = 5;
         let get_file = format!("/api/v1/gist/profile/{NAME}/{GIST}/contents/{FILE}");
         let post_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comments");
+        let gist_index = format!("/api/v1/gist/profile/{NAME}/{GIST}");
         let get_gist_comments = format!("/api/v1/gist/profile/{NAME}/{GIST}/comments");
         let get_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comment/{COMMENT_ID}");
         let delete_comment = format!("/api/v1/gist/profile/{NAME}/{GIST}/comment/{COMMENT_ID}");
@@ -276,5 +288,7 @@ mod tests {
             delete_comment,
             ROUTES.gist.get_delete_comment_route(&delete_comment_path)
         );
+
+        assert_eq!(gist_index, ROUTES.gist.get_gist_index(&post_comment_path));
     }
 }

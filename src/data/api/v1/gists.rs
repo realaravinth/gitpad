@@ -294,7 +294,6 @@ impl Data {
                 let tree = repo.find_tree(id).unwrap();
                 let mut items = Vec::with_capacity(tree.len());
                 for item in tree.iter() {
-                    println!("{:?}", item.name());
                     if let Some(name) = item.name() {
                         #[allow(clippy::needless_borrow)]
                         let mode: GitFileMode = (&item).into();
@@ -346,6 +345,12 @@ impl Data {
         }
     }
 
+    /// fetches gist metadata from DB and retrieves contents of all the files stored
+    /// in the repository
+    // TODO
+    // Data::gist_preview uses Data::read_file under the hood, which
+    // currently reads subdirectories up to level 1 depth. Decision has
+    // to be made regarding what to do with level 2 and below subdirectories.
     pub async fn gist_preview<T: GPDatabse>(
         &self,
         db: &T,
@@ -362,7 +367,6 @@ impl Data {
                     let tree = head.peel_to_tree().unwrap();
                     let mut files = Vec::with_capacity(5);
                     for item in tree.iter() {
-                        println!("name from gist_preview: {:?}:", item.name());
                         if let Some(name) = item.name() {
                             let file = data.read_file(db, gist_id, name).await?;
                             files.push(file);
@@ -505,7 +509,6 @@ pub mod tests {
                 .await
                 .unwrap();
             assert_eq!(preview.owner, NAME);
-            println!("preview {:#?}", preview);
             assert_eq!(preview.files.len(), 4);
             for file in preview.files.iter() {
                 if file.filename == escape_spaces(&files2[0].filename) {
