@@ -188,15 +188,21 @@ impl Data {
     pub async fn write_file<T: GPDatabse>(
         &self,
         _db: &T,
-        gist_id: GistID<'_>,
+        gist_id: &mut GistID<'_>,
         files: &[FileInfo],
     ) -> ServiceResult<()> {
         if files.is_empty() {
             return Err(ServiceError::GistEmpty);
         }
+
         // TODO change updated in DB
         let inner = |repo: &mut Repository| -> ServiceResult<()> {
-            let mut tree_builder = repo.treebuilder(None).unwrap();
+            let mut tree_builder = match repo.head() {
+                Err(_) => repo.treebuilder(None).unwrap(),
+
+                Ok(h) => repo.treebuilder(Some(&h.peel_to_tree().unwrap())).unwrap(),
+            };
+
             let odb = repo.odb().unwrap();
 
             for file in files.iter() {
@@ -212,7 +218,6 @@ impl Data {
                     }
                 }
             }
-
             let tree_hash = tree_builder.write().unwrap();
             let author = Signature::now("gists", "admin@gists.batsense.net").unwrap();
             let committer = Signature::now("gists", "admin@gists.batsense.net").unwrap();
@@ -249,7 +254,7 @@ impl Data {
                 let mut repo = git2::Repository::open(self.get_repository_path(path)).unwrap();
                 inner(&mut repo)
             }
-            GistID::Repository(repository) => inner(repository),
+            GistID::Repository(repository) => inner(*repository),
         }
     }
 
@@ -262,7 +267,7 @@ impl Data {
     pub async fn read_file<T: GPDatabse>(
         &self,
         _db: &T,
-        gist_id: GistID<'_>,
+        gist_id: &GistID<'_>,
         path: &str,
     ) -> ServiceResult<FileInfo> {
         let inner = |repo: &git2::Repository| -> ServiceResult<FileInfo> {
@@ -359,7 +364,7 @@ pub mod tests {
         ) {
             for file in files.iter() {
                 let content = self
-                    .read_file(db, GistID::ID(gist_id), &escape_spaces(&file.filename))
+                    .read_file(db, &GistID::ID(gist_id), &escape_spaces(&file.filename))
                     .await
                     .unwrap();
                 let req_escaped_file = FileInfo {
@@ -382,6 +387,7 @@ pub mod tests {
             const NAME: &str = "gisttestuser";
             const EMAIL: &str = "gisttestuser@sss.com";
             const PASSWORD: &str = "longpassword2";
+            const FILE_CONTENT: &str = "foobar";
 
             let _ = futures::join!(data.delete_user(db, NAME, PASSWORD),);
 
@@ -400,28 +406,28 @@ pub mod tests {
             let files = [
                 FileInfo {
                     filename: "foo".into(),
-                    content: FileType::File(ContentType::Text("foobar".into())),
+                    content: FileType::File(ContentType::Text(FILE_CONTENT.into())),
                 },
                 FileInfo {
                     filename: "bar".into(),
-                    content: FileType::File(ContentType::Text("foobar".into())),
+                    content: FileType::File(ContentType::Text(FILE_CONTENT.into())),
                 },
                 FileInfo {
                     filename: "foo bar".into(),
-                    content: FileType::File(ContentType::Text("foobar".into())),
+                    content: FileType::File(ContentType::Text(FILE_CONTENT.into())),
                 },
             ];
 
-            data.write_file(db, GistID::Repository(&mut gist.repository), &files)
+            data.write_file(db, &mut GistID::Repository(&mut gist.repository), &files)
                 .await
                 .unwrap();
             data.gist_files_written_helper(db, &gist.id, &files).await;
             let files2 = [FileInfo {
                 filename: "notfirstcommit".into(),
-                content: FileType::File(ContentType::Text("foobar".into())),
+                content: FileType::File(ContentType::Text(FILE_CONTENT.into())),
             }];
 
-            data.write_file(db, GistID::ID(&gist.id), &files2)
+            data.write_file(db, &mut GistID::ID(&gist.id), &files2)
                 .await
                 .unwrap();
             data.gist_files_written_helper(db, &gist.id, &files2).await;

@@ -79,7 +79,7 @@ async fn new(
         .await?;
     data.write_file(
         db.as_ref(),
-        GistID::Repository(&mut gist.repository),
+        &mut GistID::Repository(&mut gist.repository),
         &payload.files,
     )
     .await?;
@@ -100,7 +100,7 @@ async fn get_file(
             let contents = data
                 .read_file(
                     db.as_ref(),
-                    GistID::ID(&gist.public_id),
+                    &GistID::ID(&gist.public_id),
                     &escape_spaces(&path.file),
                 )
                 .await?;
@@ -112,7 +112,7 @@ async fn get_file(
                     let contents = data
                         .read_file(
                             db.as_ref(),
-                            GistID::ID(&gist.public_id),
+                            &GistID::ID(&gist.public_id),
                             &escape_spaces(&path.file),
                         )
                         .await?;

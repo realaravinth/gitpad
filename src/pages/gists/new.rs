@@ -294,7 +294,7 @@ async fn new_submit(
 
     data.write_file(
         db.as_ref(),
-        GistID::Repository(&mut db_gist.repository),
+        &mut GistID::Repository(&mut db_gist.repository),
         &files,
     )
     .await
