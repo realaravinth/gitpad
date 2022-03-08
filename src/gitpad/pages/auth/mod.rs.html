@@ -158,6 +158,7 @@
 <span id="156">156</span>
 <span id="157">157</span>
 <span id="158">158</span>
+<span id="159">159</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -185,9 +186,10 @@
 <span class="kw">mod</span> <span class="ident">test</span>;
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">AUTH_BASE</span>: <span class="ident">TemplateFile</span> <span class="op">=</span> <span class="ident">TemplateFile::new</span>(<span class="string">&quot;authbase&quot;</span>, <span class="string">&quot;pages/auth/base.html&quot;</span>);
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DEMO</span>: <span class="ident">TemplateFile</span> <span class="op">=</span> <span class="ident">TemplateFile::new</span>(<span class="string">&quot;demo_banner&quot;</span>, <span class="string">&quot;pages/auth/demo.html&quot;</span>);
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">register_templates</span>(<span class="ident">t</span>: <span class="kw-2">&amp;mut</span> <span class="ident">tera::Tera</span>) {
-    <span class="kw">for</span> <span class="ident">template</span> <span class="kw">in</span> [<span class="ident">AUTH_BASE</span>, <span class="ident">login::LOGIN</span>, <span class="ident">register::REGISTER</span>].<span class="ident">iter</span>() {
+    <span class="kw">for</span> <span class="ident">template</span> <span class="kw">in</span> [<span class="ident">AUTH_BASE</span>, <span class="ident">login::LOGIN</span>, <span class="ident">register::REGISTER</span>, <span class="ident">DEMO</span>].<span class="ident">iter</span>() {
         <span class="ident">template</span>.<span class="ident">register</span>(<span class="ident">t</span>).<span class="ident">expect</span>(<span class="ident">template</span>.<span class="ident">name</span>);
     }
 }

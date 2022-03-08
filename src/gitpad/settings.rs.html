@@ -354,11 +354,11 @@
 <span class="kw">use</span> <span class="ident">config</span>::{<span class="ident">Config</span>, <span class="ident">ConfigError</span>, <span class="ident">Environment</span>, <span class="ident">File</span>};
 <span class="kw">use</span> <span class="ident">derive_more::Display</span>;
 <span class="kw">use</span> <span class="ident">log::warn</span>;
-<span class="kw">use</span> <span class="ident">serde::Deserialize</span>;
+<span class="kw">use</span> <span class="ident">serde</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">url::Url</span>;
 <span class="kw">use</span> <span class="ident">validator::Validate</span>;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Server</span> {
     <span class="kw">pub</span> <span class="ident">port</span>: <span class="ident">u32</span>,
     <span class="kw">pub</span> <span class="ident">domain</span>: <span class="ident">String</span>,
@@ -375,7 +375,7 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Deserialize</span>, <span class="ident">Display</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Display</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;lowercase&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">LogLevel</span> {
     <span class="attribute">#[<span class="ident">display</span>(<span class="ident">fmt</span> <span class="op">=</span> <span class="string">&quot;debug&quot;</span>)]</span>
@@ -399,7 +399,7 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Repository</span> {
     <span class="kw">pub</span> <span class="ident">root</span>: <span class="ident">String</span>,
 }
@@ -418,7 +418,7 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Deserialize</span>, <span class="ident">Display</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>, <span class="ident">Display</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;lowercase&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DBType</span> {
     <span class="attribute">#[<span class="ident">display</span>(<span class="ident">fmt</span> <span class="op">=</span> <span class="string">&quot;postgres&quot;</span>)]</span>
@@ -437,7 +437,7 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>)]</span>
 <span class="kw">struct</span> <span class="ident">DatabaseBuilder</span> {
     <span class="kw">pub</span> <span class="ident">port</span>: <span class="ident">u32</span>,
     <span class="kw">pub</span> <span class="ident">hostname</span>: <span class="ident">String</span>,
@@ -465,14 +465,14 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Database</span> {
     <span class="kw">pub</span> <span class="ident">url</span>: <span class="ident">String</span>,
     <span class="kw">pub</span> <span class="ident">pool</span>: <span class="ident">u32</span>,
     <span class="kw">pub</span> <span class="ident">database_type</span>: <span class="ident">DBType</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Validate</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Validate</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Settings</span> {
     <span class="kw">pub</span> <span class="ident">log</span>: <span class="ident">LogLevel</span>,
     <span class="kw">pub</span> <span class="ident">database</span>: <span class="ident">Database</span>,
