@@ -1,0 +1,11 @@
+{% if footer.settings.allow_demo %}
+  <p class="auth__demo-user__banner">
+    Try Kaizen without joining<br />
+    <span class="auth__demo-user__cred" >
+      <b>user:</b> {{ footer.demo_user }}
+    </span>
+    <span class="auth__demo-user__cred">
+      <b>password:</b> {{ footer.demo_password }}
+    </span>
+  </p>
+{% endif %}

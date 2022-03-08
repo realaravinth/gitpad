@@ -8,19 +8,23 @@ html {
   color: #333;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 500;
 }
 
 h1 {
-  font-size: 2.0rem;
+  font-size: 2rem;
 }
 
 h2 {
   font-size: 1.5rem;
 }
-
 
 body {
   width: 100%;
@@ -227,7 +231,6 @@ footer {
   height: 320px;
 }
 
-
 .gist__button-group {
   display: flex;
   width: 100%;
@@ -248,4 +251,15 @@ footer {
   padding: 5px 0;
   cursor: pointer;
   background-color: #e9e9ed;
+}
+
+.auth__demo-user__banner {
+  margin: auto;
+  margin-top: 5px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.auth__demo-user__cred {
+  font-family: monospace, monospace;
 }

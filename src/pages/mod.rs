@@ -117,6 +117,9 @@ pub struct Footer<'a> {
     admin_email: &'a str,
     source_code: &'a str,
     git_hash: &'a str,
+    settings: &'a Settings,
+    demo_user: &'a str,
+    demo_password: &'a str,
 }
 
 impl<'a> Footer<'a> {
@@ -126,6 +129,9 @@ impl<'a> Footer<'a> {
             source_code: &settings.source_code,
             admin_email: &settings.admin_email,
             git_hash: &GIT_COMMIT_HASH[..8],
+            demo_user: crate::demo::DEMO_USER,
+            demo_password: crate::demo::DEMO_PASSWORD,
+            settings,
         }
     }
 }

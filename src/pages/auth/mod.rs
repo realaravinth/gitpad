@@ -25,9 +25,10 @@ pub mod register;
 mod test;
 
 pub const AUTH_BASE: TemplateFile = TemplateFile::new("authbase", "pages/auth/base.html");
+pub const DEMO: TemplateFile = TemplateFile::new("demo_banner", "pages/auth/demo.html");
 
 pub fn register_templates(t: &mut tera::Tera) {
-    for template in [AUTH_BASE, login::LOGIN, register::REGISTER].iter() {
+    for template in [AUTH_BASE, login::LOGIN, register::REGISTER, DEMO].iter() {
         template.register(t).expect(template.name);
     }
 }
