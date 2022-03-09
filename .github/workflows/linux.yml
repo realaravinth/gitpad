@@ -44,8 +44,10 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key:
-            ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Zola
+        run: ./scripts/ci.sh install
 
       - name: Login to DockerHub
         if: (github.ref == 'refs/heads/master' || github.event_name == 'push') && github.repository == 'realaravinth/gitpad'
@@ -109,5 +111,9 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: target/doc
+          FOLDER: deploy-static
+
+      - name: deploy
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'realaravinth/realaravinth' }}
+        run: >-
+          curl --location --request POST "https://deploy.batsense.net/api/v1/update" --header 'Content-Type: application/json' --data-raw "{ \"secret\": \"${{ secrets.DEPLOY_TOKEN }}\", \"branch\": \"gh-pages\" }"

@@ -1,3 +1,7 @@
+STATIC_DIST = ./deploy-static
+WEBSITE = website
+WEBSITE_DIST = $(WEBSITE)/public
+
 default: ## Debug build
 	cargo build
 
@@ -6,6 +10,8 @@ clean: ## Clean all build artifacts and dependencies
 	@-/bin/rm -rf database/migrator/target/
 	@-/bin/rm -rf database/*/target/
 	@-/bin/rm -rf database/*/tmp/
+	@-/bin/rm -rf $(WEBSITE)
+	@-/bin/rm -rf $(STATIC_DIST)
 	@cargo clean
 
 coverage: migrate ## Generate coverage report in HTML format
@@ -15,7 +21,13 @@ dev-env: ## Download development dependencies
 	cargo fetch
 
 doc: ## Prepare documentation
-	cargo doc --no-deps --workspace --all-features
+	@-/bin/rm -rf $(STATIC_DIST) || true
+	@cargo doc --no-deps --workspace --all-features
+	@-mkdir -p $(WEBSITE)/static/doc || true
+	cp -r target/doc $(WEBSITE)/static/doc
+	@./scripts/ci.sh build
+	mkdir -p $(STATIC_DIST)
+	cp -r  $(WEBSITE_DIST)/* $(STATIC_DIST)
 
 docker: ## Build docker images
 	docker build -t realaravinth/gitpad:master -t realaravinth/gitpad:latest .
