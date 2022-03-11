@@ -63,7 +63,7 @@ impl NewGist {
         payload: Option<&[FieldNames<&str>]>,
     ) -> Self {
         const FIELDNAMES_KEY: &str = "fieldnames";
-        let mut ctx = auth_ctx(username, settings);
+        let mut ctx = auth_ctx(Some(username), settings);
         ctx.insert("visibility_private", GistVisibility::Private.to_str());
         ctx.insert("visibility_unlisted", GistVisibility::Unlisted.to_str());
         ctx.insert("visibility_public", GistVisibility::Public.to_str());

@@ -16,9 +16,11 @@
     <div class="nav__link-container">
       <a class="nav__link" rel="noreferrer" href="{{ page.gist.new }}">New Paste</a>
     </div>
-    <div class="nav__link-container">
-      <a class="nav__link" rel="noreferrer" href="{{ loggedin_user }}">Profile</a>
-    </div>
+    {% if loggedin_user %}
+      <div class="nav__link-container">
+        <a class="nav__link" rel="noreferrer" href="{{ loggedin_user }}">Profile</a>
+      </div>
+    {% endif %}
     <div class="nav__link-container">
       <a class="nav__link" rel="noreferrer" href="{{ page.auth.logout }}">Log out</a>
     </div>

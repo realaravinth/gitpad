@@ -97,11 +97,16 @@ pub fn context(s: &Settings) -> Context {
     ctx
 }
 
-pub fn auth_ctx(username: &str, s: &Settings) -> Context {
+pub fn auth_ctx(username: Option<&str>, s: &Settings) -> Context {
     use routes::GistProfilePathComponent;
-    let profile_link = PAGES
-        .gist
-        .get_profile_route(GistProfilePathComponent { username });
+    let mut profile_link = None;
+    if let Some(name) = username {
+        profile_link = Some(
+            PAGES
+                .gist
+                .get_profile_route(GistProfilePathComponent { username: name }),
+        );
+    }
     let mut ctx = Context::new();
     let footer = Footer::new(s);
     ctx.insert("footer", &footer);
