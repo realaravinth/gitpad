@@ -15,8 +15,8 @@
 
 ## Features
 
--   [ ] Upload code snippets(&check; REST API)
--   [ ] Syntax Highlighting
+-   [x] Upload code snippets
+-   [x] Syntax Highlighting
 -   [ ] Comments
 -   [x] Versioning through Git
 -   [ ] Fork gists
