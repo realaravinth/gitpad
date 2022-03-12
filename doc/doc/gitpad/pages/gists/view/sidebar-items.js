@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["GIST_FILENAME",""],["GIST_TEXTFILE",""],["VIEW_GIST",""]],"fn":[["register_templates",""],["services",""]],"struct":[["ViewGist",""],["view_preview",""]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["account","Account management utility datastructures and methods"],["auth","Authentication helper methods and data structures"],["gists",""]]});
+initSidebarItems({"mod":[["account","Account management utility datastructures and methods"],["auth","Authentication helper methods and data structures"],["gists",""],["render_html",""]]});
