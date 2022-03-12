@@ -1,31 +1,39 @@
 {% extends 'gistbase' %} 
 {% block gist_main %}
     {% include "error_comp" %}
-	<div class="gist__container>
+	<div class="gist__container">
 		{% if payload %}
 
-		  <p class="gist__name">
-		  <a href={{ gist_owner_link }}>{{ payload.owner }}</a>/<a href="">{{ payload.id | truncate(length=10) }}</a>
-		   <span class="gist__visibility">{{ payload.visibility}}</span>
-		  </p>
-
+        <div class="gist__meta-container">
+            <div class="gist__name">
+			<a href={{ gist_owner_link }}><h2 class="gist__name-text">~{{ payload.owner }}</a>/<a href="">{{ payload.id | truncate(length=10, end="") }}</h2></a><span class="gist__visibility">{{ payload.visibility }}</span>
+            </div>
 		  {% if payload.description %}
 			<p class="gist__description">{{ payload.description}}</p>
 		  {% endif %}
+        </div>
+
+        <div class="gist__data-container">
 		  {% for payload_file in payload.files %}
+		  
+          <div class="gist_file">
 			{% include "gist_filename" %}
 			{% if "file" in payload_file.content %}
 				{% include "gist_textfile" %}
 			{% endif %}
+          </div>
 
 			{% if "dir" in payload_file.content %}
 			  {% for payload_file in payload_file.content.dir %}
-				{% include "gist_filename" %}
-				{% include "gist_textfile" %}
+                <div class="gist_file">
+                  {% include "gist_filename" %}
+                  {% include "gist_textfile" %}
+                </div>
 			  {% endfor %}
 			{% endif %}
 
 		  {% endfor %}
 		{% endif %}
-	</div>
+      </div>
+    </div>
 {% endblock %}

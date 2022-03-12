@@ -116,8 +116,11 @@ main {
   flex: 4;
   width: 100%;
   margin: auto;
+
   display: flex;
+  /*
   align-items: center;
+  */
   justify-content: space-evenly;
 }
 
@@ -265,17 +268,16 @@ footer {
 }
 
 .gist__container {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  height: auto;
 }
 
 pre {
   font-size: 13px;
   font-family: Consolas, \"Liberation Mono\", Menlo, Courier, monospace;
-  margin: 10px 0;
-  border: 1px solid var(--color-border-default, #ddd);
-  border-radius: 6px;
   box-sizing: border-box;
-  padding: 10px 0;
-
 }
 
 .line {
@@ -314,10 +316,8 @@ summary::marker {
   display: block;
 }
 
-
 pre {
   box-sizing: border-box;
-  padding: 10px 0;
 }
 
 .line {
@@ -329,3 +329,64 @@ pre {
   min-width: 35px;
 }
 
+.gist_file {
+  background: #eeee;
+  border-radius: 6px;
+  padding-bottom: 0px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.gist__filename {
+  padding: 8px;
+}
+
+.gist__meta-container {
+  flex: 1;
+  max-height: 70px;
+  min-height: 70px;
+  display: flex;
+  align-items: left;
+  flex-direction: column;
+  width: 80%;
+  margin-top: 20px;
+}
+
+.gist__data-container {
+  width: 70%;
+  flex: 2;
+  margin: auto;
+}
+
+.gist__name {
+  margin-left: 60px;
+  display: flex;
+}
+
+.gist__description {
+  margin-left: 60px;
+}
+
+.gist__visibility {
+  display: inline-block;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-radius: 2em;
+  background: #ffa500;
+  margin: auto 0px;
+}
+
+.gist__name-text {
+  display: inline;
+  width: auto;
+}
