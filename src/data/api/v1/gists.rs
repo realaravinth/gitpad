@@ -26,6 +26,8 @@ use crate::errors::*;
 use crate::utils::*;
 use crate::*;
 
+use super::render_html::{GenerateHTML, SourcegraphQuery};
+
 /// A FileMode represents the kind of tree entries used by git. It
 /// resembles regular file systems modes, although FileModes are
 /// considerably simpler (there are not so many), and there are some,
@@ -101,6 +103,32 @@ pub struct FileInfo {
     pub content: FileType,
 }
 
+impl GenerateHTML for FileInfo {
+    fn generate(&mut self) {
+        fn highlight(code: &mut String, filepath: &str) {
+            let q = SourcegraphQuery { code, filepath };
+            *code = q.syntax_highlight();
+        }
+
+        fn extract(f: &mut FileInfo) {
+            match f.content {
+                FileType::File(ref mut c) => match &mut *c {
+                    ContentType::Binary(_) => (),
+                    ContentType::Text(ref mut code) => highlight(&mut *code, &f.filename),
+                },
+
+                FileType::Dir(ref mut files) => {
+                    for file in files.iter_mut() {
+                        extract(file)
+                    }
+                }
+            }
+        }
+
+        extract(self);
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct GistInfo {
     pub files: Vec<FileInfo>,
@@ -109,6 +137,7 @@ pub struct GistInfo {
     pub created: i64,
     pub updated: i64,
     pub visibility: GistVisibility,
+    pub id: String,
 }
 
 #[derive(Serialize, PartialEq, Clone, Debug, Deserialize)]
@@ -397,6 +426,7 @@ impl Data {
             visibility: gist_info.visibility,
             description: gist_info.description,
             owner: gist_info.owner,
+            id: gist_info.public_id,
         };
 
         Ok(resp)

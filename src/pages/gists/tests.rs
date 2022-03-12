@@ -1,3 +1,4 @@
+use actix_http::header;
 /*
  * Copyright (C) 2022  Aravinth Manivannan <realaravinth@batsense.net>
  *
@@ -70,6 +71,9 @@ async fn gists_new_route_works(data: Arc<Data>, db: BoxDB) {
     )
     .await;
     assert_eq!(resp.status(), StatusCode::FOUND);
+    let gist_id = resp.headers().get(header::LOCATION).unwrap();
+    let resp = get_request!(&app, gist_id.to_str().unwrap(), cookies.clone());
+    assert_eq!(resp.status(), StatusCode::OK);
 
     // add new file during gist creation
     let payload = serde_json::json!({
@@ -88,7 +92,6 @@ async fn gists_new_route_works(data: Arc<Data>, db: BoxDB) {
     )
     .await;
     assert_eq!(resp.status(), StatusCode::OK);
-
     let empty_gist = test::call_service(
         &app,
         post_request!(&serde_json::Value::default(), PAGES.gist.new, FORM)

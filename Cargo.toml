@@ -1,37 +1,28 @@
 [package]
-name = "gitpad"
-description = "Self-Hosted GitHub Gists"
-version = "0.1.0"
-edition = "2021"
-homepage = "https://github.com/realaravinth/gitpad"
-repository = "https://github.com/realaravinth/gitpad"
-documentation = "https://github.con/realaravinth/gitpad"
-readme = "https://github.com/realaravinth/gitpad/blob/master/README.md"
-license = "AGPLv3 or later version"
 authors = ["realaravinth <realaravinth@batsense.net>"]
 build = "build.rs"
+description = "Self-Hosted GitHub Gists"
+documentation = "https://github.con/realaravinth/gitpad"
+edition = "2021"
+homepage = "https://github.com/realaravinth/gitpad"
+license = "AGPLv3 or later version"
+name = "gitpad"
+readme = "https://github.com/realaravinth/gitpad/blob/master/README.md"
+repository = "https://github.com/realaravinth/gitpad"
+version = "0.1.0"
+[build-dependencies]
+mime = "0.3.16"
+serde_json = "1"
 
-[workspace]
-exclude = ["database/migrator"]
-members = [
-    ".", 
-    "database/db-core",
-    "database/db-sqlx-postgres",
-    "database/db-sqlx-sqlite",
-]
+[build-dependencies.cache-buster]
+git = "https://github.com/realaravinth/cache-buster"
 
 [dependencies]
-actix-auth-middleware = { branch="v4", version = "0.2", git = "https://github.com/realaravinth/actix-auth-middleware", features = ["actix_identity_backend"] }
-actix-web = "4.0.0-rc.3"
 actix-http = "3.0.0-rc.2"
 actix-identity = "0.4.0-beta.8"
 actix-rt = "2.6.0"
-argon2-creds = { branch = "master", git = "https://github.com/realaravinth/argon2-creds"}
-cache-buster = { git = "https://github.com/realaravinth/cache-buster" }
+actix-web = "4.0.0-rc.3"
 config = "0.11"
-db-core = {path = "./database/db-core"}
-db-sqlx-postgres = {path = "./database/db-sqlx-postgres"}
-db-sqlx-sqlite = {path = "./database/db-sqlx-sqlite"}
 derive_more = "0.99"
 futures = "0.3.21"
 git2 = "0.13.25"
@@ -39,27 +30,66 @@ lazy_static = "1.4"
 log = "0.4"
 mime = "0.3.16"
 mime_guess = "2.0.3"
-my-codegen = {package = "actix-web-codegen", git ="https://github.com/realaravinth/actix-web"}
 num_cpus = "1.13"
 num_enum = "0.5.6"
 pretty_env_logger = "0.4"
+pulldown-cmark = "*"
 rand = "0.8.4"
 rust-embed = "6.0.0"
-serde = { version = "1", features = ["derive"]}
 serde_json = "1"
-sqlx = { version = "0.5.10", features = [ "runtime-actix-rustls", "uuid", "postgres", "time", "offline", "sqlite" ] }
-tera = { version = "1.15.0", default-features = false}
-tokio = { version = "1.16.1", features = ["fs"] }
+syntect = "*"
 url = "2.2"
 urlencoding = "2.1.0"
-validator = { version = "0.14.0", features = ["derive"] }
+
+[dependencies.actix-auth-middleware]
+branch = "v4"
+features = ["actix_identity_backend"]
+git = "https://github.com/realaravinth/actix-auth-middleware"
+version = "0.2"
+
+[dependencies.argon2-creds]
+branch = "master"
+git = "https://github.com/realaravinth/argon2-creds"
+
+[dependencies.cache-buster]
+git = "https://github.com/realaravinth/cache-buster"
+
+[dependencies.db-core]
+path = "./database/db-core"
+
+[dependencies.db-sqlx-postgres]
+path = "./database/db-sqlx-postgres"
+
+[dependencies.db-sqlx-sqlite]
+path = "./database/db-sqlx-sqlite"
+
+[dependencies.my-codegen]
+git = "https://github.com/realaravinth/actix-web"
+package = "actix-web-codegen"
+
+[dependencies.serde]
+features = ["derive"]
+version = "1"
+
+[dependencies.sqlx]
+features = ["runtime-actix-rustls", "uuid", "postgres", "time", "offline", "sqlite"]
+version = "0.5.10"
+
+[dependencies.tera]
+default-features = false
+version = "1.15.0"
+
+[dependencies.tokio]
+features = ["fs"]
+version = "1.16.1"
+
+[dependencies.validator]
+features = ["derive"]
+version = "0.14.0"
 
 [dev-dependencies]
 actix-rt = "2"
 
-
-[build-dependencies]
-serde_json = "1"
-cache-buster = { git = "https://github.com/realaravinth/cache-buster" }
-#cache-buster = { version = "0.2.0", git = "https://github.com/realaravinth/cache-buster" }
-mime = "0.3.16"
+[workspace]
+exclude = ["database/migrator"]
+members = [".", "database/db-core", "database/db-sqlx-postgres", "database/db-sqlx-sqlite"]

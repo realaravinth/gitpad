@@ -263,3 +263,69 @@ footer {
 .auth__demo-user__cred {
   font-family: monospace, monospace;
 }
+
+.gist__container {
+}
+
+pre {
+  font-size: 13px;
+  font-family: Consolas, \"Liberation Mono\", Menlo, Courier, monospace;
+  margin: 10px 0;
+  border: 1px solid var(--color-border-default, #ddd);
+  border-radius: 6px;
+  box-sizing: border-box;
+  padding: 10px 0;
+
+}
+
+.line {
+  display: block;
+  padding: 0px;
+  cursor: pointer;
+}
+
+.line-number {
+  color: #24292f;
+  margin: 0;
+  margin-right: 20px;
+  min-width: 35px;
+  padding: 0;
+  width: 1%;
+  padding-right: 10px;
+  padding-left: 10px;
+  display: inline-block;
+  text-align: right;
+}
+
+details,
+summary {
+  display: "inline";
+  margin: 0;
+  padding: 0;
+}
+
+summary::marker {
+  content: "";
+  margin: 0;
+  padding: 0 5px;
+}
+
+.line-link {
+  display: block;
+}
+
+
+pre {
+  box-sizing: border-box;
+  padding: 10px 0;
+}
+
+.line {
+  /* margin: -5px 5px; */
+}
+
+.line-number {
+  /* min-width: 50px; */
+  min-width: 35px;
+}
+

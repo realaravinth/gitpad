@@ -24,18 +24,21 @@ pub use super::{
 pub mod new;
 #[cfg(test)]
 mod tests;
+pub mod view;
 
 pub const GIST_BASE: TemplateFile = TemplateFile::new("gistbase", "pages/gists/base.html");
 pub const GIST_EXPLORE: TemplateFile =
     TemplateFile::new("gist_explore", "pages/gists/explore.html");
 
 pub fn register_templates(t: &mut tera::Tera) {
-    for template in [GIST_BASE, GIST_EXPLORE, new::NEW_GIST].iter() {
+    for template in [GIST_BASE, GIST_EXPLORE].iter() {
         template.register(t).expect(template.name);
     }
     new::register_templates(t);
+    view::register_templates(t);
 }
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     new::services(cfg);
+    view::services(cfg);
 }

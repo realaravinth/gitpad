@@ -17,5 +17,6 @@
 pub mod account;
 pub mod auth;
 pub mod gists;
+pub mod render_html;
 
 pub(crate) use crate::utils::get_random;
