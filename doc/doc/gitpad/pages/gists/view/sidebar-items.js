@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["GIST_FILENAME",""],["GIST_TEXTFILE",""],["VIEW_GIST",""]],"fn":[["register_templates",""],["services",""]],"struct":[["ViewGist",""],["view_preview",""]]});
+initSidebarItems({"constant":[["GIST_COMMENT_INPUT",""],["GIST_FILENAME",""],["GIST_TEXTFILE",""],["VIEW_GIST",""]],"fn":[["register_templates",""],["services",""]],"struct":[["Payload",""],["ViewGist",""],["view_preview",""]]});
