@@ -48,7 +48,10 @@ impl<'a> SourcegraphQuery<'a> {
         let c = theme.settings.background.unwrap_or(Color::WHITE);
         let mut num = 1;
         let mut output = format!(
-            "<div style=\"background-color:#{:02x}{:02x}{:02x};\">\n",
+            "<style>
+        .gist_file {{
+            background-color:#{:02x}{:02x}{:02x};
+        }}</style>",
             c.r, c.g, c.b
         );
 

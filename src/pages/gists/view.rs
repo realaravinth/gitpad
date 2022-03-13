@@ -18,6 +18,7 @@ use std::cell::RefCell;
 
 use actix_identity::Identity;
 use actix_web::http::header::ContentType;
+use serde::*;
 use tera::Context;
 
 use db_core::prelude::*;
@@ -38,8 +39,11 @@ pub const GIST_TEXTFILE: TemplateFile =
 pub const GIST_FILENAME: TemplateFile =
     TemplateFile::new("gist_filename", "pages/gists/view/_filename.html");
 
+pub const GIST_COMMENT_INPUT: TemplateFile =
+    TemplateFile::new("gist_comment_input", "components/comments.html");
+
 pub fn register_templates(t: &mut tera::Tera) {
-    for template in [VIEW_GIST, GIST_FILENAME, GIST_TEXTFILE].iter() {
+    for template in [VIEW_GIST, GIST_FILENAME, GIST_TEXTFILE, GIST_COMMENT_INPUT].iter() {
         template.register(t).expect(template.name);
     }
 }
@@ -59,21 +63,31 @@ impl CtxError for ViewGist {
     }
 }
 
+#[derive(Debug, Default, Clone, Serialize)]
+pub struct Payload<'a> {
+    pub gist: Option<&'a GistInfo>,
+    pub comments: Option<&'a Vec<GistComment>>,
+}
+
 impl ViewGist {
-    pub fn new(username: Option<&str>, gist: Option<&GistInfo>, settings: &Settings) -> Self {
+    pub fn new(username: Option<&str>, payload: Payload, settings: &Settings) -> Self {
         let mut ctx = auth_ctx(username, settings);
         ctx.insert("visibility_private", GistVisibility::Private.to_str());
         ctx.insert("visibility_unlisted", GistVisibility::Unlisted.to_str());
         ctx.insert("visibility_public", GistVisibility::Public.to_str());
 
-        if let Some(gist) = gist {
-            ctx.insert(PAYLOAD_KEY, gist);
+        ctx.insert(PAYLOAD_KEY, &payload);
+        if let Some(gist) = payload.gist {
             ctx.insert(
                 "gist_owner_link",
                 &PAGES.gist.get_profile_route(GistProfilePathComponent {
                     username: &gist.owner,
                 }),
             );
+        }
+
+        if let Some(comments) = payload.comments {
+            ctx.insert("gist_comments", comments);
         }
 
         let ctx = RefCell::new(ctx);
@@ -86,8 +100,8 @@ impl ViewGist {
             .unwrap()
     }
 
-    pub fn page(username: Option<&str>, gist: Option<&GistInfo>, s: &Settings) -> String {
-        let p = Self::new(username, gist, s);
+    pub fn page(username: Option<&str>, payload: Payload, s: &Settings) -> String {
+        let p = Self::new(username, payload, s);
         p.render()
     }
 }
@@ -100,8 +114,18 @@ async fn view_preview(
 ) -> PageResult<impl Responder, ViewGist> {
     let username = id.identity();
 
-    let map_err = |e: ServiceError, g: Option<&GistInfo>| -> PageError<ViewGist> {
-        PageError::new(ViewGist::new(username.as_deref(), g, &data.settings), e)
+    let map_err = |e: ServiceError, gist: Option<&GistInfo>| -> PageError<ViewGist> {
+        PageError::new(
+            ViewGist::new(
+                username.as_deref(),
+                Payload {
+                    gist,
+                    comments: None,
+                },
+                &data.settings,
+            ),
+            e,
+        )
     };
 
     let gist = db.get_gist(&path.gist).await.map_err(|e| {
@@ -122,7 +146,21 @@ async fn view_preview(
 
     gist.files.iter_mut().for_each(|file| file.generate());
 
-    let page = ViewGist::page(username.as_deref(), Some(&gist), &data.settings);
+    log::info!("testing start");
+
+    let comments = db.get_comments_on_gist(&path.gist).await.map_err(|e| {
+        let e: ServiceError = e.into();
+        map_err(e, None)
+    })?;
+
+    log::info!("testing end");
+
+    let ctx = Payload {
+        gist: Some(&gist),
+        comments: Some(&comments),
+    };
+
+    let page = ViewGist::page(username.as_deref(), ctx, &data.settings);
     let html = ContentType::html();
     Ok(HttpResponse::Ok().content_type(html).body(page))
 }
