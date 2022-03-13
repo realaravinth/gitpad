@@ -23,6 +23,7 @@ use tera::Context;
 
 use db_core::prelude::*;
 
+use crate::api::v1::gists::PostCommentRequest;
 use crate::data::api::v1::gists::{GistID, GistInfo};
 use crate::data::api::v1::render_html::GenerateHTML;
 use crate::errors::*;
@@ -50,8 +51,10 @@ pub fn register_templates(t: &mut tera::Tera) {
 
 pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(view_preview);
+    cfg.service(post_comment);
 }
 
+#[derive(Clone)]
 pub struct ViewGist {
     ctx: RefCell<Context>,
 }
@@ -84,6 +87,14 @@ impl ViewGist {
                     username: &gist.owner,
                 }),
             );
+
+            ctx.insert(
+                "gist_comment_link",
+                &PAGES.gist.get_post_comment_route(&PostCommentPath {
+                    username: gist.owner.clone(),
+                    gist: gist.id.clone(),
+                }),
+            );
         }
 
         if let Some(comments) = payload.comments {
@@ -100,18 +111,19 @@ impl ViewGist {
             .unwrap()
     }
 
-    pub fn page(username: Option<&str>, payload: Payload, s: &Settings) -> String {
-        let p = Self::new(username, payload, s);
-        p.render()
+    pub fn set_comment(&self, comment: &PostCommentRequest) {
+        self.ctx
+            .borrow_mut()
+            .insert("new_comment", &comment.comment);
     }
 }
-#[my_codegen::get(path = "PAGES.gist.view_gist", wrap = "super::get_auth_middleware()")]
-async fn view_preview(
-    data: AppData,
-    db: crate::DB,
-    id: Identity,
-    path: web::Path<PostCommentPath>,
-) -> PageResult<impl Responder, ViewGist> {
+
+async fn view_util(
+    data: &AppData,
+    db: &crate::DB,
+    id: &Identity,
+    path: &web::Path<PostCommentPath>,
+) -> PageResult<ViewGist, ViewGist> {
     let username = id.identity();
 
     let map_err = |e: ServiceError, gist: Option<&GistInfo>| -> PageError<ViewGist> {
@@ -160,7 +172,76 @@ async fn view_preview(
         comments: Some(&comments),
     };
 
-    let page = ViewGist::page(username.as_deref(), ctx, &data.settings);
+    Ok(ViewGist::new(username.as_deref(), ctx, &data.settings))
+}
+
+#[my_codegen::get(path = "PAGES.gist.view_gist")]
+async fn view_preview(
+    data: AppData,
+    db: crate::DB,
+    id: Identity,
+    path: web::Path<PostCommentPath>,
+) -> PageResult<impl Responder, ViewGist> {
+    let page = view_util(&data, &db, &id, &path).await?.render();
     let html = ContentType::html();
     Ok(HttpResponse::Ok().content_type(html).body(page))
+}
+
+#[my_codegen::post(
+    path = "PAGES.gist.post_comment",
+    wrap = "super::get_auth_middleware()"
+)]
+async fn post_comment(
+    data: AppData,
+    db: crate::DB,
+    id: Identity,
+    payload: web::Form<PostCommentRequest>,
+    path: web::Path<PostCommentPath>,
+) -> PageResult<impl Responder, ViewGist> {
+    let comment = payload.comment.trim();
+
+    let username = id.identity();
+
+    let page = view_util(&data, &db, &id, &path).await?;
+    let map_err = |e: ServiceError| -> PageError<ViewGist> {
+        let page = page.clone();
+        page.set_comment(&payload);
+        PageError::new(page, e)
+    };
+
+    let username = username.unwrap();
+
+    if comment.is_empty() {
+        return Err(map_err(ServiceError::EmptyComment));
+    }
+
+    let gist = db.get_gist(&path.gist).await.map_err(|e| {
+        let e: ServiceError = e.into();
+        map_err(e)
+    })?;
+
+    if gist.visibility == GistVisibility::Private && username != gist.owner {
+        return Err(map_err(ServiceError::GistNotFound));
+    }
+
+    let msg = CreateGistComment {
+        owner: &username,
+        gist_public_id: &path.gist,
+        comment: &payload.comment,
+    };
+
+    let _comment_id = db.new_comment(&msg).await.map_err(|e| {
+        let e: ServiceError = e.into();
+        map_err(e)
+    })?;
+
+    let gist_link = PostCommentPath {
+        username: gist.owner,
+        gist: gist.public_id,
+    };
+
+    let gist_link = PAGES.gist.get_gist_route(&gist_link);
+    Ok(HttpResponse::Found()
+        .insert_header((http::header::LOCATION, gist_link.as_str()))
+        .finish())
 }

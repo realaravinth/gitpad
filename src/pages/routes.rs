@@ -85,6 +85,8 @@ pub struct Gists {
     pub new: &'static str,
     /// view gist
     pub view_gist: &'static str,
+    /// post comment on gist
+    pub post_comment: &'static str,
 }
 
 impl Gists {
@@ -92,11 +94,13 @@ impl Gists {
     pub const fn new() -> Self {
         let profile = "/{username}";
         let view_gist = "/{username}/{gist}";
+        let post_comment = "/{username}/{gist}/comment";
         let new = "/";
         Self {
             profile,
             new,
             view_gist,
+            post_comment,
         }
     }
 
@@ -108,6 +112,13 @@ impl Gists {
     /// get gist route route with placeholders replaced with values provided.
     pub fn get_gist_route(&self, components: &PostCommentPath) -> String {
         self.view_gist
+            .replace("{username}", &components.username)
+            .replace("{gist}", &components.gist)
+    }
+
+    /// get post_comment route with placeholders replaced with values provided.
+    pub fn get_post_comment_route(&self, components: &PostCommentPath) -> String {
+        self.post_comment
             .replace("{username}", &components.username)
             .replace("{gist}", &components.gist)
     }
@@ -140,6 +151,7 @@ mod tests {
         const GIST: &str = "foo";
         let get_profile = format!("/{NAME}");
         let view_gist = format!("/{NAME}/{GIST}");
+        let post_comment = format!("/{NAME}/{GIST}/comment");
 
         let profile_component = GistProfilePathComponent { username: NAME };
 
@@ -151,5 +163,15 @@ mod tests {
         };
 
         assert_eq!(view_gist, PAGES.gist.get_gist_route(&profile_component));
+
+        let post_comment_path = PostCommentPath {
+            gist: GIST.into(),
+            username: NAME.into(),
+        };
+
+        assert_eq!(
+            post_comment,
+            PAGES.gist.get_post_comment_route(&post_comment_path)
+        );
     }
 }

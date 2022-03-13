@@ -1,4 +1,3 @@
-use actix_http::header;
 /*
  * Copyright (C) 2022  Aravinth Manivannan <realaravinth@batsense.net>
  *
@@ -15,14 +14,17 @@ use actix_http::header;
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+use actix_http::header;
 use actix_web::http::StatusCode;
 use actix_web::test;
 use actix_web::ResponseError;
 
 use db_core::prelude::*;
+use pages::routes::PostCommentPath;
 
 use super::new::*;
 
+use crate::api::v1::gists::PostCommentRequest;
 use crate::data::Data;
 use crate::errors::*;
 use crate::tests::*;
@@ -44,6 +46,7 @@ async fn gists_new_route_works(data: Arc<Data>, db: BoxDB) {
     const NAME: &str = "newgisttestuserexists";
     const PASSWORD: &str = "longpassword2";
     const EMAIL: &str = "newgisttestuserexists@a.com2";
+    const COMMENT: &str = "this string is never used anywhere but for commenting, so that I can get away with body inlcudes";
     let db = &db;
 
     let _ = data.delete_user(db, NAME, PASSWORD).await;
@@ -95,9 +98,36 @@ async fn gists_new_route_works(data: Arc<Data>, db: BoxDB) {
     let empty_gist = test::call_service(
         &app,
         post_request!(&serde_json::Value::default(), PAGES.gist.new, FORM)
-            .cookie(cookies)
+            .cookie(cookies.clone())
             .to_request(),
     )
     .await;
     assert_eq!(empty_gist.status(), ServiceError::GistEmpty.status_code());
+
+    // get gist
+
+    let mut route_iter = gist_id.to_str().unwrap().split('/');
+    let name = route_iter.nth(1).unwrap();
+    let gist = route_iter.next().unwrap();
+    let gist_route_componenet = PostCommentPath {
+        username: name.to_string(),
+        gist: gist.to_string(),
+    };
+    let gist_html_route = PAGES.gist.get_gist_route(&gist_route_componenet);
+    let gist_html_page = get_request!(&app, &gist_html_route);
+    assert_eq!(gist_html_page.status(), StatusCode::OK);
+
+    // post comment
+    let comment_url = PAGES.gist.get_post_comment_route(&gist_route_componenet);
+    let comment = PostCommentRequest {
+        comment: COMMENT.into(),
+    };
+    let comment_resp = test::call_service(
+        &app,
+        post_request!(&comment, &comment_url, FORM)
+            .cookie(cookies)
+            .to_request(),
+    )
+    .await;
+    assert_eq!(comment_resp.status(), StatusCode::FOUND);
 }
