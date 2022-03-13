@@ -41,10 +41,21 @@ pub const GIST_FILENAME: TemplateFile =
     TemplateFile::new("gist_filename", "pages/gists/view/_filename.html");
 
 pub const GIST_COMMENT_INPUT: TemplateFile =
-    TemplateFile::new("gist_comment_input", "components/comments.html");
+    TemplateFile::new("gist_comment_input", "components/comments/new.html");
+
+pub const GIST_COMMENTS: TemplateFile =
+    TemplateFile::new("gist_comments", "components/comments/index.html");
 
 pub fn register_templates(t: &mut tera::Tera) {
-    for template in [VIEW_GIST, GIST_FILENAME, GIST_TEXTFILE, GIST_COMMENT_INPUT].iter() {
+    for template in [
+        VIEW_GIST,
+        GIST_FILENAME,
+        GIST_TEXTFILE,
+        GIST_COMMENT_INPUT,
+        GIST_COMMENTS,
+    ]
+    .iter()
+    {
         template.register(t).expect(template.name);
     }
 }

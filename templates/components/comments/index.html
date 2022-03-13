@@ -1,0 +1,15 @@
+<div class="gist__comment-container">
+  {% if "comments" in payload %} 
+    {% for comment in payload.comments %}
+      {% set comment_id = "comment" ~ comment.id %}
+      <div id="{{ comment_id }}" class="comment__container">
+        <div class="comment__meta">
+          <a href="/{{ comment.owner }}" class="comment__owner">~{{ comment.owner }}</a>
+            <a href="{{ comment_id }}" class="comment__created">{{ comment.created }}</a>
+        </div>
+        <p class="comment__body">{{ comment.comment }}</p>
+      </div>
+    {% endfor %}
+  {% endif %}
+  {% include "gist_comment_input" %}
+</div>

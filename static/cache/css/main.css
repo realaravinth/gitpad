@@ -413,9 +413,27 @@ pre {
   min-height: 100px;
 }
 
-  
 .gist__comment-content {
-  width:  100%;
+  width: 100%;
   border: 1px solid #ddd;
   padding: 5px;
+}
+
+.comment__meta {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.comment__container {
+  width: 95%;
+  margin: 20px auto;
+}
+
+.comment__created {
+  font-size: 0.8rem;
+}
+
+.comment__owner {
+  font-size: 0.8rem;
 }
