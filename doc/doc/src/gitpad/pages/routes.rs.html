@@ -155,6 +155,28 @@
 <span id="153">153</span>
 <span id="154">154</span>
 <span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -242,6 +264,8 @@
     <span class="kw">pub</span> <span class="ident">new</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
     <span class="doccomment">/// view gist</span>
     <span class="kw">pub</span> <span class="ident">view_gist</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+    <span class="doccomment">/// post comment on gist</span>
+    <span class="kw">pub</span> <span class="ident">post_comment</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Gists</span> {
@@ -249,11 +273,13 @@
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">profile</span> <span class="op">=</span> <span class="string">&quot;/{username}&quot;</span>;
         <span class="kw">let</span> <span class="ident">view_gist</span> <span class="op">=</span> <span class="string">&quot;/{username}/{gist}&quot;</span>;
+        <span class="kw">let</span> <span class="ident">post_comment</span> <span class="op">=</span> <span class="string">&quot;/{username}/{gist}/comment&quot;</span>;
         <span class="kw">let</span> <span class="ident">new</span> <span class="op">=</span> <span class="string">&quot;/&quot;</span>;
         <span class="self">Self</span> {
             <span class="ident">profile</span>,
             <span class="ident">new</span>,
             <span class="ident">view_gist</span>,
+            <span class="ident">post_comment</span>,
         }
     }
 
@@ -265,6 +291,13 @@
     <span class="doccomment">/// get gist route route with placeholders replaced with values provided.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_gist_route</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">components</span>: <span class="kw-2">&amp;</span><span class="ident">PostCommentPath</span>) -&gt; <span class="ident">String</span> {
         <span class="self">self</span>.<span class="ident">view_gist</span>
+            .<span class="ident">replace</span>(<span class="string">&quot;{username}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">username</span>)
+            .<span class="ident">replace</span>(<span class="string">&quot;{gist}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">gist</span>)
+    }
+
+    <span class="doccomment">/// get post_comment route with placeholders replaced with values provided.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_post_comment_route</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">components</span>: <span class="kw-2">&amp;</span><span class="ident">PostCommentPath</span>) -&gt; <span class="ident">String</span> {
+        <span class="self">self</span>.<span class="ident">post_comment</span>
             .<span class="ident">replace</span>(<span class="string">&quot;{username}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">username</span>)
             .<span class="ident">replace</span>(<span class="string">&quot;{gist}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">gist</span>)
     }
@@ -297,6 +330,7 @@
         <span class="kw">const</span> <span class="ident">GIST</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;foo&quot;</span>;
         <span class="kw">let</span> <span class="ident">get_profile</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/{NAME}&quot;</span>);
         <span class="kw">let</span> <span class="ident">view_gist</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/{NAME}/{GIST}&quot;</span>);
+        <span class="kw">let</span> <span class="ident">post_comment</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/{NAME}/{GIST}/comment&quot;</span>);
 
         <span class="kw">let</span> <span class="ident">profile_component</span> <span class="op">=</span> <span class="ident">GistProfilePathComponent</span> { <span class="ident">username</span>: <span class="ident">NAME</span> };
 
@@ -308,6 +342,16 @@
         };
 
         <span class="macro">assert_eq!</span>(<span class="ident">view_gist</span>, <span class="ident">PAGES</span>.<span class="ident">gist</span>.<span class="ident">get_gist_route</span>(<span class="kw-2">&amp;</span><span class="ident">profile_component</span>));
+
+        <span class="kw">let</span> <span class="ident">post_comment_path</span> <span class="op">=</span> <span class="ident">PostCommentPath</span> {
+            <span class="ident">gist</span>: <span class="ident">GIST</span>.<span class="ident">into</span>(),
+            <span class="ident">username</span>: <span class="ident">NAME</span>.<span class="ident">into</span>(),
+        };
+
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">post_comment</span>,
+            <span class="ident">PAGES</span>.<span class="ident">gist</span>.<span class="ident">get_post_comment_route</span>(<span class="kw-2">&amp;</span><span class="ident">post_comment_path</span>)
+        );
     }
 }
 </code></pre></div>
