@@ -247,6 +247,17 @@
 <span id="245">245</span>
 <span id="246">246</span>
 <span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -290,10 +301,21 @@
     <span class="ident">TemplateFile::new</span>(<span class="string">&quot;gist_filename&quot;</span>, <span class="string">&quot;pages/gists/view/_filename.html&quot;</span>);
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GIST_COMMENT_INPUT</span>: <span class="ident">TemplateFile</span> <span class="op">=</span>
-    <span class="ident">TemplateFile::new</span>(<span class="string">&quot;gist_comment_input&quot;</span>, <span class="string">&quot;components/comments.html&quot;</span>);
+    <span class="ident">TemplateFile::new</span>(<span class="string">&quot;gist_comment_input&quot;</span>, <span class="string">&quot;components/comments/new.html&quot;</span>);
+
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GIST_COMMENTS</span>: <span class="ident">TemplateFile</span> <span class="op">=</span>
+    <span class="ident">TemplateFile::new</span>(<span class="string">&quot;gist_comments&quot;</span>, <span class="string">&quot;components/comments/index.html&quot;</span>);
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">register_templates</span>(<span class="ident">t</span>: <span class="kw-2">&amp;mut</span> <span class="ident">tera::Tera</span>) {
-    <span class="kw">for</span> <span class="ident">template</span> <span class="kw">in</span> [<span class="ident">VIEW_GIST</span>, <span class="ident">GIST_FILENAME</span>, <span class="ident">GIST_TEXTFILE</span>, <span class="ident">GIST_COMMENT_INPUT</span>].<span class="ident">iter</span>() {
+    <span class="kw">for</span> <span class="ident">template</span> <span class="kw">in</span> [
+        <span class="ident">VIEW_GIST</span>,
+        <span class="ident">GIST_FILENAME</span>,
+        <span class="ident">GIST_TEXTFILE</span>,
+        <span class="ident">GIST_COMMENT_INPUT</span>,
+        <span class="ident">GIST_COMMENTS</span>,
+    ]
+    .<span class="ident">iter</span>()
+    {
         <span class="ident">template</span>.<span class="ident">register</span>(<span class="ident">t</span>).<span class="ident">expect</span>(<span class="ident">template</span>.<span class="ident">name</span>);
     }
 }
