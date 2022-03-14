@@ -72,7 +72,6 @@ impl<'a> SourcegraphQuery<'a> {
                 }
             }
         }
-        output.push_str("</div>");
         output
     }
 

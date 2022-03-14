@@ -1,0 +1,8 @@
+<div class="gist__meta-container">
+  <div class="gist__name">
+    <a href={{ gist_owner_link }}><h2 class="gist__name-text">~{{ payload.gist.owner }}</a>/<a href="">{{ payload.gist.id | truncate(length=10, end="") }}</h2></a><span class="gist__visibility">{{ payload.gist.visibility }}</span>
+  </div>
+  {% if "description" in payload.gist %}
+    <p class="gist__description">{{ payload.gist.description}}</p>
+  {% endif %}
+</div>

@@ -23,9 +23,12 @@ use tera::Context;
 
 use db_core::prelude::*;
 
-use crate::api::v1::gists::PostCommentRequest;
-use crate::data::api::v1::gists::{GistID, GistInfo};
-use crate::data::api::v1::render_html::GenerateHTML;
+use crate::api::v1::{gists::PostCommentRequest, routes::GetFilePath};
+use crate::data::api::v1::{
+    gists::{FileInfo, GistID, GistInfo},
+    render_html::GenerateHTML,
+};
+//use crate::data::api::v1::render_html::GenerateHTML;
 use crate::errors::*;
 use crate::pages::routes::GistProfilePathComponent;
 use crate::pages::routes::PostCommentPath;
@@ -40,6 +43,8 @@ pub const GIST_TEXTFILE: TemplateFile =
 pub const GIST_FILENAME: TemplateFile =
     TemplateFile::new("gist_filename", "pages/gists/view/_filename.html");
 
+pub const GIST_META: TemplateFile = TemplateFile::new("gist_meta", "pages/gists/view/_meta.html");
+
 pub const GIST_COMMENT_INPUT: TemplateFile =
     TemplateFile::new("gist_comment_input", "components/comments/new.html");
 
@@ -53,6 +58,7 @@ pub fn register_templates(t: &mut tera::Tera) {
         GIST_TEXTFILE,
         GIST_COMMENT_INPUT,
         GIST_COMMENTS,
+        GIST_META,
     ]
     .iter()
     {
@@ -78,13 +84,13 @@ impl CtxError for ViewGist {
 }
 
 #[derive(Debug, Default, Clone, Serialize)]
-pub struct Payload<'a> {
+pub struct PreviewPayload<'a> {
     pub gist: Option<&'a GistInfo>,
     pub comments: Option<&'a Vec<GistComment>>,
 }
 
 impl ViewGist {
-    pub fn new(username: Option<&str>, payload: Payload, settings: &Settings) -> Self {
+    pub fn new(username: Option<&str>, payload: PreviewPayload, settings: &Settings) -> Self {
         let mut ctx = auth_ctx(username, settings);
         ctx.insert("visibility_private", GistVisibility::Private.to_str());
         ctx.insert("visibility_unlisted", GistVisibility::Unlisted.to_str());
@@ -141,7 +147,7 @@ async fn view_util(
         PageError::new(
             ViewGist::new(
                 username.as_deref(),
-                Payload {
+                PreviewPayload {
                     gist,
                     comments: None,
                 },
@@ -169,16 +175,11 @@ async fn view_util(
 
     gist.files.iter_mut().for_each(|file| file.generate());
 
-    log::info!("testing start");
-
     let comments = db.get_comments_on_gist(&path.gist).await.map_err(|e| {
         let e: ServiceError = e.into();
         map_err(e, None)
     })?;
-
-    log::info!("testing end");
-
-    let ctx = Payload {
+    let ctx = PreviewPayload {
         gist: Some(&gist),
         comments: Some(&comments),
     };
