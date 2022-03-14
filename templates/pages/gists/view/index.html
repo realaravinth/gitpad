@@ -9,34 +9,31 @@
               <div class="gist__name">
               <a href={{ gist_owner_link }}><h2 class="gist__name-text">~{{ payload.gist.owner }}</a>/<a href="">{{ payload.gist.id | truncate(length=10, end="") }}</h2></a><span class="gist__visibility">{{ payload.gist.visibility }}</span>
               </div>
-            {% if "description" in payload.gist %}
-              <p class="gist__description">{{ payload.gist.description}}</p>
-            {% endif %}
-          </div>
-
-          <div class="gist__data-container">
-            {% for payload_file in payload.gist.files %}
-            
-              <div class="gist_file">
-                {% include "gist_filename" %}
-                {% if "file" in payload_file.content %}
-                    {% include "gist_textfile" %}
-                {% endif %}
-              </div>
-
-              {% if "dir" in payload_file.content %}
-                {% for payload_file in payload_file.content.dir %}
-                  <div class="gist_file">
-                    {% include "gist_filename" %}
-                    {% include "gist_textfile" %}
-                  </div>
-                {% endfor %}
+              {% if "description" in payload.gist %}
+                <p class="gist__description">{{ payload.gist.description}}</p>
               {% endif %}
+            </div>
 
-          {% endfor %}
-        </div>
+            <div class="gist__data-container">
+              {% for payload_file in payload.gist.files %}
+              
+                <div class="gist_file">
+                  {% if "file" in payload_file.content %}
+                      {% include "gist_filename" %}
+                      {% include "gist_textfile" %}
+                  {% elif "dir" in payload_file.content %}
+                    {% for payload_file in payload_file.content.dir %}
+                        {% include "gist_filename" %}
+                        {% if "file" in payload_file.content %}
+                          {% include "gist_textfile" %}
+                        {% endif %}
+                    {% endfor %}
+                  {% endif %}
+
+            {% endfor %}
+          </div>
+        {% endif %}
       {% endif %}
-	{% endif %}
     </div>
     {% include "gist_comments" %}
 {% endblock %}
