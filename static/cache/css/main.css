@@ -119,10 +119,12 @@ main {
 
   display: flex;
   flex-direction: column;
-  /*
   align-items: center;
-  */
   justify-content: space-evenly;
+}
+
+.auth__main {
+  flex-direction: row;
 }
 
 .main {
@@ -340,10 +342,26 @@ pre {
   overflow-x: scroll;
 }
 
-.gist__filename {
+.gist__filename-container {
   padding: 8px;
   background: #eeee;
   margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.gist__filename-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.gist__file-anchor {
+  color: rgb(0, 86, 179);
+  margin-right: 5px;
+}
+
+.gist__filename-raw {
+  margin-left: 10px;
 }
 
 .gist__meta-container {

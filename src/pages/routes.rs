@@ -17,7 +17,7 @@
 use actix_auth_middleware::{Authentication, GetLoginRoute};
 use serde::*;
 
-pub use crate::api::v1::routes::PostCommentPath;
+pub use crate::api::v1::routes::{GetFilePath, PostCommentPath};
 
 /// constant [Pages](Pages) instance
 pub const PAGES: Pages = Pages::new();
@@ -87,20 +87,24 @@ pub struct Gists {
     pub view_gist: &'static str,
     /// post comment on gist
     pub post_comment: &'static str,
+    /// get file
+    pub get_file: &'static str,
 }
 
 impl Gists {
     /// create new instance of Gists route
     pub const fn new() -> Self {
-        let profile = "/{username}";
-        let view_gist = "/{username}/{gist}";
-        let post_comment = "/{username}/{gist}/comment";
+        let profile = "/~{username}";
+        let view_gist = "/~{username}/{gist}";
+        let post_comment = "/~{username}/{gist}/comment";
+        let get_file = "/~{username}/{gist}/contents/{file}";
         let new = "/";
         Self {
             profile,
             new,
             view_gist,
             post_comment,
+            get_file,
         }
     }
 
@@ -121,6 +125,15 @@ impl Gists {
         self.post_comment
             .replace("{username}", &components.username)
             .replace("{gist}", &components.gist)
+    }
+
+    /// get file routes with placeholders replaced with values provided.
+    /// filename is auto-escaped using [urlencoding::encode]
+    pub fn get_file_route(&self, components: &GetFilePath) -> String {
+        self.get_file
+            .replace("{username}", &components.username)
+            .replace("{gist}", &components.gist)
+            .replace("{file}", &urlencoding::encode(&components.file))
     }
 }
 
@@ -149,9 +162,11 @@ mod tests {
     fn gist_route_substitution_works() {
         const NAME: &str = "bob";
         const GIST: &str = "foo";
+        const FILE: &str = "README.md";
         let get_profile = format!("/{NAME}");
         let view_gist = format!("/{NAME}/{GIST}");
         let post_comment = format!("/{NAME}/{GIST}/comment");
+        let get_file = format!("/{NAME}/{GIST}/contents/{FILE}");
 
         let profile_component = GistProfilePathComponent { username: NAME };
 
@@ -173,5 +188,12 @@ mod tests {
             post_comment,
             PAGES.gist.get_post_comment_route(&post_comment_path)
         );
+
+        let file_component = GetFilePath {
+            username: NAME.into(),
+            gist: GIST.into(),
+            file: FILE.into(),
+        };
+        assert_eq!(get_file, PAGES.gist.get_file_route(&file_component));
     }
 }

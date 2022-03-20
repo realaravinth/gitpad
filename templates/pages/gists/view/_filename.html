@@ -1,3 +1,7 @@
-<div class="gist__filename">
-  <a href="">{{ payload_file.filename }}</a>
+<div class="gist__filename-container">
+  <a class="gist__filename-name" href="#{{ payload_file.f.filename }}"><span class="gist__file-anchor">#</span>{{ payload_file.f.filename }}</a>
+  <span>
+    <a class="gist__filename-link" href="{{ payload_file.highlighted_link }}">Link</a>
+    <a class="gist__filename-raw" href="{{ payload_file.raw }}">Raw</a>
+  </span>
 </div>

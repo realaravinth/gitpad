@@ -71,6 +71,69 @@ pub fn services(cfg: &mut web::ServiceConfig) {
     cfg.service(post_comment);
 }
 
+#[derive(Serialize, Debug, Clone, PartialEq)]
+pub struct HTMLFileInfo {
+    pub f: FileInfo,
+    pub raw: String,
+    pub highlighted_link: String,
+}
+
+impl HTMLFileInfo {
+    pub fn new(mut f: FileInfo, owner: &str, gist_public_id: &str) -> Self {
+        f.generate();
+        let owner = owner.to_string();
+        let gist = gist_public_id.into();
+        let raw_component = GetFilePath {
+            username: owner,
+            gist,
+            file: f.filename,
+        };
+        let raw = crate::V1_API_ROUTES.gist.get_file_route(&raw_component);
+        let highlighted_link = PAGES.gist.get_file_route(&raw_component);
+        f.filename = raw_component.file;
+        Self {
+            f,
+            raw,
+            highlighted_link,
+        }
+    }
+}
+
+#[derive(Serialize, Debug, Clone, PartialEq)]
+pub struct HTMLGistInfo {
+    pub files: Vec<HTMLFileInfo>,
+    pub description: Option<String>,
+    pub owner: String,
+    pub created: i64,
+    pub updated: i64,
+    pub visibility: GistVisibility,
+    pub id: String,
+}
+
+impl From<GistInfo> for HTMLGistInfo {
+    fn from(mut g: GistInfo) -> Self {
+        let mut files = Vec::with_capacity(g.files.len());
+        g.files
+            .drain(..)
+            .for_each(|f| files.push(HTMLFileInfo::new(f, &g.owner, &g.id)));
+        Self {
+            files,
+            description: g.description,
+            owner: g.owner,
+            created: g.created,
+            updated: g.updated,
+            visibility: g.visibility,
+            id: g.id,
+        }
+    }
+}
+
+impl GenerateHTML for HTMLFileInfo {
+    fn generate(&mut self) {
+        self.f.generate();
+    }
+}
+
 #[derive(Clone)]
 pub struct ViewGist {
     ctx: RefCell<Context>,
@@ -85,7 +148,7 @@ impl CtxError for ViewGist {
 
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct PreviewPayload<'a> {
-    pub gist: Option<&'a GistInfo>,
+    pub gist: Option<&'a HTMLGistInfo>,
     pub comments: Option<&'a Vec<GistComment>>,
 }
 
@@ -143,7 +206,7 @@ async fn view_util(
 ) -> PageResult<ViewGist, ViewGist> {
     let username = id.identity();
 
-    let map_err = |e: ServiceError, gist: Option<&GistInfo>| -> PageError<ViewGist> {
+    let map_err = |e: ServiceError, gist: Option<&HTMLGistInfo>| -> PageError<ViewGist> {
         PageError::new(
             ViewGist::new(
                 username.as_deref(),
@@ -168,12 +231,13 @@ async fn view_util(
         }
     }
 
-    let mut gist = data
+    let gist = data
         .gist_preview(db.as_ref(), &mut GistID::ID(&path.gist))
         .await
         .map_err(|e| map_err(e, None))?;
 
-    gist.files.iter_mut().for_each(|file| file.generate());
+    //gist.files.iter_mut().for_each(|file| file.generate());
+    let gist: HTMLGistInfo = gist.into();
 
     let comments = db.get_comments_on_gist(&path.gist).await.map_err(|e| {
         let e: ServiceError = e.into();

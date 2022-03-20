@@ -1,3 +1,7 @@
-{% if "text" in payload_file.content.file %}
-  {{ payload_file.content.file.text }}
-{% endif %}
+<div id="{{ payload_file.f.filename }}" class="gist_file">
+  {% include "gist_filename" %}
+  {% if "text" in payload_file.f.content.file %}
+    {{ payload_file.f.content.file.text }}
+  {% endif %}
+</div>
+

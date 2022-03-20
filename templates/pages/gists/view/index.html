@@ -7,18 +7,12 @@
         {% include "gist_meta" %}
         <div class="gist__data-container">
         {% for payload_file in payload.gist.files %}
-            {% if "file" in payload_file.content %}
-              <div class="gist_file">
-                {% include "gist_filename" %}
-                {% include "gist_textfile" %}
-              </div>
-          {% elif "dir" in payload_file.content %}
-            {% for payload_file in payload_file.content.dir %}
-              {% if "file" in payload_file.content %}
-                <div class="gist_file">
-                  {% include "gist_filename" %}
+          {% if "file" in payload_file.f.content %}
+            {% include "gist_textfile" %}
+          {% elif "dir" in payload_file.f.content %}
+            {% for payload_file in payload_file.f.content.dir %}
+              {% if "file" in payload_file.f.content %}
                   {% include "gist_textfile" %}
-                </div>
               {% endif %}
             {% endfor %}
           {% endif %}
