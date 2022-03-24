@@ -17,9 +17,11 @@
 //! Account management utility datastructures and methods
 use db_core::prelude::*;
 use serde::{Deserialize, Serialize};
+use tokio::fs;
 
 pub use super::auth;
 use super::get_random;
+use super::gists::GistID;
 use crate::db::BoxDB;
 use crate::errors::*;
 use crate::Data;
@@ -142,6 +144,11 @@ impl Data {
         password: &str,
     ) -> ServiceResult<()> {
         self.authenticate(db, username, password).await?;
+        let gists = db.get_user_gists(username).await?;
+        for gist in gists.iter() {
+            let path = self.get_gist_id_from_repo_path(&GistID::ID(&gist.public_id));
+            fs::remove_dir_all(&path).await?;
+        }
         db.delete_account(username).await?;
         Ok(())
     }
