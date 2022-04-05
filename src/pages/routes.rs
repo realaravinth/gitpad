@@ -163,10 +163,10 @@ mod tests {
         const NAME: &str = "bob";
         const GIST: &str = "foo";
         const FILE: &str = "README.md";
-        let get_profile = format!("/{NAME}");
-        let view_gist = format!("/{NAME}/{GIST}");
-        let post_comment = format!("/{NAME}/{GIST}/comment");
-        let get_file = format!("/{NAME}/{GIST}/contents/{FILE}");
+        let get_profile = format!("/~{NAME}");
+        let view_gist = format!("/~{NAME}/{GIST}");
+        let post_comment = format!("/~{NAME}/{GIST}/comment");
+        let get_file = format!("/~{NAME}/{GIST}/contents/{FILE}");
 
         let profile_component = GistProfilePathComponent { username: NAME };
 
