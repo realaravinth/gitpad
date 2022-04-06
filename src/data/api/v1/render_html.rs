@@ -40,18 +40,22 @@ pub struct SourcegraphQuery<'a> {
     pub code: &'a str,
 }
 
+pub fn render_markdown(content: &str) -> String {
+    // Set up options and parser. Strikethroughs are not part of the CommonMark standard
+    // and we therefore must enable it explicitly.
+    let options = Options::all();
+    //    options.insert(Options::ENABLE_STRIKETHROUGH);
+    let parser = Parser::new_ext(content, options);
+
+    // Write to String buffer.
+    let mut html_output = String::with_capacity(content.len());
+    html::push_html(&mut html_output, parser);
+    html_output
+}
+
 impl<'a> SourcegraphQuery<'a> {
     pub fn render_markdown(&self) -> String {
-        // Set up options and parser. Strikethroughs are not part of the CommonMark standard
-        // and we therefore must enable it explicitly.
-        let options = Options::all();
-        //    options.insert(Options::ENABLE_STRIKETHROUGH);
-        let parser = Parser::new_ext(self.code, options);
-
-        // Write to String buffer.
-        let mut html_output = String::new();
-        html::push_html(&mut html_output, parser);
-        html_output
+        render_markdown(self.code)
     }
 
     pub fn syntax_highlight(&self) -> String {

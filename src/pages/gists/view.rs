@@ -24,11 +24,11 @@ use tera::Context;
 use db_core::prelude::*;
 
 use crate::api::v1::{gists::PostCommentRequest, routes::GetFilePath};
+use crate::data::api::v1::render_html::GenerateHTML;
 use crate::data::api::v1::{
     gists::{FileInfo, GistID, GistInfo},
-    render_html::GenerateHTML,
+    render_html::render_markdown,
 };
-//use crate::data::api::v1::render_html::GenerateHTML;
 use crate::errors::*;
 use crate::pages::routes::GistProfilePathComponent;
 use crate::pages::routes::PostCommentPath;
@@ -239,10 +239,15 @@ async fn view_util(
     //gist.files.iter_mut().for_each(|file| file.generate());
     let gist: HTMLGistInfo = gist.into();
 
-    let comments = db.get_comments_on_gist(&path.gist).await.map_err(|e| {
+    let mut comments = db.get_comments_on_gist(&path.gist).await.map_err(|e| {
         let e: ServiceError = e.into();
         map_err(e, None)
     })?;
+
+    comments
+        .iter_mut()
+        .for_each(|mut comment| comment.comment = render_markdown(&comment.comment));
+
     let ctx = PreviewPayload {
         gist: Some(&gist),
         comments: Some(&comments),

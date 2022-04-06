@@ -17,7 +17,7 @@
 
 -   [x] Upload code snippets
 -   [x] Syntax Highlighting
--   [ ] Comments
+-   [x] Comments
 -   [x] Versioning through Git
 -   [ ] Fork gists
 -   [x] Gist privacy: public, unlisted, private
