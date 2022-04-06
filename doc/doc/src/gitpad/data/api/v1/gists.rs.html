@@ -562,6 +562,10 @@
 <span id="560">560</span>
 <span id="561">561</span>
 <span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -671,7 +675,11 @@
     <span class="kw">fn</span> <span class="ident">generate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
         <span class="kw">fn</span> <span class="ident">highlight</span>(<span class="ident">code</span>: <span class="kw-2">&amp;mut</span> <span class="ident">String</span>, <span class="ident">filepath</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) {
             <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">SourcegraphQuery</span> { <span class="ident">code</span>, <span class="ident">filepath</span> };
-            <span class="kw-2">*</span><span class="ident">code</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">syntax_highlight</span>();
+            <span class="kw">if</span> <span class="ident">filepath</span>.<span class="ident">ends_with</span>(<span class="string">&quot;md&quot;</span>) {
+                <span class="kw-2">*</span><span class="ident">code</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">render_markdown</span>();
+            } <span class="kw">else</span> {
+                <span class="kw-2">*</span><span class="ident">code</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">syntax_highlight</span>();
+            }
         }
 
         <span class="kw">fn</span> <span class="ident">extract</span>(<span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FileInfo</span>) {

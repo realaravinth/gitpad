@@ -173,6 +173,34 @@
 <span id="171">171</span>
 <span id="172">172</span>
 <span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (C) 2022  Aravinth Manivannan &lt;realaravinth@batsense.net&gt;
  *
@@ -191,6 +219,7 @@
  */</span>
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
 
+<span class="kw">use</span> <span class="ident">pulldown_cmark</span>::{<span class="ident">html</span>, <span class="ident">Options</span>, <span class="ident">Parser</span>};
 <span class="kw">use</span> <span class="ident">syntect::highlighting</span>::{<span class="ident">Color</span>, <span class="ident">ThemeSet</span>};
 <span class="kw">use</span> <span class="ident">syntect::html::highlighted_html_for_string</span>;
 <span class="kw">use</span> <span class="ident">syntect::parsing</span>::{<span class="ident">SyntaxReference</span>, <span class="ident">SyntaxSet</span>};
@@ -215,6 +244,19 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SourcegraphQuery</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_markdown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
+        <span class="comment">// Set up options and parser. Strikethroughs are not part of the CommonMark standard</span>
+        <span class="comment">// and we therefore must enable it explicitly.</span>
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::all</span>();
+        <span class="comment">//    options.insert(Options::ENABLE_STRIKETHROUGH);</span>
+        <span class="kw">let</span> <span class="ident">parser</span> <span class="op">=</span> <span class="ident">Parser::new_ext</span>(<span class="self">self</span>.<span class="ident">code</span>, <span class="ident">options</span>);
+
+        <span class="comment">// Write to String buffer.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">html_output</span> <span class="op">=</span> <span class="ident">String::new</span>();
+        <span class="ident">html::push_html</span>(<span class="kw-2">&amp;mut</span> <span class="ident">html_output</span>, <span class="ident">parser</span>);
+        <span class="ident">html_output</span>
+    }
+
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">syntax_highlight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="comment">//    let ss = SYNTAX_SET;</span>
         <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">ThemeSet::load_defaults</span>();
@@ -332,6 +374,20 @@
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">query</span>.<span class="ident">determine_language</span>(<span class="kw-2">&amp;</span><span class="ident">syntax_set</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">result</span>.<span class="ident">unwrap</span>().<span class="ident">name</span>, <span class="string">&quot;TeX&quot;</span>);
         <span class="kw">let</span> <span class="ident">_result</span> <span class="op">=</span> <span class="ident">query</span>.<span class="ident">syntax_highlight</span>();
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="comment">// renders markdown file into HTML</span>
+    <span class="kw">fn</span> <span class="ident">markdown_render_works</span>() {
+        <span class="kw">const</span> <span class="ident">README</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="macro">include_str!</span>(<span class="string">&quot;./../../../../README.md&quot;</span>);
+        <span class="kw">let</span> <span class="ident">query</span> <span class="op">=</span> <span class="ident">SourcegraphQuery</span> {
+            <span class="ident">filepath</span>: <span class="string">&quot;README.md&quot;</span>,
+            <span class="ident">code</span>: <span class="ident">README</span>,
+        };
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">query</span>.<span class="ident">render_markdown</span>();
+        <span class="comment">// NOTE: this test will fail if README.md doesn&#39;t contain a H1 and an input field</span>
+        <span class="comment">// of type checkbox that isn&#39;t checked/marked completed.</span>
+        <span class="macro">assert!</span>(<span class="ident">result</span>.<span class="ident">contains</span>(<span class="string">&quot;&lt;h1&gt;&quot;</span>));
     }
 
     <span class="comment">//#[test]</span>
