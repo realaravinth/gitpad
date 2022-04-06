@@ -107,7 +107,11 @@ impl GenerateHTML for FileInfo {
     fn generate(&mut self) {
         fn highlight(code: &mut String, filepath: &str) {
             let q = SourcegraphQuery { code, filepath };
-            *code = q.syntax_highlight();
+            if filepath.ends_with("md") {
+                *code = q.render_markdown();
+            } else {
+                *code = q.syntax_highlight();
+            }
         }
 
         fn extract(f: &mut FileInfo) {

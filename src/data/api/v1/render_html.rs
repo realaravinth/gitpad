@@ -16,6 +16,7 @@
  */
 use std::path::Path;
 
+use pulldown_cmark::{html, Options, Parser};
 use syntect::highlighting::{Color, ThemeSet};
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::{SyntaxReference, SyntaxSet};
@@ -40,6 +41,19 @@ pub struct SourcegraphQuery<'a> {
 }
 
 impl<'a> SourcegraphQuery<'a> {
+    pub fn render_markdown(&self) -> String {
+        // Set up options and parser. Strikethroughs are not part of the CommonMark standard
+        // and we therefore must enable it explicitly.
+        let options = Options::all();
+        //    options.insert(Options::ENABLE_STRIKETHROUGH);
+        let parser = Parser::new_ext(self.code, options);
+
+        // Write to String buffer.
+        let mut html_output = String::new();
+        html::push_html(&mut html_output, parser);
+        html_output
+    }
+
     pub fn syntax_highlight(&self) -> String {
         //    let ss = SYNTAX_SET;
         let ts = ThemeSet::load_defaults();
@@ -157,6 +171,20 @@ mod tests {
         let result = query.determine_language(&syntax_set);
         assert_eq!(result.unwrap().name, "TeX");
         let _result = query.syntax_highlight();
+    }
+
+    #[test]
+    // renders markdown file into HTML
+    fn markdown_render_works() {
+        const README: &str = include_str!("./../../../../README.md");
+        let query = SourcegraphQuery {
+            filepath: "README.md",
+            code: README,
+        };
+        let result = query.render_markdown();
+        // NOTE: this test will fail if README.md doesn't contain a H1 and an input field
+        // of type checkbox that isn't checked/marked completed.
+        assert!(result.contains("<h1>"));
     }
 
     //#[test]
