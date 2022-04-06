@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["STYLE",""],["SYNTAX_SET",""]],"struct":[["SourcegraphQuery",""]],"trait":[["GenerateHTML",""]]});
+initSidebarItems({"constant":[["STYLE",""],["SYNTAX_SET",""]],"fn":[["render_markdown",""]],"struct":[["SourcegraphQuery",""]],"trait":[["GenerateHTML",""]]});
