@@ -10,6 +10,7 @@
 [![Build](https://github.com/realaravinth/gitpad/actions/workflows/linux.yml/badge.svg)](https://github.com/realaravinth/gitpad/actions/workflows/linux.yml)
 [![dependency status](https://deps.rs/repo/github/realaravinth/gitpad/status.svg)](https://deps.rs/repo/github/realaravinth/gitpad)
 [![codecov](https://codecov.io/gh/realaravinth/gitpad/branch/master/graph/badge.svg)](https://codecov.io/gh/realaravinth/gitpad)
+[![Chat](https://img.shields.io/badge/matrix-+gitpad:matrix.batsense.net-purple?style=flat-square)](https://matrix.to/#/#gitpad:matrix.batsense.net)
 
 </div>
 
